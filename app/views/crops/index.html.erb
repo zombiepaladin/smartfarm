@@ -1,0 +1,9 @@
+<h1>Crops</h1>
+
+<div class="row">
+  <% @crops.each do |crop| %>
+    <%= render crop %>
+  <% end %>
+</div>
+
+<%= link_to 'New Crop', new_crop_path %>

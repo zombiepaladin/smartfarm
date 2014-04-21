@@ -1,0 +1,21 @@
+<div class="panel panel-default">
+
+  <div class="panel-heading">
+    <%= link_to edit_crop_path(@crop), class: "btn btn-info pull-right" do %>
+      <i class="fa fa-retweet"></i> See Inside
+    <% end %>
+    <h1 class="panel-title"><%= @crop.name %></h1>
+    <p>by <%= link_to @crop.user.username, @crop.user %></p>
+  </div>
+
+  <div class="panel-body">
+    <h4>Description</h4>
+    <div>
+      <%= @crop.description %>
+    </div>
+  </div>
+
+</div>
+
+<%= link_to 'Edit', edit_crop_path(@crop) %> |
+<%= link_to 'Back', crops_path %>
