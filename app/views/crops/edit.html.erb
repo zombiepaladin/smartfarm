@@ -1,3 +1,14 @@
 <div class="well">
-  <canvas id='crop-editor' data-crop-id="<%= @crop.id %>" width="1024" height="768"></canvas>
+
+  <div id="blockyDiv" style="height: 100%; width: 100%;"></div>
+  <xml id="toolbox" style="display: none">
+    <block type="controls_if"></block>
+    <block type="controls_repeat_ext"></block>
+    <block type="logic_compare"></block>
+    <block type="math_number"></block>
+    <block type="math_arithmetic"></block>
+    <block type="text"></block>
+    <block type="text_print"></block>
+  </xml>
+
 </div>

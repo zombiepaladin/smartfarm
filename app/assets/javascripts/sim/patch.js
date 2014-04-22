@@ -1,3 +1,0 @@
-Patch = new function() {}
-
-
