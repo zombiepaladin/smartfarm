@@ -17,5 +17,6 @@
 //= require blockly/blockly_compressed
 //= require blockly/blocks_compressed
 //= require blockly/javascript_compressed
-//= require blockly/msg/js/en.js
+//= require blockly/msg/js/en
+//= require soil_patch
 //= require_tree .

@@ -1,14 +1,44 @@
 <div class="well">
-
-  <div id="blockyDiv" style="height: 100%; width: 100%;"></div>
+  <div class="btn-groupy">
+    <button id="run" role="button" class="btn btn-success">
+      <i class="fa fa-play-circle-o"></i>
+      Run Crop Simulation
+    </button>
+    <button id="save" role="button" class="btn btn-info">
+      <i class="fa fa-floppy-o"></i>
+      Save Crop
+    </button>
+    <span id='message' class="alert"></span>
+  </div>
+<br>
+  <div id="crop-editor" data-crop-id="<%= @crop.id %>" style="height: 80%; width: 100%;"></div>
   <xml id="toolbox" style="display: none">
-    <block type="controls_if"></block>
-    <block type="controls_repeat_ext"></block>
-    <block type="logic_compare"></block>
-    <block type="math_number"></block>
-    <block type="math_arithmetic"></block>
-    <block type="text"></block>
-    <block type="text_print"></block>
+    <category name="stuff">
+      <block type="controls_if"></block>
+      <block type="controls_repeat_ext"></block>
+      <block type="logic_compare"></block>
+      <block type="math_number"></block>
+      <block type="math_arithmetic"></block>
+      <block type="text"></block>
+      <block type="text_print"></block>
+<block type="variables_set"><field name="VAR">heat units</field></block>
+    </category>      
+    <category name="entry points">
+      <block type="procedures_defnoreturn">
+        <field name="NAME">before water and nutrient allocation</field>
+      </block>
+      <block type="procedures_defnoreturn">
+        <field name="NAME">between water and nutrient allocation</field>
+      </block>
+      <block type="procedures_defnoreturn">
+        <field name="NAME">after water and nutrient allocation</field>
+      </block>
+    </category>
+    <category name="functions" custom="PROCEDURE"></category>
+    <category name="variables" custom="VARIABLE">
+    </category>
   </xml>
+  <%= @crop.workspace.html_safe %>
+  <!--xml id="workspace" style="display:none"><block type="procedures_defnoreturn" id="4" x="39" y="27"><mutation></mutation><field name="NAME">before water and nutrient allocation</field><statement name="STACK"><block type="text_print" id="12" inline="false"><value name="TEXT"><block type="text" id="23"><field name="TEXT">Hello?</field></block></value></block></statement></block></xml-->
 
 </div>

@@ -19,9 +19,8 @@ class CropsController < InheritedResources::Base
   def update
     # TODO: Create a clone if we aren't the owner
     @crop = Crop.find(params[:id])
-    attributes = ActiveSupport::JSON.decode(params[:data])
-    if @crop.update(attributes)
-      render json: "{'message':'Saved', 'data':'#{@crop.inspect}'}"
+    if @crop.update(resource_params)
+      render text: "Successfully saved #{@crop.name}"
     else
       render json: "{'message':'Failed', 'errors':'#{@crop.errors.full_messages.join(",")}'}"
     end
@@ -30,7 +29,7 @@ class CropsController < InheritedResources::Base
   private
  
   def resource_params
-    params.require(:crop).permit(:name, :description, :variables, :scripts)
+    params.require(:crop).permit(:name, :code, :description, :variables, :scripts, :workspace)
   end
   
 end

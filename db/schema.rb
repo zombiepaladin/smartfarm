@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140414153833) do
+ActiveRecord::Schema.define(version: 20140423155759) do
 
   create_table "crops", force: true do |t|
     t.integer  "user_id"
@@ -20,8 +20,7 @@ ActiveRecord::Schema.define(version: 20140414153833) do
     t.text     "code"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "variables"
-    t.text     "scripts"
+    t.text     "workspace"
   end
 
   create_table "users", force: true do |t|

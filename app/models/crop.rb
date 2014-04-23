@@ -3,7 +3,4 @@ class Crop < ActiveRecord::Base
   
   belongs_to :user
 
-  serialize :scripts
-  serialize :variables
-
 end
