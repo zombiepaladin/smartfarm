@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140423155759) do
+ActiveRecord::Schema.define(version: 20140430153616) do
 
   create_table "crops", force: true do |t|
     t.integer  "user_id"
@@ -51,5 +51,15 @@ ActiveRecord::Schema.define(version: 20140423155759) do
   end
 
   add_index "versions", ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
+
+  create_table "weather", force: true do |t|
+    t.integer  "user_id"
+    t.string   "name"
+    t.text     "description", default: "Unamed Weather"
+    t.text     "code"
+    t.text     "workspace",   default: "<block type=\"weather\"></block>"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end

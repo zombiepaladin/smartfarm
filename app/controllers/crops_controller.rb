@@ -29,7 +29,7 @@ class CropsController < InheritedResources::Base
   private
  
   def resource_params
-    params.require(:crop).permit(:name, :code, :description, :variables, :scripts, :workspace)
+    params.require(:crop).permit(:name, :code, :description, :workspace)
   end
   
 end

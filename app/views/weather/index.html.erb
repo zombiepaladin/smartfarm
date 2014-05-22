@@ -1,0 +1,18 @@
+<h1>Weather Models</h1>
+
+<div class="well">
+  <i class="fa fa-lightbulb-o"></i> A weather model updates the weather
+  for your simluation, providing needed sunlight, precipitation, and 
+  temperature.  Weather models typically draw from historical weather
+  data, mathematical models of weather performance, or is randomly 
+  generated.  Read the model descriptions to learn how a specific weather
+  model works.
+</div>
+
+<div class="row">
+  <% @weather.each do |weather| %>
+    <%= render weather %>
+  <% end %>
+</div>
+
+<%= link_to 'New Weather Model', new_weather_path %>

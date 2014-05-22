@@ -1,4 +1,6 @@
 Smartfarm::Application.routes.draw do
+  resources :weather
+
   resources :crops 
   post '/crops/:id' => 'crops#update'
 

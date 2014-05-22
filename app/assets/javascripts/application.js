@@ -18,5 +18,8 @@
 //= require blockly/blocks_compressed
 //= require blockly/javascript_compressed
 //= require blockly/msg/js/en
+//= require simulation 
 //= require soil_patch
+//= require smartfarm
+//= require weather_system
 //= require_tree .
