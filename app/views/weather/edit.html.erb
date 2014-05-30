@@ -13,14 +13,21 @@
 <br>
   <div id="weather-editor" data-weather-id="<%= @weather.id %>" style="height: 80%; width: 100%;"></div>
   <xml id="toolbox" style="display: none">
+
+    <category name="TEST">
+      <a href="#">GRRR</a>
+    </category>
+
     <category name="Operators">
       <block type="math_on_list"></block>
     </category>
     <category name="Lists">
       <block type="lists_create_with"></block>
+      <a id="list_from_json" href="#">List from JSON</a>
     </category>
 
     <category name="stuff">
+      <block type="net_http_request"></block>
       <block type="set_weather"></block>
       <block type="controls_if"></block>
       <block type="controls_repeat_ext"></block>

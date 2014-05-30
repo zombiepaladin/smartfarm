@@ -1,0 +1,55 @@
+<%= form_for(@farm, html: {role: "form"}) do |f| %>
+  <% if @farm.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@farm.errors.count, "error") %> prohibited this farm from being saved:</h2>
+
+      <ul>
+      <% @farm.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :name %>
+    <%= f.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-3">
+      <div class="form-group">
+        <%= f.label :latitude %>
+        <%= f.text_field :latitude, class: "form-control" %>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <%= f.label :longitude %>
+        <%= f.text_field :longitude, class: "form-control" %>
+      </div>
+    </div>
+    <div class="col-sm-1">
+      <h3>OR</h3>
+    </div>
+    <div class="col-sm-5">
+      <div class="form-group">
+        <%= label_tag "Search by Address" %>
+        <div class="input-group">
+          <%= text_field_tag :address, "", class: "form-control" %>
+          <span class="input-group-btn">
+            <button id="search-by-address" class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= f.hidden_field :data %>
+
+  <div id="farm-map"></div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

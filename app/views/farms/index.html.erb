@@ -1,0 +1,7 @@
+<h1>Farms</h1>
+
+<% @farms.each do |farm| %>
+  <%= render farm %>
+<% end %>
+
+<%= link_to 'New Farm', new_farm_path %>

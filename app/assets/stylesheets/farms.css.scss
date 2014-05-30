@@ -1,0 +1,19 @@
+// Place all the styles related to the farms controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+#farm-map, #farm_field_map {
+  height: 300px;
+  width: 100%;
+}
+
+.field-bounds {
+  counter-reset: corner;
+}
+
+tr.boundary-corner::before {
+  counter-increment: corner;
+  content: counter(corner);
+  display: table-cell;
+  padding-top: 8px;
+  text-align: center;
+}
