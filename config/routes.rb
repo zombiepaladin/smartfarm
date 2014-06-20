@@ -1,4 +1,6 @@
 Smartfarm::Application.routes.draw do
+  resources :simulations
+
   resources :farms
 
   resources :weather
