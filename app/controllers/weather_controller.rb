@@ -8,7 +8,7 @@ class WeatherController < InheritedResources::Base
   end
 
   def new
-    @weather = Weather.create(user: current_user)
+    @weather = Weather.create(user: current_user, workspace: "<xml id=\"workspace\" style=\"display: none\"></xml>")
     redirect_to edit_weather_path(@weather)
   end
 

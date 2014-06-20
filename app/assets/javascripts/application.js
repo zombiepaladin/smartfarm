@@ -18,6 +18,8 @@
 //= require blockly/blocks_compressed
 //= require blockly/javascript_compressed
 //= require blockly/msg/js/en
+//= require JS-Interpreter/acorn
+//= require JS-Interpreter/interpreter
 //= require simulation 
 //= require soil_patch
 //= require smartfarm

@@ -40,12 +40,9 @@ jQuery ->
 
     runButton = $('button#run');
     runButton.on 'click', () ->
-      system = new System()
-
-      # load code
-      system.include Blockly.JavaScript.workspaceToCode()
-      system.fire "TIMESTEP:DAY"
-      console.log "LOADED CODE"
+      interpreter = new Interpreter(Blockly.JavaScript.workspaceToCode(), initSimulationInterpreter)
+      interpreter.run()
 
   
-    
+    $('#average_temperature').on 'change', () ->
+      weather.average_temperature = $(this).val()    
