@@ -1,0 +1,35 @@
+<div class="bs-callout bs-callout-info">
+  <h4>Picking your farm</h4>
+  <p>
+    Before you can run your simulation, you need to identify the characteristics of the farm
+    you intend to simulate.  You can choose from all the farms that have been uploaded into
+    the SmartFarm site, or you can <%= link_to 'create your own', new_farm_path %> and then
+    come back to create your simulation.
+  </p>
+</div>
+
+ <div class="row">
+  <div class="col-md-4">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h4 class="panel-title">Farms to Simulate</h4>
+      </div>
+      <div id="simulation-farms" class="panel-body">
+      </div>
+    </div>
+  </div>
+
+   <div class="col-md-8">
+      <h4>
+        Farms
+        <div class="btn-group">
+          <button type="button" class="btn btn-success">My Farms</button>
+          <button type="button" class="btn btn-default">All Farms</button>
+        </div>
+      </h4>
+      <div class="container">
+        <%= render Farm.all %>
+      </div>
+  </div>
+</div>
+

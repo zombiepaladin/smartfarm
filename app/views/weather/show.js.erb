@@ -1,0 +1,32 @@
+var clock = {};
+
+var weather = {
+  rainfall: 0,                  // in mm
+  snowfall: 0,                  // in mm
+  solar_radiation: 0,
+  day_length: 0,
+  average_temperature: 0,       // in degrees C
+  low_temperature: 0,           // in degrees C
+  high_temperature: 0,          // in degrees C
+  wind_speed: 0,                // in m/s
+  wind_direction: 0,            // in compass degrees
+  relative_humidity: 0,         // % saturation
+};
+
+var rainfall = 0;
+
+function set_rainfall(val) {
+  weather.rainfall = val;
+}
+
+onmessage = function(msg) {
+
+  // copy clock state
+  clock = msg.data.clock;
+
+  // update weather 
+  <%= @weather.code.html_safe %>
+  weather.snowfall = Math.random() * 20;
+
+  postMessage(weather);
+}

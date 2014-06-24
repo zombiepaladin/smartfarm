@@ -1,0 +1,12 @@
+// Place all the styles related to the weather controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+#weather-iopanel {
+  border: 1px solid #ddd;
+  overflow-y: scroll;
+}
+
+#weather-iopanel .list-group-item-header {
+  background-color: #ddd;
+}

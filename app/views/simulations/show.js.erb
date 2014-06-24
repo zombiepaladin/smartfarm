@@ -1,0 +1,28 @@
+var simulation = {
+  rate: 0,                      // in ms
+  clock: {
+    elapsed_time: 1420,           // in minutes
+  }
+  regions: [
+    <%= @
+    {
+      weather_worker: 5,
+    }
+  ],
+};
+
+
+function initializeRegion(weatherModelID, weatherState) {
+  var region = {
+    weather: {},
+    worker: new WebWorker('/weather/' + weatherModelId + '.js');
+  };
+  region.worker.onerror = function(err) {
+    console.log(err);
+    alert("An error occured");
+  };
+  region.worker.onmessage = function(event) {
+    region.weather = event.data;
+  };
+}
+

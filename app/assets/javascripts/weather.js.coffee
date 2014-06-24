@@ -2,6 +2,7 @@ jQuery ->
   editor = $('#weather-editor')
   if(editor.length > 0)
     editor.height($(window).height() - 120);
+    $('#weather-iopanel').height(editor.height());
     Blockly.inject(document.getElementById('weather-editor'), {
       path: '/assets/blockly/', 
       toolbox: document.getElementById('toolbox')
