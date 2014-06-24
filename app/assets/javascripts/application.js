@@ -14,6 +14,8 @@
 //= require jquery_ujs
 //= require twitter/bootstrap
 // require turbolinks
+//= require paralleljs/eval.js
+//= require paralleljs/parallel.js
 //= require blockly/blockly_compressed
 //= require blockly/blocks_compressed
 //= require blockly/javascript_compressed
@@ -23,7 +25,7 @@
 //= require simulation 
 //= require soil_patch
 //= require smartfarm
-//= require weather_system
+//= require weather_blocks
 //= require_tree .
 
 

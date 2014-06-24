@@ -1,7 +1,3 @@
-<%= io_panel(%w{latitude longitude}, %w{solar_radiation average_temperature high_temperature low_temperature}) %>
-
-<% render 'input_output' %>
-
 <div class="well">
   <div class="btn-groupy">
     <button id="run" role="button" class="btn btn-success">
@@ -23,24 +19,60 @@
         <li class="list-group-item">
           <h4>Inputs</h4>
         </li>
+
         <li class="list-group-item">
-          <span class="badge"><a href="#">122</a></span>
-          stuff
+          <input id="elapsed_time" type="number" value="0" class="pull-right">
+          Elapsed simulation time (minutes)
         </li>
-        <li class="list-group-item">things</li>
+
+        <li class="list-group-item">
+          <input id="latitude" type="number" value="0" class="pull-right">
+          Latitude
+        </li>
+        <li class="list-group-item">
+          <input id="longitude" type="number" value="0" class="pull-right">
+          Longitude
+        </li>
+
 
         <li class="list-group-item">
           <h4>Outputs</h4>
         </li>
         <li class="list-group-item">
-          <span class="badge">0</span>
-          rain
+          <span id="rainfall" class="badge">0</span>
+          rain (mm)
         </li>
         <li class="list-group-item">
-          <span class="badge">0</span>
-          snow
+          <span id="snowfall" class="badge">0</span>
+          snow (mm)
         </li>
 
+        <li class="list-group-item">
+          <span id="average_temperature" class="badge">0</span>
+          average temperature (&deg;C)
+        </li>
+        <li class="list-group-item">
+          <span id="high_temperature" class="badge">0</span>
+          high temperature (&deg;C)
+        </li>
+        <li class="list-group-item">
+          <span id="low_temperature" class="badge">0</span>
+          low temperature (&deg;C)
+        </li>
+
+        <li class="list-group-item">
+          <span id="wind_speed" class="badge">0</span>
+          wind speed (m/h)
+        </li>
+        <li class="list-group-item">
+          <span id="wind_direction" class="badge">0</span>
+          wind direction (compass degrees)
+        </li>
+
+        <li class="list-group-item">
+          <span id="relative_humidity" class="badge">0</span>
+          relative humidity (%)
+        </li>
 
       </ul>
     </div>
