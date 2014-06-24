@@ -1,4 +1,4 @@
-var clock = {};
+var simulation = {};
 
 var weather = {
   rainfall: 0,                  // in mm
@@ -13,20 +13,82 @@ var weather = {
   relative_humidity: 0,         // % saturation
 };
 
-var rainfall = 0;
+function get_elapsed_time() {
+  return simulation.elapsed_time;
+}
+
+function get_rainfall() {
+  return weather.rainfall;
+}
 
 function set_rainfall(val) {
   weather.rainfall = val;
 }
 
+function get_snowfall() {
+  return weather.rainfall;
+}
+
+function set_snowfall(val) {
+  weather.snowfall = val;
+}
+
+function get_average_temperature() {
+  return weather.average_temperature;
+}
+
+function set_average_temperature(val) {
+  weather.average_temperature = val;
+}
+
+function get_low_temperature() {
+  return weather.low_temperature;
+}
+
+function set_low_temperature(val) {
+  weather.low_temperature = val;
+}
+
+function get_high_temperature() {
+  return weather.high_temperature;
+}
+
+function set_high_temperature(val) {
+  weather.high_temperature = val;
+}
+
+function get_wind_speed() {
+  return weather.wind_speed;
+}
+
+function set_wind_speed(val) {
+  weather.wind_speed = val;
+}
+
+function get_wind_direction() {
+  return weather.wind_direction;
+}
+
+function set_wind_direction(val) {
+  weather.wind_direction = val;
+}
+
+function get_relative_humidity() {
+  return weather.relative_humidity;
+}
+
+function set_relative_humidity(val) {
+  weather.relative_humidity = val;
+}
+
+
 onmessage = function(msg) {
 
-  // copy clock state
-  clock = msg.data.clock;
+  // copy simulation state
+  simulation = msg.data.simulation;
 
   // update weather 
   <%= @weather.code.html_safe %>
-  weather.snowfall = Math.random() * 20;
 
   postMessage(weather);
 }
