@@ -1,8 +1,13 @@
 jQuery ->
   editor = $('#weather-editor')
   if(editor.length > 0)
+
+    # Resize editor to fit window
     editor.height($(window).height() - 120);
     $('#weather-iopanel').height(editor.height());
+
+    # Setup Blockly
+    Blockly.JavaScript.addReservedWords('highlightBlock')
     Blockly.inject(document.getElementById('weather-editor'), {
       path: '/assets/blockly/', 
       toolbox: document.getElementById('toolbox')
@@ -12,12 +17,14 @@ jQuery ->
       document.getElementById('workspace')
     )
 
+    # Add a saved/needs saving message
     msg = $('#message');
     Blockly.addChangeListener () ->
       msg.text("Changed...")
     callback = -> msg.text("")
     setTimeout callback, 100
 
+    # Add a save button
     saveButton = $('button#save');
     saveButton.on 'click', () ->
       xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)
@@ -37,19 +44,6 @@ jQuery ->
           msg.text(response)
         error: (jXHR, status, err) ->
           msg.text(err);
-
-    # Weather object
-    weather = 
-      rainfall: 0              #    // in mm
-      snowfall: 0              #    // in mm
-      solar_radiation: 0       #
-      day_length: 0            #
-      average_temperature: 0   #    // in degrees C
-      low_temperature: 0       #    // in degrees C
-      high_temperature: 0      #    // in degrees C
-      wind_speed: 0            #    // in m/s
-      wind_direction: 0        #    // in compass degrees
-      relative_humidity: 0     #    // % saturation
 
     # Add an output getter and setter to the interpreter
     outputAttrAccessor = (name, interpreter, scope) ->
@@ -115,15 +109,22 @@ jQuery ->
       attributes.forEach (name) ->
         outputAttrAccessor(name, interpreter, scope)
 
-    stepButton = $('button#step');
-    stepButton.on 'click', () ->
-      inte
+    interpreter = undefined
+    nextStep = () ->
+      if interpreter
+        if !interpreter.step()
+          interpreter = undefined
 
-    runButton = $('button#run');
+    stepButton = $('button#step')
+    stepButton.on 'click', () ->
+      if !interpreter
+        interpreter = new Interpreter(Blockly.JavaScript.workspaceToCode(), setupWeatherSystem)
+      nextStep()
+
+    # Add a run button
+    runButton = $('button#run')
     runButton.on 'click', () ->
       interpreter = new Interpreter(Blockly.JavaScript.workspaceToCode(), setupWeatherSystem)
       interpreter.run()
 
   
-    $('#average_temperature').on 'change', () ->
-      weather.average_temperature = $(this).val()    
