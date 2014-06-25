@@ -1,4 +1,6 @@
 Smartfarm::Application.routes.draw do
+  resources :soils
+
   resources :simulations
 
   resources :farms

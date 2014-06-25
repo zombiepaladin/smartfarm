@@ -5,6 +5,7 @@ class CreateCrops < ActiveRecord::Migration
       t.string :name, default: "Unnamed Crop"
       t.text :description
       t.text :code
+      t.text :workspace, default: "<xml id=\"workspace\" style=\"display: none\"></xml>"
 
       t.timestamps
     end
