@@ -16,8 +16,8 @@
   </div>
 
   <div class="row">
-    <div id="weather-editor" data-weather-id="<%= @weather.id %>" class="col-md-9" style="height: 80%;"></div>
-    <div id="weather-iopanel" class="col-md-3">
+    <div id="blockly-editor" data-model-type="weather" data-model-url="<%= url_for(@weather) %>" class="col-md-9" style="height: 80%;"></div>
+    <div id="blockly-iopanel" class="col-md-3">
       <ul class="list-group">
 
         <li class="list-group-item list-group-item-header">
@@ -42,41 +42,18 @@
         <li class="list-group-item list-group-item-header">
           <h4>Outputs</h4>
         </li>
-        <li class="list-group-item">
-          <span id="rainfall" class="badge">0</span>
-          rain (mm)
-        </li>
-        <li class="list-group-item">
-          <span id="snowfall" class="badge">0</span>
-          snow (mm)
-        </li>
 
-        <li class="list-group-item">
-          <span id="average_temperature" class="badge">0</span>
-          average temperature (&deg;C)
-        </li>
-        <li class="list-group-item">
-          <span id="high_temperature" class="badge">0</span>
-          high temperature (&deg;C)
-        </li>
-        <li class="list-group-item">
-          <span id="low_temperature" class="badge">0</span>
-          low temperature (&deg;C)
-        </li>
+        <%= io_item "rainfall", "rain (mm)", 0, as: :number %>
+        <%= io_item "snowfall", "snow (mm)", 0, as: :number %>
 
-        <li class="list-group-item">
-          <span id="wind_speed" class="badge">0</span>
-          wind speed (m/h)
-        </li>
-        <li class="list-group-item">
-          <span id="wind_direction" class="badge">0</span>
-          wind direction (compass degrees)
-        </li>
+        <%= io_item "average_temperature", "average temperature (&deg;C)", 0, as: :number %>
+        <%= io_item "low_temperature", "low temperature (&deg;C)", 0, as: :number %>
+        <%= io_item "high_temperature", "high temperature (&deg;C)", 0, as: :number %>
 
-        <li class="list-group-item">
-          <span id="relative_humidity" class="badge">0</span>
-          relative humidity (%)
-        </li>
+        <%= io_item "wind_speed", "wind speed (m/s)", 0, as: :number %>
+        <%= io_item "wind_direction", "wind direction (compass degrees)", 0, as: :number %>
+
+        <%= io_item "relative_humidity", "relative humidity (%)", 0, as: :number %>
 
       </ul>
     </div>
