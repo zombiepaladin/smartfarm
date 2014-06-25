@@ -1,0 +1,35 @@
+<h1>Listing soils</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Code</th>
+      <th>Workspace</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @soils.each do |soil| %>
+      <tr>
+        <td><%= soil.user_id %></td>
+        <td><%= soil.name %></td>
+        <td><%= soil.description %></td>
+        <td><%= soil.code %></td>
+        <td><%= soil.workspace %></td>
+        <td><%= link_to 'Show', soil %></td>
+        <td><%= link_to 'Edit', edit_soil_path(soil) %></td>
+        <td><%= link_to 'Destroy', soil, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Soil', new_soil_path %>

@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>User:</strong>
+  <%= @soil.user_id %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @soil.name %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @soil.description %>
+</p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @soil.code %>
+</p>
+
+<p>
+  <strong>Workspace:</strong>
+  <%= @soil.workspace %>
+</p>
+
+<%= link_to 'Edit', edit_soil_path(@soil) %> |
+<%= link_to 'Back', soils_path %>

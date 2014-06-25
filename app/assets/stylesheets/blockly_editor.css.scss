@@ -1,0 +1,20 @@
+// Place all the styles related to the weather controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+#blockly-iopanel {
+  border: 1px solid #ddd;
+  overflow-y: scroll;
+}
+
+#blockly-iopanel .list-group-item-header {
+  background-color: #ddd;
+}
+
+#blockly-iopanel input {
+  color: #333;
+  text-align: right;
+  width: 50px;
+  padding: 0;
+  margin: 0;
+}
