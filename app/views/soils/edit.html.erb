@@ -54,6 +54,19 @@
 
         <%= io_item("h20", "h20 (in mm3)", 20) %>
 
+        <%= io_item "nitrate", "nitrate (kg/ha)", 0 %>
+        <%= io_item "ammonium", "ammonium (kg/ha)", 0 %>
+        <%= io_item "fresh_organic_nitrogen", "fresh organic N (kg/ha)", 0 %>
+        <%= io_item "active_organic_nitrogen", "fresh organic N (kg/ha)", 0 %>
+        <%= io_item "stable_organic_nitrogen", "fresh organic N (kg/ha)", 0 %>
+        <%= io_item "labile_phosphorus", "labile phosphorus (kg/ha)", 0 %>
+        <%= io_item "fresh_organic_phosphorus", "fresh organic phosphorus (kg/ha)", 0 %>
+        <%= io_item "bound_organic_phosphorus", "organic matter-bound phosphorus (kg/ha)", 0 %>
+        <%= io_item "active_mineral_phosphorus", "active mineral phosphorus (kg/ha)", 0 %>
+        <%= io_item "stable_mineral_phosphorus", "stable mineral phosphorus (kg/ha)", 0 %>
+        <%= io_item "flat_residue_carbon", "carbon in flat residue (kg/ha)", 0 %>
+        <%= io_item "humus_carbon", "carbon in humus (kg/ha)", 0 %>
+
 
       </ul>
     </div>
@@ -72,6 +85,17 @@
       <block type="weather_get_wind_speed"></block>
       <block type="weather_get_wind_direction"></block>
       <block type="weather_get_relative_humidity"></block>
+    </category>
+
+    <category name="Soil">
+      <block type="soil_set_ammonium"></block>
+      <block type="soil_get_ammonium"></block>
+      <block type="soil_set_nitrogen"></block>
+      <block type="soil_get_nitrogen"></block>
+      <block type="soil_set_phosphorus"></block>
+      <block type="soil_get_phosphorus"></block>
+      <block type="soil_set_carbon"></block>
+      <block type="soil_get_carbon"></block>
     </category>
 
     <category name="Logic">

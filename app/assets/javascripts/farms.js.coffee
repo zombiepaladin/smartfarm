@@ -1,4 +1,4 @@
-# Place all the behaviors and hooks related to the matching controller here.
+\# Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
@@ -6,6 +6,11 @@ jQuery ->
   farm_data = $('#farm_data')
   if farm_data.size() > 0
     farm = JSON.parse(farm_data.val())
+    window.farm = farm
+
+
+    # Location Map controls & data
+    #-----------------------------------
 
     location = new google.maps.LatLng(farm.location.latitude, farm.location.longitude)
 
@@ -27,6 +32,12 @@ jQuery ->
 
     google.maps.event.addListener locationMapMarker, 'dragend', () ->
       panmap()
+      
+
+    # Field Map controls & data
+    #------------------------------------
+
+    fieldPaths = []
 
     fieldMap = new google.maps.Map $('#farm_field_map')[0], 
       center: location
@@ -51,18 +62,27 @@ jQuery ->
     drawingManager = new google.maps.drawing.DrawingManager drawingOptions
     drawingManager.setMap fieldMap
             
-    farm.fields.forEach (field) ->
+    farm.field_bounds.forEach (bounds, i) ->
       path = []
-      field.boundary.forEach (coord) ->
+      bounds.forEach (coord, j) ->
+        farm.fieldPaths
         path.push new google.maps.LatLng(coord.latitude, coord.longitude)
         console.log(coord.latitude, coord.longitude)
-        console.log("path", path)
-        new google.maps.Polygon
-          map: map
-          path: path
-          fillColor: '#00ff00'
-          draggable: true
-          editable: true
+      fieldPolygon = new google.maps.Polygon
+        map: fieldMap
+        path: path
+        fillColor: '#00ff00'
+        draggable: true
+        editable: true
+      fieldPaths.push(fieldPolygon.getPath())
+
+    bounds = []
+    google.maps.event.addListener drawingManager, 'polygoncomplete', (polygon) ->
+      bounds.push(polygon);
+      fieldPaths.push(polygon.getPath());
+
+    # General map functions
+    #-------------------------------
 
     panmap = () ->
       locationMapMarker.setPosition location
@@ -130,14 +150,50 @@ jQuery ->
       farm.latitude = $('#farm_longitude').val()
       panmap()
     
-    bounds = []
 
-    google.maps.event.addListener drawingManager, 'polygoncomplete', (polygon) ->
-      bounds.push(polygon);
+    elevation_canvas = $('#elevation_bitmap')[0]
+    elevation_context = elevation_canvas.getContext('2d')
+
+    # Draw fields to map(s)
+    drawFields = () ->
+      left = location.lat()
+      right = location.lat()
+      top = location.lng()
+      bottom = location.lng()
+
+      # find the edges
+      fields.forEach (field) ->
+        left = field.left if field.left < left 
+        right = field.right if field.right > right 
+        top = field.top if field.top < top
+        bottom = field.bottom if field.bottom > bottom 
+        console.log("borders", left, right, top, bottom);
+ 
+      # find scaling factors
+      scale_x = $('#elevation_bitmap').width() / (right - left);
+      scale_y = $('#elevation_botmap').height() / (bottom - top);
+      console.log("Scales", scale_x, scale_y)
+
+      # draw the fields
+      elevation_context.beginPath()
+      fields.forEach (field) ->
+        field.border.forEach (loc) ->
+          elevation_context.lineTo(
+            ((loc.latitiude - left) * scale_x),
+            ((loc.longitude - top) * scale_y)
+          ) 
+          console.log( "drawing line",
+            ((loc.latitiude - left) * scale_x),
+            ((loc.longitude - top) * scale_y)
+          ) 
+      elevation_context.stroke()
+
+     # bounds.forEach (boundary, i) ->
+     #   if  
 
     createField = (boundary) ->
       field = 
-        bounds: {bottom:0, left:0, right:0, top:0}
+        bounds: {bottom: location.lat(), left: location.lat(), right: location.lng(), top: location.lng()}
         border: []
         patches: []
       boundary.getPath().forEach (coord, i) ->
@@ -152,26 +208,24 @@ jQuery ->
           longitude: lng
       field
         
-    $('#new_farm').on 'submit', (event) ->
+    $('.edit_farm').on 'submit', (event) ->
       # Submits can be triggered from the "search by address"
       # box, which is probably not the user intent
       if $('#address').is(":focus")
-        console.log('donothing')
         event.preventDefault()
         searchByAddress()
         return
-      boundaries = []
-      bounds.forEach (boundary, i) ->
-        boundaries[i] = []
-        boundary.getPath().forEach (coord, j) ->
-          boundaries[i][j] = 
+
+      farm.location = 
+        latitude: location.lat()
+        longitude: location.lng()
+
+      farm.field_bounds = []
+      fieldPaths.forEach (path, i) ->
+        farm.field_bounds[i] = []
+        path.forEach (coord, j) ->
+          farm.field_bounds[i][j] =
             latitude: coord.lat()
             longitude: coord.lng()
-      loc = {
-        latitude: location.lat(),
-        longitude: location.lng()
-      }
-      farm = new Farm(farm.name, loc, boundaries)
-      $('#farm_data').val JSON.stringify(farm)
 
-      
+      $('#farm_data').val( JSON.stringify(farm) )

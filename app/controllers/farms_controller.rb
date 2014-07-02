@@ -12,7 +12,7 @@ class FarmsController < InheritedResources::Base
       name: "Unnamed farm", 
       latitude: 39.1974437, 
       longitude: -96.5847248999, 
-      data: '{"name":"Unnamed farm", "location": {"latitude": 39.1974437, "longitude": -96.5847248999}, "fields": []}'
+      data: '{"name":"Unnamed farm", "location": {"latitude": 39.1974437, "longitude": -96.5847248999}, "field_bounds": []}'
     )
 #    render :edit
   end

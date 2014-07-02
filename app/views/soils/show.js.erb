@@ -1,0 +1,136 @@
+var simulation = {};
+var weather = {};
+var soil = {};
+
+function get_elapsed_time() {
+  return simulation.elapsed_time;
+}
+
+function get_rainfall() {
+  return weather.rainfall;
+}
+
+function set_rainfall(val) {
+  weather.rainfall = val;
+}
+
+function get_snowfall() {
+  return weather.rainfall;
+}
+
+function set_snowfall(val) {
+  weather.snowfall = val;
+}
+
+function get_average_temperature() {
+  return weather.average_temperature;
+}
+
+function set_average_temperature(val) {
+  weather.average_temperature = val;
+}
+
+function get_low_temperature() {
+  return weather.low_temperature;
+}
+
+function set_low_temperature(val) {
+  weather.low_temperature = val;
+}
+
+function get_high_temperature() {
+  return weather.high_temperature;
+}
+
+function set_high_temperature(val) {
+  weather.high_temperature = val;
+}
+
+function get_wind_speed() {
+  return weather.wind_speed;
+}
+
+function set_wind_speed(val) {
+  weather.wind_speed = val;
+}
+
+function get_wind_direction() {
+  return weather.wind_direction;
+}
+
+function set_wind_direction(val) {
+  weather.wind_direction = val;
+}
+
+function get_relative_humidity() {
+  return weather.relative_humidity;
+}
+
+function set_relative_humidity(val) {
+  weather.relative_humidity = val;
+}
+
+<% for name in %w{flat_residue_carbon} %>
+
+function get_<%= name %>() {
+  return soil.<%= name %>;
+}
+
+function set_<%= name %>(val) {
+  soil.<%= name %> = val;
+}
+
+water_level = 250
+
+<% end %>
+
+onmessage = function(msg) {
+
+  // respond to message appropriately
+  switch(msg.data.type) {
+
+    // Advance the simulation by a single step (1 minute)
+    case "step":
+
+      // copy provided state
+      simulation = msg.data.simulation;
+      weather = msg.data.weather;
+
+      // update the soil state
+      <%= @soil.code.html_safe %>
+
+      // post the updated soil state
+      postMessage({
+        type: "step complete",
+        soil: soil,
+      });
+      break;
+
+    case "request water":
+      var requested_water = msg.data.requested_water,
+          supplied_water = 0;
+
+      if(water_level > 0) {
+        if(water_level < requested_water) {
+          supplied_water = water_level;
+          water_level = 0;
+        } else {
+          supplied_water = requested_water;
+          water_level -= requested_water;
+        }
+      } 
+      
+      postMessage({
+        type: "supply water",
+        supplied_water: supplied_water,
+      });
+
+    case "water level":
+      postMessage({
+        type: "water level",
+        water_level: water_level,
+      });
+      
+  }
+
+}

@@ -24,6 +24,10 @@
           <h4>Inputs</h4>
         </li>
 
+        <%= io_item "simulation_year", "simulation year", 0, as: :number %>
+        <%= io_item "simulation_month", "simulation month", 0, as: :number %>
+        <%= io_item "simulation_day", "simulation day", 0, as: :number %>
+
         <li class="list-group-item">
           <input id="elapsed_time" type="number" value="0" class="pull-right">
           Elapsed simulation time (minutes)
@@ -64,6 +68,7 @@
     <category name="Simulation">
       <block type="simulation_elapsed_time"></block>
       <block type="simulation_every_timestep"></block>
+      <block type="simulation_get_date"></block>
     </category>
 
     <category name="Weather">

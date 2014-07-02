@@ -1,5 +1,6 @@
 class CropsController < InheritedResources::Base
   respond_to :json, only: [:show, :update]
+  respond_to :js, only: [:show]
 
   def showy
     render text: '{"id":1,"user_id":1,"scripts":[[76,43,[["receiveGo"],["doForever", [["doWait","1"]]]]]],"variables":[{"name":"punk","value":"lucky"}],"name":"Winter Wheat","description":"Blah, Blah, Blah","code":"","created_at":"2014-04-03T15:52:46.299Z","updated_at":"2014-04-04T02:10:23.899Z"}'

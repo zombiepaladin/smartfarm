@@ -86,6 +86,26 @@ jQuery ->
         return interpreter.createPrimitive(num);
       interpreter.setProperty(scope, 'get_elapsed_time', interpreter.createNativeFunction(wrapper))
 
+      # date getters
+      wrapper = () ->
+        num = $('#simulation_year').val()
+        num = parseInt(num)
+        return interpreter.createPrimitive(num);
+      interpreter.setProperty(scope, 'get_simulation_year', interpreter.createNativeFunction(wrapper))
+
+      wrapper = () ->
+        num = $('#simulation_month').val()
+        num = parseInt(num)
+        return interpreter.createPrimitive(num);
+      interpreter.setProperty(scope, 'get_simulation_month', interpreter.createNativeFunction(wrapper))
+
+      wrapper = () ->
+        num = $('#simulation_day').val()
+        num = parseInt(num)
+        return interpreter.createPrimitive(num);
+      interpreter.setProperty(scope, 'get_simulation_day', interpreter.createNativeFunction(wrapper))
+
+
       # simulation attribute getters/setters
       attributes = ["latitude", "longitude"]
       attributes.forEach (name) ->
@@ -93,6 +113,15 @@ jQuery ->
 
       # weather attribute getters/setters
       attributes = ["rainfall", "snowfall", "average_temperature", "high_temperature", "low_temperature", "wind_speed", "wind_direction", "relative_humidity"]
+      attributes.forEach (name) ->
+        attrAccessor(name, interpreter, scope)
+
+      # soil attribute getters/setters
+      attributes = [
+        "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen", 
+        "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus",
+        "flat_residue_carbon", "humus_carbon"
+      ]
       attributes.forEach (name) ->
         attrAccessor(name, interpreter, scope)
 

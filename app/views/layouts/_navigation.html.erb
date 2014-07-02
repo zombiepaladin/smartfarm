@@ -1,28 +1,25 @@
 
-<%= nav_bar fixed: :top, brand: "Smartfarm", brand_link: root_path do %>
+<%= nav_bar fixed: :top, brand: "Smartfarm", brand_link: root_path, responsive: true do %>
 
-  <div id="navbar-toggle">
-    <span class="down"><i class="fa fa-chevron-down"></i> Show Menu</span>
-    <span class="up"><i class="fa fa-chevron-up"></i> Hide Menu</span>
-  </div>
-
-  <%= menu_group do %>
-     <%= menu_item "Simulations", simulations_path %>
-     <%= menu_item "Farms", farms_path %>
-     <%= menu_item "Soils", soils_path %>
-     <%= menu_item "Crops", crops_path %>
-     <%= menu_item "Weather", weather_index_path %>
-  <% end %>
-  <%= menu_group pull: :right do %>
-    <% if user_signed_in? %>
-      <%= drop_down "Signed in as #{current_user.username}" do %>
-        <%= menu_item "Profile", edit_user_registration_path %>
-        <%= menu_item "Sign out", destroy_user_session_path, method: :delete %>
-      <% end %>
-    <% else %>
-      <%= menu_item "Sign up", new_user_registration_path %>
-      <%= menu_item "Sign in", new_user_session_path %>
+    <%= menu_group do %>
+       <%= menu_item "Simulations", simulations_path %>
+       <%= menu_item "Farms", farms_path %>
+       <%= menu_item "Soils", soils_path %>
+       <%= menu_item "Crops", crops_path %>
+       <%= menu_item "Weather", weather_index_path %>
     <% end %>
-  <% end %>
+
+    <%= menu_group pull: :right do %>
+      <% if user_signed_in? %>
+        <%= drop_down "Signed in as #{current_user.username}" do %>
+          <%= menu_item "Profile", edit_user_registration_path %>
+          <%= menu_item "Sign out", destroy_user_session_path, method: :delete %>
+        <% end %>
+      <% else %>
+        <%= menu_item "Sign up", new_user_registration_path %>
+        <%= menu_item "Sign in", new_user_session_path %>
+      <% end %>
+    <% end %>
+
 <% end %>
 
