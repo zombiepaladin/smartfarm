@@ -1,4 +1,5 @@
 class SimulationsController < InheritedResources::Base
+  respond_to :js, only: [:show]
 
   def create
     @simulation = Simulation.new(resource_params)

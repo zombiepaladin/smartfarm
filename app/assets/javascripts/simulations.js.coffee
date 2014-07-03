@@ -6,73 +6,21 @@ jQuery ->
   if $('#simulation-controls').length > 0
 
     # Create the simulation object
-    simulation = {
+    simulation = 
+      worker: new Worker(window.location.toString() + '.js')
+      rate: 1000
+      interval: undefined
+      paused: true
 
-      # time details
-      start_date: new Date('2014-6-1')
-      end_date: new Date('2014-7-31')
-      elapsed_time: 0
+    simulation.worker.onmessage = (msg) ->
+      console.log(msg.data)
+      switch msg.data.type 
+        when 'time_update' then updateTime(msg.data.time)
+          
+  
 
-      regions_to_process: 0
-      regions: [
-        {
-          weather: {}
-          weather_worker: new Worker('/weather/5.js')
-          patches_to_process: 0
-          patches: [
-            {
-              soil: {}
-              soil_worker: new Worker('/soils/1.js')
-            },
-            {
-              soil: {}
-              soil_worker: new Worker('/soils/1.js')
-            },
-            {
-              soil: {}
-              soil_worker: new Worker('/soils/1.js')
-            }
-          ]
-        }
-        {
-          weather: {}
-          weather_worker: new Worker('/weather/5.js')
-          patches_to_process: 0
-          patches: []
-        }
-
-      ]
-    }
-    simulation.regions = for index in [1..50]
-      weather: {}
-      weather_worker: new Worker('/weather/5.js')
-      patches_to_process: 0
-      patches: []
-    window.simulation = simulation
-
-    soil_listener = (msg) ->
-      console.log("SOIL CALLBACK")
-      switch msg.data.type
-        when "step complete" 
-          console.log(msg.data.soil)
-
-    # Tie in the simulation callbacks
-    simulation.regions.forEach (region, region_index) ->
-      region.weather_worker.onmessage = (msg) ->
-         weather_callback(region_index, msg.data)
-         region.patches.forEach (patch, patch_index) ->
-           patch.soil_worker.onmessage = (msg) ->
-             soil_listener(msg)
-             #soil_callback(region_index, soil_index, msg.data)
-
-    step = () ->
-
-      # add a minute to the simulation's clock
-      #simulation.elapsed_time += 1
-
-      # calculate the simulation's date & time
-      elapsed_ms = simulation.elapsed_time * 60000;
-      simtime = new Date(simulation.start_date.getMilliseconds() + elapsed_ms)
+    updateTime = (time) ->
+      simtime = new Date(time)
 
       switch(simtime.getMonth()) 
         when 1 then $('#calendar-month').html('Jan')
@@ -90,47 +38,21 @@ jQuery ->
 
       $('#calendar-day').html( simtime.getDate() );
 
-      $('#simulation-clock').html( simtime.getHours() + ':' + simtime.getMinutes() )
+      #simtime.getHours() + ':' + ( '0' + simtime.getMinutes())
+      $('#simulation-clock').html( simtime.getUTCHours() + ':' + ('0' + simtime.getUTCMinutes()).slice(-2) )
 
-      # Update regions
-      simulation.regions_to_process = simulation.regions.length
-      simulation.regions.forEach (region) ->
-        region.weather = region.weather_worker.postMessage
-          simulation: 
-            elapsed_time: simulation.elapsed_time
-
-    weather_callback = (index, weather) ->
-      console.log("WEATHER CALLBACK")
-      simulation.regions[index].weather = weather
-      simulation.regions_to_process -= 1
-
-      # Weather data is ready, update patches
-      simulation.regions[index].patches_to_process = simulation.regions[index].patches.length
-      simulation.regions[index].patches.forEach (patch) ->
-        console.log("posting step")
-        patch.soil_worker.postMessage
-          type: "step"
-          simulation: 
-            elapsed_time: simulation.elapsed_time
-          weather: weather
-
-      # if weather for the last region was processed, move on to next step
-      #if (simulation.regions_to_process = 0) 
-      console.log(weather)
-      console.log(simulation.regions_to_process + " regions processing")
-
-    soil_callback = (region_index, patch_index, soil) ->
-      simulation.regions[region_index].patches[patch_index].soil = soil
-      simulation.regions[region_index].patches_to_process -= 1
-      console.log(soil)
   
     run  = $('#simulation-run')
     pause = $('#simulation-pause')
     restart = $('#simulation-restart')
 
+    step = () ->
+      console.log('step')
+      simulation.worker.postMessage({type: 'tick'});
+
     run.on 'click', () ->
-      step()
-      #simulation.interval = setInterval(step, simulation.rate)        
+      console.log('before step')
+      simulation.interval = setInterval(step, 1000)        
       simulation.paused = false
 
     pause.on 'click', () ->

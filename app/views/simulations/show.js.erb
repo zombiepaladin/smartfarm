@@ -1,21 +1,61 @@
 var simulation = {
   rate: 0,                      // in ms
   clock: {
-    elapsed_time: 1420,           // in minutes
-  }
-  regions: [
-    <%= @
-    {
-      weather_worker: 5,
-    }
-  ],
+    time: Date.parse('<%= @simulation.start_on %>'),
+    elapsed_time: 0,           // in minutes
+  },
+  weather: {},
+  patches: [],
 };
+
+
+
+onmessage = function(msg) {
+
+  switch(msg.data.type) {
+
+    case 'tick': 
+      simulation.clock.elapsed_time += 60000; // Add one minute to elapsed time
+      simulation.clock.time += 60000; // Add one minute to time
+      update(simulation);
+      postMessage({type: 'time_update', time: simulation.clock.time});
+//      postMessage({type: 'weather_update', weather: {rainfall: 0}});
+      break;
+  }
+
+
+}
+
+function update(simulation) {
+  updateWeather(simulation.weather);
+  simulation.patches.forEach( function (patch, index) {
+    updatePatch(index, patch, weather);
+  });
+}
+
+function updateWeather(weather) {
+
+  function set_rainfall(val) {
+    weather.rainfall = val;
+  }
+
+  <%= Weather.all[7].code.html_safe %>
+
+  postMessage({
+    type: 'weather_update',
+    weather: weather
+  });
+}
+
+function updatePatch(id, patch, weather) {
+  patch.
+}
 
 
 function initializeRegion(weatherModelID, weatherState) {
   var region = {
     weather: {},
-    worker: new WebWorker('/weather/' + weatherModelId + '.js');
+    worker: new WebWorker('/weather/' + weatherModelId + '.js'),
   };
   region.worker.onerror = function(err) {
     console.log(err);
