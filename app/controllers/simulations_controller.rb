@@ -1,5 +1,6 @@
 class SimulationsController < InheritedResources::Base
   respond_to :js, only: [:show]
+  respond_to :json, only: [:show]
 
   def create
     @simulation = Simulation.new(resource_params)
@@ -10,7 +11,7 @@ class SimulationsController < InheritedResources::Base
 private
 
   def resource_params
-    params.require(:simulation).permit(:name, :start_on, :end_on, :description)
+    params.require(:simulation).permit(:name, :start_on, :end_on, :description, :state)
   end
 
 end

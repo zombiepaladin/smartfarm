@@ -3,6 +3,37 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
 
+  # New simulation form controls
+  #=======================================================
+
+  if($('.new_simulation').size() > 0) 
+    simulation = {}
+    window.simulation = simulation
+
+    
+
+    $('.farm a').on 'click', (event) ->
+      event.preventDefault()
+      $('#selected-farms').children().detach().appendTo("#unselected-farms").wrap('<div class="col-sm-4 col-md-3"></div>')
+      selected = $(this).parent().unwrap().detach().appendTo('#selected-farms')
+      console.log( $(this).attr('href') )
+      simulation.farm = 
+        id: selected.data('id')
+      return false
+
+    saveButton = $('button#save');
+    saveButton.on 'click', (event) ->
+
+
+
+      $('#simulation_state').val( JSON.stringify(simulation) )
+      
+      alert("whoohoo")  
+
+
+  # Simulation running controls
+  #=========================================================
+
   if $('#simulation-controls').length > 0
 
     # Create the simulation object
@@ -11,13 +42,42 @@ jQuery ->
       rate: 1000
       interval: undefined
       paused: true
+      size: {width: 0, height: 0}
+      layerContexts: {}
 
     simulation.worker.onmessage = (msg) ->
       console.log(msg.data)
       switch msg.data.type 
+        when 'size_update' then updateSize(msg.data.size)
         when 'time_update' then updateTime(msg.data.time)
+        when 'water_update' then updateWater(msg.data.water)
           
+
+    simulation.worker.postMessage({type: 'init'});
   
+    updateSize = (size) ->
+      simulation.size = size
+      layerWidth = $('body').width() - 40
+      layers = $('#data-layers')
+      #layers.children('.layer').remove()
+
+      fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
+      ctx = fields[0].getContext('2d');
+      simulation.size.fields.forEach (field) ->
+        ctx.beginPath();
+        field.forEach (corner) ->
+          ctx.lineTo(corner.x * 50, corner.y * 50)
+        ctx.closePath()
+        ctx.stroke()
+      layers.prepend(fields)
+      
+      
+      water = $("<canvas id='water' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
+      simulation.layerContexts.water = water[0].getContext('2d');
+      layers.prepend(water)
+
+      $('#data-layers .layer').css('width', '100%');
+      
 
     updateTime = (time) ->
       simtime = new Date(time)
@@ -39,7 +99,24 @@ jQuery ->
       $('#calendar-day').html( simtime.getDate() );
 
       #simtime.getHours() + ':' + ( '0' + simtime.getMinutes())
-      $('#simulation-clock').html( simtime.getUTCHours() + ':' + ('0' + simtime.getUTCMinutes()).slice(-2) )
+      $('#simulation-clock').html( simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2) )
+
+    updateWater = (water) ->
+      console.log('here')
+      brush = simulation.layerContexts.water.createImageData(1,1)
+      brushData = brush.data;
+      brushData[2] = 255
+      brushData[3] = 255
+      console.log("after")
+      for y in [0..simulation.size.height] by 1
+        offset = y * simulation.size.width
+        for x in [0..simulation.size.width] by 1
+          console.log(water[x + offset])
+          brushData[0] = water[x + offset]
+          brushData[1] = water[x + offset] 
+          simulation.layerContexts.water.putImageData(brush, x, y)
+        
+
 
   
     run  = $('#simulation-run')
@@ -60,4 +137,9 @@ jQuery ->
       simulation.paused = true
 
     restart.on 'click', () ->
-      window.location = window.location
+      clearInterval(simulation.interval)
+      simulation.paused = true
+      simulation.worker.postMessage({type: 'init'})
+#      window.location = window.location
+
+

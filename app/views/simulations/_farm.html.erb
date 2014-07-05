@@ -12,9 +12,9 @@
   <div class="col-md-4">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <h4 class="panel-title">Farms to Simulate</h4>
+        <h4 class="panel-title">Farm to Simulate</h4>
       </div>
-      <div id="simulation-farms" class="panel-body">
+      <div id="selected-farms" class="panel-body">
       </div>
     </div>
   </div>
@@ -27,7 +27,7 @@
           <button type="button" class="btn btn-default">All Farms</button>
         </div>
       </h4>
-      <div class="container">
+      <div id="unselected-farms" class="container">
         <%= render Farm.all %>
       </div>
   </div>

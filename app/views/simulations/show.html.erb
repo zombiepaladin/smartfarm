@@ -1,5 +1,3 @@
-<p id="notice"><%= notice %></p>
-
 <div class="well">
 
   <div id="simulation-controls" class="row">
@@ -14,7 +12,7 @@
     </div>
 
     <div id="simulation-clock" class="pull-left">
-      <%= @simulation.start_on.strftime("%H:%m") %>
+      <%= @simulation.start_on.strftime("%H:%M") %>
     </div>
 
     <button id="simulation-run" role="button" class="btn">
@@ -71,6 +69,8 @@
   </div>
 
   <div class="tab-pane" id="data">
+    <div id="data-layers">
+    </div>
   </div>
 
 </div>

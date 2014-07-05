@@ -1,4 +1,5 @@
 class FarmsController < InheritedResources::Base
+  respond_to :json, only: :show
 
   def create
     @farm = Farm.new(resource_params)

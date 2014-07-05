@@ -1,38 +1,182 @@
+<% data = JSON.parse @simulation.state %>
+
 var simulation = {
   rate: 0,                      // in ms
   clock: {
-    time: Date.parse('<%= @simulation.start_on %>'),
+    time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
     elapsed_time: 0,           // in minutes
   },
   weather: {},
   patches: [],
+  width: 0,
+  height: 0,
+  water: undefined,
 };
 
+postMessage({start_time: '<%= @simulation.start_on.to_s %>'});
 
-
+// ====================================================
+// Message Handler
+// Processes messages from the user interface thread
+// These are: 
+//  (1) initialization messages, (re)setting up the simulation
+//  (2) tick messages, advancing the simulation, and
+//  (3) various agricultural operations carryed out by the user, 
+//      such as planting
+//
 onmessage = function(msg) {
 
   switch(msg.data.type) {
+    
+    case 'init':
+      initialize(simulation);
+      break;
 
     case 'tick': 
       simulation.clock.elapsed_time += 60000; // Add one minute to elapsed time
       simulation.clock.time += 60000; // Add one minute to time
       update(simulation);
       postMessage({type: 'time_update', time: simulation.clock.time});
-//      postMessage({type: 'weather_update', weather: {rainfall: 0}});
       break;
   }
 
 
 }
 
+//=====================================================
+// Simulation initialization methods
+
+function initialize(simulation) {
+  initClock(simulation);
+  initWeather(simulation);
+  initPatches(simulation);
+}
+
+function initClock(simulation) {
+  simulation.clock = {
+    time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
+    elapsed_time: 0,           // in minutes
+  }
+  postMessage({type: 'time_update', time: simulation.clock.time});
+}
+
+function initWeather(simulation) {
+  simulation.weather = {
+    rainfall: 0,
+    snowfall: 0,
+    solar_radiation: 0,
+    day_length: 0,
+    average_temperature: 14,
+    low_temperature: 14,
+    high_temperature: 14,
+    wind_speed: 0,
+    wind_direction: 0,
+    relative_humidity: 0.5,
+  }
+}
+
+function initPatches(simulation) {
+  var farm = <%= Farm.find(data["farm"]["id"]).data.html_safe %>,
+      north = farm.location.latitude, 
+      south = farm.location.latitude, 
+      east = farm.location.longitude, 
+      west = farm.location.longitude,
+      widthInPatches,
+      heightInPatches,
+      degreesPerMeterLat,
+      degreesPerMeterLng,
+      halfWidth,
+      halfHeight;
+
+  // Find the outer boundaries of the simulations
+  farm.field_bounds.forEach( function(bounds) {
+    bounds.forEach( function(corner) {
+      north = corner.latitude > north ? corner.latitude : north;
+      south = corner.latitude < south ? corner.latitude : south;
+      west = corner.longitude > west ? corner.longitude : west;
+      east = corner.longitude < east ? corner.longitude : east;
+    });
+  });
+  
+  // 111,111 meters = 1 degree latitude
+  heightInPatches = Math.ceil(111111 * (north - south) / 100);
+  degreesPerHundredMeterLat = 100/111111;
+  halfHeight = degreesPerHundredMeterLat / 2;
+
+  // 111,111 * cos(latitude) = 1 degree longitude
+  widthInPatches = Math.ceil(111111 * Math.cos(farm.location.latitude * (Math.PI/180)) * (west - east) / 100);
+  degreesPerHundredMeterLng = 100/(111111 * Math.cos(farm.location.latitude * (Math.PI/180)));
+  halfWidth = degreesPerHundredMeterLng / 2;
+
+  simulation.width = widthInPatches;
+  simulation.height = heightInPatches;
+
+  // Convert field bounds into pixel coordinates
+  simulation.fields = farm.field_bounds.map( function(boundary) {
+    return boundary.map( function(corner) {
+      return {
+        x: (corner.longitude - east) * (simulation.width / (west - east)),
+        y: (corner.latitude - south) * (simulation.height / (north - south))
+      };
+    });
+  });
+  
+  
+
+
+  postMessage({type: 'size_update', size: {width: simulation.width, height: simulation.height, fields: simulation.fields}});
+
+  simulation.water = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.nitrogen = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.potassium = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.other = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.thing = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.stuff = new Uint8Array(widthInPatches * heightInPatches );
+  simulation.foo = new Uint8Array(widthInPatches * heightInPatches );
+
+postMessage({type: 'debug', water: simulation.water, width: widthInPatches, height: heightInPatches});
+postMessage({type: 'water_update', water: simulation.water});
+/*
+  // Create soil patches
+  simulation.patches = []
+  for(x = 0; x < widthInPatches; x++) {
+    for(y = 0; y < heightInPatches; y++) {
+      var id = x + y * widthInPatches;
+      simulation.patches[id] = {
+        id: id,
+        longitude: east + halfWidth + x * degreesPerHundredMeterLat,
+        latitude: south + halfHeight + y * degreesPerHundredMeterLat,
+        stuff: 'things',
+      }
+      postMessage({type: 'update_patch', patch: simulation.patches[id]});
+    }
+  }
+*/
+}
+
+//=====================================================
+// Simulation update methods
+
+
+// Update the simulation
+//-----------------------------------------------------
 function update(simulation) {
   updateWeather(simulation.weather);
+/*
   simulation.patches.forEach( function (patch, index) {
     updatePatch(index, patch, weather);
   });
+*/
+  for(x = 0; x < simulation.width; x++) {
+    for(y = 0; y < simulation.height; y++) {
+      simulation.water[x + simulation.width * y] = Math.random() * 255;
+    }
+  }
+  postMessage({type: 'water_update', water: simulation.water});
 }
 
+// Update the weather
+//-----------------------------------------------------
 function updateWeather(weather) {
 
   function set_rainfall(val) {
@@ -47,22 +191,8 @@ function updateWeather(weather) {
   });
 }
 
+// Update a patch
+//-----------------------------------------------------
 function updatePatch(id, patch, weather) {
-  patch.
+  
 }
-
-
-function initializeRegion(weatherModelID, weatherState) {
-  var region = {
-    weather: {},
-    worker: new WebWorker('/weather/' + weatherModelId + '.js'),
-  };
-  region.worker.onerror = function(err) {
-    console.log(err);
-    alert("An error occured");
-  };
-  region.worker.onmessage = function(event) {
-    region.weather = event.data;
-  };
-}
-

@@ -18,3 +18,12 @@
 #calendar-day {
   font-size: 15pt;
 }
+
+#data-layers {
+  position: relative;
+}
+
+#data-layers .layer {
+  width: 100%;
+  position: absolute;
+}
