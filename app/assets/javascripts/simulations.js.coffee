@@ -58,12 +58,29 @@ jQuery ->
         when 'size_update' then updateSize(msg.data.size)
         when 'time_update' then updateTime(msg.data.time)
         when 'weather_update' then updateWeather(msg.data.weather)
-        when 'water_content_update' then updateWaterContent(msg.data.water_content)
-        when 'nitrate_update' then updateNitrate(msg.data.nitrate)
+        when 'data_layer_update' then updateDataLayer(msg.data.layer_name, msg.data.layer_data)
+#        when 'water_content_update' then updateWaterContent(msg.data.water_content)
+#        when 'nitrate_update' then updateNitrate(msg.data.nitrate)
           
 
     simulation.worker.postMessage({type: 'init'});
-  
+
+    # data layer colors
+    layerColors = {}
+    layerColors["water_content"] = [0, 0, 255]
+    layerColors["nitrate"] = [100, 100, 100]
+    layerColors["ammonium"]= [100, 100, 100]
+    layerColors["fresh_organic_nitrogen"]= [100, 100, 100]
+    layerColors["active_organic_nitrogen"]= [100, 100, 100]
+    layerColors["stable_organic_nitrogen"]= [100, 100, 100]
+    layerColors["labile_phosphorus"]= [100, 100, 100]
+    layerColors["fresh_organic_phosphorus"]= [100, 100, 100]
+    layerColors["bound_organic_phosphorus"]= [100, 100, 100]
+    layerColors["active_mineral_phosphorus"]= [100, 100, 100]
+    layerColors["stable_mineral_phosphorus"]= [100, 100, 100]
+    layerColors["flat_residue_carbon"]= [100, 100, 100]
+    layerColors["humus_carbon"]= [100, 100, 100]
+ 
     updateSize = (size) ->
       simulation.size = size
       layerWidth = $('body').width() - 40
@@ -80,13 +97,26 @@ jQuery ->
         ctx.stroke()
       layers.prepend(fields)
       
-      water = $("<canvas id='water_content' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
-      simulation.layerContexts.waterContent = water[0].getContext('2d');
-      layers.prepend(water)
+#      water = $("<canvas id='water_content' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
+#      simulation.layerContexts.waterContent = water[0].getContext('2d');
+#      layers.prepend(water)
 
-      nitrate = $("<canvas id='nitrate' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid brown;'></canvas>")
-      simulation.layerContexts.nitrate = nitrate[0].getContext('2d');
-      layers.prepend(nitrate)
+#      nitrate = $("<canvas id='nitrate' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid brown;'></canvas>")
+#      simulation.layerContexts.nitrate = nitrate[0].getContext('2d');
+#      layers.prepend(nitrate)
+
+      # data layers
+      attributes = [
+        "water_content",
+        "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen",
+        "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus",
+        "flat_residue_carbon", "humus_carbon"
+      ]
+      attributes.forEach (name) ->
+        layer = $("<canvas id='#{name}' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid red'></canvas>")
+        simulation.layerContexts[name] = layer[0].getContext('2d');
+        layers.prepend(layer)
+      window.simulation = simulation
 
       $('#data-layers .layer').css('width', '100%');
       
@@ -115,9 +145,20 @@ jQuery ->
 
     updateWeather = (weather) ->
     
+    updateDataLayer = (name, data) ->
+      brush = simulation.layerContexts[name].createImageData(1,1)
+      brushData = brush.data
+      brushData[0] = layerColors[name][0]
+      brushData[1] = layerColors[name][1]
+      brushData[2] = layerColors[name][2]
+      for y in [0..simulation.size.height] by 1
+        offset = y * simulation.size.width
+        for x in [0..simulation.size.width] by 1
+          brushData[3] = data[x + offset]
+          simulation.layerContexts[name].putImageData(brush, x, y)
 
-    updateWaterContent = (waterContent) ->
-      brush = simulation.layerContexts.waterContent.createImageData(1,1)
+    updateWaterContent = (water_content) ->
+      brush = simulation.layerContexts.water_content.createImageData(1,1)
       brushData = brush.data;
       brushData[0] = 90
       brushData[1] = 151
@@ -125,11 +166,8 @@ jQuery ->
       for y in [0..simulation.size.height] by 1
         offset = y * simulation.size.width
         for x in [0..simulation.size.width] by 1
-#          console.log(water[x + offset])
-          brushData[3] = waterContent[x + offset]
-          simulation.layerContexts.waterContent.putImageData(brush, x, y)
-
-    
+          brushData[3] = water_content[x + offset]
+          simulation.layerContexts.water_content.putImageData(brush, x, y)
 
     updateNitrate = (nitrate) ->
       brush = simulation.layerContexts.nitrate.createImageData(1,1)

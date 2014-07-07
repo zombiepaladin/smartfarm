@@ -158,7 +158,7 @@ function initPatches(simulation) {
   
 <% for property in Soil::PROPERTIES %>
   simulation.soil.<%= property %> = new Uint8Array(widthInPatches * heightInPatches );
-  postMessage({type: '<%= property %>_update', <%= property %>: simulation.soil.<%= property %>});
+  postMessage({type: 'data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 
 }
@@ -197,7 +197,7 @@ function updateSoil() {
     }
   }
 <% for property in Soil::PROPERTIES %>
-  postMessage({type: '<%= property %>_update', <%= property %>: simulation.soil.<%= property %>});
+  postMessage({type: 'data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 }
 
