@@ -1,6 +1,5 @@
 class WeatherController < InheritedResources::Base
   respond_to :json, only: [:show, :update]
-  respond_to :js, only: [:show]
 
   def create
     @weather = Weather.new(resource_params)

@@ -52,7 +52,7 @@
           <h4>Outputs</h4>
         </li>
 
-        <%= io_item("h20", "h20 (in mm3)", 20) %>
+        <%= io_item("water_content", "water content (in mm3)", 20) %>
 
         <%= io_item "nitrate", "nitrate (kg/ha)", 0 %>
         <%= io_item "ammonium", "ammonium (kg/ha)", 0 %>
@@ -88,6 +88,10 @@
     </category>
 
     <category name="Soil">
+      <block type="soil_set_water_content"></block>
+      <block type="soil_get_water_content"></block>
+      <block type="soil_set_nitrate"></block>
+      <block type="soil_get_nitrate"></block>
       <block type="soil_set_ammonium"></block>
       <block type="soil_get_ammonium"></block>
       <block type="soil_set_nitrogen"></block>

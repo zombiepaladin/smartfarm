@@ -1,5 +1,4 @@
 class CropsController < InheritedResources::Base
-  respond_to :json, only: [:show, :update]
   respond_to :js, only: [:show]
 
   def showy

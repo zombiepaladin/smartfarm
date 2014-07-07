@@ -57,7 +57,9 @@ jQuery ->
       switch msg.data.type 
         when 'size_update' then updateSize(msg.data.size)
         when 'time_update' then updateTime(msg.data.time)
-        when 'water_update' then updateWater(msg.data.water)
+        when 'weather_update' then updateWeather(msg.data.weather)
+        when 'water_content_update' then updateWaterContent(msg.data.water_content)
+        when 'nitrate_update' then updateNitrate(msg.data.nitrate)
           
 
     simulation.worker.postMessage({type: 'init'});
@@ -78,10 +80,13 @@ jQuery ->
         ctx.stroke()
       layers.prepend(fields)
       
-      
-      water = $("<canvas id='water' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
-      simulation.layerContexts.water = water[0].getContext('2d');
+      water = $("<canvas id='water_content' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
+      simulation.layerContexts.waterContent = water[0].getContext('2d');
       layers.prepend(water)
+
+      nitrate = $("<canvas id='nitrate' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid brown;'></canvas>")
+      simulation.layerContexts.nitrate = nitrate[0].getContext('2d');
+      layers.prepend(nitrate)
 
       $('#data-layers .layer').css('width', '100%');
       
@@ -108,21 +113,36 @@ jQuery ->
       #simtime.getHours() + ':' + ( '0' + simtime.getMinutes())
       $('#simulation-clock').html( simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2) )
 
-    updateWater = (water) ->
-      console.log('here')
-      brush = simulation.layerContexts.water.createImageData(1,1)
+    updateWeather = (weather) ->
+    
+
+    updateWaterContent = (waterContent) ->
+      brush = simulation.layerContexts.waterContent.createImageData(1,1)
       brushData = brush.data;
-      brushData[2] = 255
-      brushData[3] = 255
-      console.log("after")
+      brushData[0] = 90
+      brushData[1] = 151
+      brushData[2] = 206
       for y in [0..simulation.size.height] by 1
         offset = y * simulation.size.width
         for x in [0..simulation.size.width] by 1
-          console.log(water[x + offset])
-          brushData[0] = water[x + offset]
-          brushData[1] = water[x + offset] 
-          simulation.layerContexts.water.putImageData(brush, x, y)
-        
+#          console.log(water[x + offset])
+          brushData[3] = waterContent[x + offset]
+          simulation.layerContexts.waterContent.putImageData(brush, x, y)
+
+    
+
+    updateNitrate = (nitrate) ->
+      brush = simulation.layerContexts.nitrate.createImageData(1,1)
+      brushData = brush.data;
+      brushData[0] = 224
+      brushData[1] = 73
+      brushData[2] = 87
+      for y in [0..simulation.size.height] by 1
+        offset = y * simulation.size.width
+        for x in [0..simulation.size.width] by 1
+#          console.log(water[x + offset])
+          brushData[3] = soil.nitrate[x + offset] 
+          simulation.layerContexts.nitrate.putImageData(brush, x, y)
 
 
   
@@ -136,7 +156,7 @@ jQuery ->
 
     run.on 'click', () ->
       console.log('before step')
-      simulation.interval = setInterval(step, 1000)        
+      simulation.interval = setInterval(step, 100)        
       simulation.paused = false
 
     pause.on 'click', () ->

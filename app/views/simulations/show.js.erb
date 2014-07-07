@@ -7,6 +7,7 @@ var simulation = {
     elapsed_time: 0,           // in minutes
   },
   weather: {},
+  soil: {},
   patches: [],
   width: 0,
   height: 0,
@@ -33,7 +34,7 @@ onmessage = function(msg) {
       break;
 
     case 'tick': 
-      simulation.clock.elapsed_time += 60000; // Add one minute to elapsed time
+      simulation.clock.elapsed_time += 1; // Add one minute to elapsed time
       simulation.clock.time += 60000; // Add one minute to time
       update(simulation);
       postMessage({type: 'time_update', time: simulation.clock.time});
@@ -42,6 +43,37 @@ onmessage = function(msg) {
 
 
 }
+
+//=====================================================
+// Simulation API
+
+function get_elapsed_time() {
+  return simulation.clock.elapsed_time;
+}
+
+// Weather API
+<% for property in Weather::PROPERTIES %>
+function get_<%= property %>() {
+  return simulation.weather.<%= property %>;
+}
+
+function set_<%= property %>(value) {
+  simulation.weather.<%= property %> = value;
+}
+<% end %> 
+
+// Soil API
+var index = 0
+<% for property in Soil::PROPERTIES %>
+function get_<%= property %>() {
+  return simulation.soil.<%= property %>[index];
+}
+
+function set_<%= property %>(value) {
+  simulation.soil.<%= property %>[index] = value;
+}
+<% end %>
+
 
 //=====================================================
 // Simulation initialization methods
@@ -120,38 +152,15 @@ function initPatches(simulation) {
       };
     });
   });
-  
-  
 
 
   postMessage({type: 'size_update', size: {width: simulation.width, height: simulation.height, fields: simulation.fields}});
+  
+<% for property in Soil::PROPERTIES %>
+  simulation.soil.<%= property %> = new Uint8Array(widthInPatches * heightInPatches );
+  postMessage({type: '<%= property %>_update', <%= property %>: simulation.soil.<%= property %>});
+<% end %>
 
-  simulation.water = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.nitrogen = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.potassium = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.other = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.thing = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.stuff = new Uint8Array(widthInPatches * heightInPatches );
-  simulation.foo = new Uint8Array(widthInPatches * heightInPatches );
-
-postMessage({type: 'debug', water: simulation.water, width: widthInPatches, height: heightInPatches});
-postMessage({type: 'water_update', water: simulation.water});
-/*
-  // Create soil patches
-  simulation.patches = []
-  for(x = 0; x < widthInPatches; x++) {
-    for(y = 0; y < heightInPatches; y++) {
-      var id = x + y * widthInPatches;
-      simulation.patches[id] = {
-        id: id,
-        longitude: east + halfWidth + x * degreesPerHundredMeterLat,
-        latitude: south + halfHeight + y * degreesPerHundredMeterLat,
-        stuff: 'things',
-      }
-      postMessage({type: 'update_patch', patch: simulation.patches[id]});
-    }
-  }
-*/
 }
 
 //=====================================================
@@ -161,38 +170,34 @@ postMessage({type: 'water_update', water: simulation.water});
 // Update the simulation
 //-----------------------------------------------------
 function update(simulation) {
-  updateWeather(simulation.weather);
-/*
-  simulation.patches.forEach( function (patch, index) {
-    updatePatch(index, patch, weather);
-  });
-*/
-  for(x = 0; x < simulation.width; x++) {
-    for(y = 0; y < simulation.height; y++) {
-      simulation.water[x + simulation.width * y] = Math.random() * 255;
-    }
-  }
-  postMessage({type: 'water_update', water: simulation.water});
+  updateWeather();
+  updateSoil();
+  // updateCrops();
 }
 
 // Update the weather
 //-----------------------------------------------------
-function updateWeather(weather) {
-
-  function set_rainfall(val) {
-    weather.rainfall = val;
-  }
+function updateWeather() {
 
   <%= Weather.find(data["weather"]["id"]).code.html_safe %>
 
   postMessage({
     type: 'weather_update',
-    weather: weather
+    weather: simulation.weather
   });
 }
 
-// Update a patch
+// Update the soil
 //-----------------------------------------------------
-function updatePatch(id, patch, weather) {
-  
+function updateSoil() {
+  for(x = 0; x < simulation.width; x++) {
+    for(y = 0; y < simulation.height; y++) {
+      index = x + simulation.width * y
+      <%= Soil.find(data["soil"]["id"]).code.html_safe %>
+    }
+  }
+<% for property in Soil::PROPERTIES %>
+  postMessage({type: '<%= property %>_update', <%= property %>: simulation.soil.<%= property %>});
+<% end %>
 }
+
