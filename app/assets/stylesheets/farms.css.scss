@@ -1,7 +1,7 @@
 // Place all the styles related to the farms controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-#farm-map, #farm_field_map {
+#farm-map, #farm_field_map, #farm_soil_profile_map {
   height: 300px;
   width: 100%;
 }
@@ -16,4 +16,11 @@ tr.boundary-corner::before {
   display: table-cell;
   padding-top: 8px;
   text-align: center;
+}
+
+#farm-collection .farm {
+  width: 20%;
+  margin-left: 15px;
+  margin-right: 15px;
+  float: left;
 }

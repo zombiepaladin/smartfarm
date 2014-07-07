@@ -8,10 +8,17 @@ class SimulationsController < InheritedResources::Base
     create!
   end
 
+  def edit
+    @simulation = Simulation.find(params[:id])
+    data = JSON.parse @simulation.state
+    @farm = Farm.find data["farm"]["id"] if data["farm"]
+    @weather = Weather.find data["weather"]["id"] if data["weather"]
+  end
+
 private
 
   def resource_params
-    params.require(:simulation).permit(:name, :start_on, :end_on, :description, :state)
+    params.require(:simulation).permit(:name, :start_on, :end_on, :description, :farm, :weather, :state)
   end
 
 end

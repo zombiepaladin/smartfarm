@@ -1,0 +1,36 @@
+<div class="bs-callout bs-callout-info">
+  <h4>Picking your weather model</h4>
+  <p>
+    Before you can run your simulation, you need to identify the model by which you will
+    simulate weather.  You can choose form all the weather models that have been uploaded
+    into the SmartFarm site, or you can <%= link_to 'create your own', new_weather_path %>
+    and then come back to create your simulation.
+  </p>
+</div>
+
+ <div class="row">
+  <div class="col-md-4">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h4 class="panel-title">Weather Model to Use</h4>
+      </div>
+      <div id="selected-weather" class="panel-body">
+        <%= render @weather if @weather %>
+      </div>
+    </div>
+  </div>
+
+   <div class="col-md-8">
+      <h4>
+        Farms
+        <div class="btn-group">
+          <button type="button" class="btn btn-success">My Weather Models</button>
+          <button type="button" class="btn btn-default">All Weather Models</button>
+        </div>
+      </h4>
+      <div id="unselected-weather">
+        <%= render Weather.all %>
+      </div>
+  </div>
+</div>
+

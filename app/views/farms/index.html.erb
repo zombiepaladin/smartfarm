@@ -1,7 +1,9 @@
 <h1>Farms</h1>
 
-<% @farms.each do |farm| %>
-  <%= render farm %>
-<% end %>
+<div id="farm-collection" class="row">
+  <% @farms.each do |farm| %>
+    <%= render farm %>
+  <% end %>
+</div>
 
 <%= link_to 'New Farm', new_farm_path %>

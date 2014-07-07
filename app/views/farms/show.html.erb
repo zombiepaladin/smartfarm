@@ -1,24 +1,33 @@
-<p id="notice"><%= notice %></p>
+<div class="panel panel-default">
 
-<p>
-  <strong>Name:</strong>
-  <%= @farm.name %>
-</p>
+  <div class="panel-heading">
+    <%= link_to edit_farm_path(@farm), class: "btn btn-info pull-right" do %>
+      <i class="fa fa-edit"></i> Edit
+    <% end %>
+    <h1 class="panel-title"><%= @farm.name %></h1>
+    <p>by <%= link_to @farm.user.username,@farm.user %></p>
+  </div>
 
-<p>
-  <strong>Latitude:</strong>
-  <%= @farm.latitude %>
-</p>
+  <div class="panel-body">
+    <div class="row">
 
-<p>
-  <strong>Longitude:</strong>
-  <%= @farm.longitude %>
-</p>
+      <div class="col-md-4">
+        <div class="thumbnail">
+          <%= image_tag @farm.static_map_url, alt: @farm.name %>
+        </div>
+      </div>
 
-<p>
-  <strong>Data:</strong>
-  <%= @farm.data %>
-</p>
+      <div class="col-md-8">
 
-<%= link_to 'Edit', edit_farm_path(@farm) %> |
-<%= link_to 'Back', farms_path %>
+        <h4>Description</h4>
+        <div>
+          <%= @farm.description %>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+

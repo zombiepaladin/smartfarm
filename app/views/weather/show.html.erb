@@ -1,24 +1,30 @@
-<p id="notice"><%= notice %></p>
+<div class="panel panel-default">
 
-<p>
-  <strong>Name:</strong>
-  <%= @weather.name %>
-</p>
+  <div class="panel-heading">
+    <%= link_to edit_weather_path(@weather), class: "btn btn-info pull-right" do %>
+      <i class="fa fa-retweet"></i> See Inside
+    <% end %>
+    <h1 class="panel-title"><%= @weather.name %></h1>
+    <p>by <%= link_to @weather.user.username, @weather.user %></p>
+  </div>
 
-<p>
-  <strong>Description:</strong>
-  <%= @weather.description %>
-</p>
+  <div class="panel-body">
+    <div class="row">
+  
+      <div class="col-md-4">
+        <%= image_tag "weather-#{@weather.icons}.png" %>
+      </div>
 
-<p>
-  <strong>Code:</strong>
-  <%= @weather.code %>
-</p>
+      <div class="col-md-8">
+        <h4>Description</h4>
+        <div>
+          <%= @weather.description %>
+        </div>
+      </div>
 
-<p>
-  <strong>Workspace:</strong>
-  <%= @weather.workspace %>
-</p>
+    </div>
+  </div>
 
-<%= link_to 'Edit', edit_weather_path(@weather) %> |
-<%= link_to 'Back', weather_index_path %>
+</div>
+
+

@@ -183,7 +183,7 @@ function updateWeather(weather) {
     weather.rainfall = val;
   }
 
-  <%= Weather.all[7].code.html_safe %>
+  <%= Weather.find(data["weather"]["id"]).code.html_safe %>
 
   postMessage({
     type: 'weather_update',

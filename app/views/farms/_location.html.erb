@@ -1,0 +1,38 @@
+      <div class="bs-callout bs-callout-info">
+        <h4>Establishing your farm's location</h4>
+        <p>
+          You need to provide your farm's <a href="http://en.wikipedia.org/wiki/Geographic_coordinate_system">geographic coordinates<i class="fa fa-external-link"></i></a>.
+          These can be provided three ways: 1) directly entering your farm's latitude and longitude, 2) searching by address, or 3) dragging the farm's pin to the
+          appropriate location on the Google map.
+        </p>
+      </div>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <%= f.label :latitude %>
+            <%= f.text_field :latitude, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+            <%= f.label :longitude %>
+            <%= f.text_field :longitude, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-1">
+          <h3>OR</h3>
+        </div>
+        <div class="col-sm-5">
+          <div class="form-group">
+            <%= label_tag "Search by Address" %>
+            <div class="input-group">
+              <%= text_field_tag :address, "", class: "form-control" %>
+              <span class="input-group-btn">
+                <button id="search-by-address" class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <label>Drag on Map</label>
+      <div id="farm-map"></div>

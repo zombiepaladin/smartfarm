@@ -6,29 +6,36 @@ jQuery ->
   # New simulation form controls
   #=======================================================
 
-  if($('.new_simulation').size() > 0) 
-    simulation = {}
-    window.simulation = simulation
-
-    
+  if($('.simulation-form').size() > 0) 
 
     $('.farm a').on 'click', (event) ->
       event.preventDefault()
-      $('#selected-farms').children().detach().appendTo("#unselected-farms").wrap('<div class="col-sm-4 col-md-3"></div>')
-      selected = $(this).parent().unwrap().detach().appendTo('#selected-farms')
-      console.log( $(this).attr('href') )
-      simulation.farm = 
+      $('#selected-farms').children().detach().appendTo("#unselected-farms")
+      selected = $(this).parent().detach().appendTo('#selected-farms')
+      farm = 
         id: selected.data('id')
+      $('#simulation_farm').val( JSON.stringify(farm) )
+      return false
+
+    $('.weather a').on 'click', (event) ->
+      event.preventDefault()
+      $('#selected-weather').children().detach().appendTo("#unselected-weater")
+      selected = $(this).parent().detach().appendTo('#selected-weather')
+      weather = 
+        id: selected.data('id')
+      $('#simulation_weather').val( JSON.stringify(weather) )
       return false
 
     saveButton = $('button#save');
     saveButton.on 'click', (event) ->
 
-
+      #event.preventDefault()
+      simulation = {}
+      simulation.farm = JSON.parse( $('#simulation_farm').val() )
+      simulation.weather = JSON.parse( $('#simulation_weather').val() )
 
       $('#simulation_state').val( JSON.stringify(simulation) )
-      
-      alert("whoohoo")  
+      console.log(simulation)
 
 
   # Simulation running controls

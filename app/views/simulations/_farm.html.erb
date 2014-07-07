@@ -15,6 +15,7 @@
         <h4 class="panel-title">Farm to Simulate</h4>
       </div>
       <div id="selected-farms" class="panel-body">
+        <%= render @farm if @farm %>
       </div>
     </div>
   </div>
@@ -27,7 +28,7 @@
           <button type="button" class="btn btn-default">All Farms</button>
         </div>
       </h4>
-      <div id="unselected-farms" class="container">
+      <div id="unselected-farms">
         <%= render Farm.all %>
       </div>
   </div>

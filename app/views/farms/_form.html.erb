@@ -1,55 +1,47 @@
-<%= form_for(@farm, html: {role: "form"}) do |f| %>
-  <% if @farm.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@farm.errors.count, "error") %> prohibited this farm from being saved:</h2>
+<%= form_for(@farm, html: {class: "farm-form"}) do |f| %>
 
-      <ul>
-      <% @farm.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <button type="submit" role="button" class="pull-right btn-success"><i class="fa fa-floppy-o"></i></button>
 
-  <div class="form-group">
-    <%= f.label :name %>
-    <%= f.text_field :name, class: "form-control" %>
-  </div>
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+    <li><a id="location-tab" href="#location" data-toggle="tab">Location</a></li>
+    <li><a id="boundary-tab" href="#boundary" data-toggle="tab">Field Boundaries</a></li>
+    <li><a href="#elevation" data-toggle="tab">Elevation</a></li>
+    <li><a id="soil-tab" href="#soil" data-toggle="tab">Soil Profile</a></li>
+  </ul>
 
-  <div class="row">
-    <div class="col-sm-3">
+
+  <div class="tab-content">
+
+    <div class="tab-pane active" id="details">
+      <div class="form_group">
+        <%= f.label :name %>
+        <%= f.text_field :name, class: "form-control" %>
+      </div>
       <div class="form-group">
-        <%= f.label :latitude %>
-        <%= f.text_field :latitude, class: "form-control" %>
+        <%= f.label :description %>
+        <%= f.text_area :description, class: "form-control" %>
       </div>
     </div>
-    <div class="col-sm-3">
-      <div class="form-group">
-        <%= f.label :longitude %>
-        <%= f.text_field :longitude, class: "form-control" %>
-      </div>
+
+    <div class="tab-pane" id="location">
+      <%= render partial: "location", locals: {f: f} %>
     </div>
-    <div class="col-sm-1">
-      <h3>OR</h3>
+
+    <div class="tab-pane" id="boundary">
+      <%= render partial: "field_boundaries", locals: {f: f} %>
     </div>
-    <div class="col-sm-5">
-      <div class="form-group">
-        <%= label_tag "Search by Address" %>
-        <div class="input-group">
-          <%= text_field_tag :address, "", class: "form-control" %>
-          <span class="input-group-btn">
-            <button id="search-by-address" class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-          </span>
-        </div>
-      </div>
+
+    <div class="tab-pane" id="elevation">
+      <%= render partial: "elevation", locals: {f: f} %>
     </div>
+
+    <div class="tab-pane" id="soil">
+      <%= render partial: "soil_profile", locals: {f: f} %>
+    </div>
+
   </div>
 
   <%= f.hidden_field :data %>
 
-  <div id="farm-map"></div>
-
-  <div class="actions">
-    <%= f.submit %>
-  </div>
 <% end %>

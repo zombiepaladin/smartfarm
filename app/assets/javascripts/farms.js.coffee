@@ -81,6 +81,35 @@ jQuery ->
       bounds.push(polygon);
       fieldPaths.push(polygon.getPath());
 
+    # Soil Map controls & data
+    #-------------------------------
+     
+    soilMap = new google.maps.Map $('#farm_soil_profile_map')[0],
+      center: location
+      zoom: 14
+      mapTypeId: google.maps.MapTypeId.TERRAIN
+
+    soilMapMarker = new google.maps.Marker
+      map: soilMap
+      title: farm.name
+      position: location
+
+    drawingOptions =
+      drawingMode: google.maps.drawing.OverlayType.POLYGON
+      drawingControl: true
+      drawingControlOptions:
+        position: google.maps.ControlPosition.TOP_CENTER
+        drawingModes: [ google.maps.drawing.OverlayType.POLYGON ]
+      polygonOptions:
+        fillColor: '#56493D'
+        draggable: true
+        editable: true
+    drawingManager = new google.maps.drawing.DrawingManager drawingOptions
+    drawingManager.setMap soilMap
+
+
+
+
     # General map functions
     #-------------------------------
 
@@ -103,10 +132,14 @@ jQuery ->
       resetMap locationMap
 
     $('#boundary-tab').on 'click', (event)->
-      event.preventDefault();
+      event.preventDefault()
       $(this).tab('show')
-      console.log('resize')
       resetMap fieldMap
+
+    $('#soil-tab').on 'click', (event) ->
+      event.preventDefault()
+      $(this).tab('show')
+      resetMap soilMap
 
 
     searchByAddress = () ->   
