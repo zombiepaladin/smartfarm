@@ -50,6 +50,7 @@ jQuery ->
       interval: undefined
       paused: true
       size: {width: 0, height: 0}
+      operationContext: undefined
       layerContexts: {}
 
     simulation.worker.onmessage = (msg) ->
@@ -59,8 +60,6 @@ jQuery ->
         when 'time_update' then updateTime(msg.data.time)
         when 'weather_update' then updateWeather(msg.data.weather)
         when 'data_layer_update' then updateDataLayer(msg.data.layer_name, msg.data.layer_data)
-#        when 'water_content_update' then updateWaterContent(msg.data.water_content)
-#        when 'nitrate_update' then updateNitrate(msg.data.nitrate)
           
 
     simulation.worker.postMessage({type: 'init'});
@@ -87,6 +86,28 @@ jQuery ->
       layers = $('#data-layers')
       #layers.children('.layer').remove()
 
+      operations = $("<canvas id='operations' class='layer' width=#{size.width * 100} height=#{size.height * 100}>")
+      simulation.operationContext = operations[0].getContext('2d')
+      simulation.operationContext.fillStyle = 'tan'
+      simulation.operationContext.fillRect(0,0,size.width * 100, size.height * 100)
+      simulation.operationContext.strokeStyle = 'yellow'
+      simulation.operationContext.lineWidth = 5
+      simulation.size.fields.forEach (field) ->
+        simulation.operationContext.beginPath();
+        field.forEach (corner) ->
+          simulation.operationContext.lineTo(corner.x * 100, corner.y * 100)
+        simulation.operationContext.closePath()
+        simulation.operationContext.stroke()
+      $('#farm .farm-display').prepend(operations)    
+
+      equipment = $("<canvas id='equipment' class='layer' width=#{size.width * 100} height=#{size.height * 100} style='position: absolute;'>")
+      simulation.equipmentContext = equipment[0].getContext('2d')
+      simulation.equipmentContext.fillRect(50, 50, 100, 100)
+      $('#farm .farm-display').prepend(equipment)
+  
+      $('#farm .layer').css('width', '100%')
+
+
       fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
       ctx = fields[0].getContext('2d');
       simulation.size.fields.forEach (field) ->
@@ -97,14 +118,6 @@ jQuery ->
         ctx.stroke()
       layers.prepend(fields)
       
-#      water = $("<canvas id='water_content' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid blue;'></canvas>")
-#      simulation.layerContexts.waterContent = water[0].getContext('2d');
-#      layers.prepend(water)
-
-#      nitrate = $("<canvas id='nitrate' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid brown;'></canvas>")
-#      simulation.layerContexts.nitrate = nitrate[0].getContext('2d');
-#      layers.prepend(nitrate)
-
       # data layers
       attributes = [
         "water_content",
