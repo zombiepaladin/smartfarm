@@ -131,7 +131,7 @@ jQuery ->
         layers.prepend(layer)
       window.simulation = simulation
 
-      $('#data-layers .layer').css('width', '100%');
+#      $('#data-layers .layer').css('width', '100%');
       
 
     updateTime = (time) ->

@@ -11,7 +11,7 @@ var simulation = {
   patches: [],
   width: 0,
   height: 0,
-  water: undefined,
+  water: undefined
 };
 
 postMessage({start_time: '<%= @simulation.start_on.to_s %>'});
@@ -161,6 +161,46 @@ function initPatches(simulation) {
   postMessage({type: 'data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 
+  var soil_samples = [
+    {x: 5, y:2, water_content: 50},
+    {x: 12, y:3, water_content: 120},
+    {x: 7, y:5, water_content: 200},
+  ]
+
+  simulation.soil.water_content[soil_samples[0].x + soil_samples[0].y * simulation.width] = soil_samples[0].water_content;
+  for(i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
+    for(j = -i; j <= i; j++) {
+      
+      for(k = 0; k < soil_samples.length; k++) {
+        var doneFlag = true,
+            dx = soil_samples[k].x - i;
+            dy = soil_samples[k].y + j;
+        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+          doneFlag = false;
+        }
+        dx = soil_samples[k].x + i;      
+        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+          doneFlag = false;
+        }
+        dy = soil_samples[k].y - i;
+        dx = soil_samples[k].x + j;
+        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+          doneFlag = false;
+        }
+        dy = soil_samples[k].y + i;
+        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+          doneFlag = false;
+        }
+        if(doneFlag) continue;
+      }
+
+    }
+  }
+  postMessage({type: 'data_layer_update', layer_name: 'water_content', layer_data: simulation.soil.water_content});
 }
 
 //=====================================================
