@@ -1,0 +1,2 @@
+module GenerateListHelper
+end

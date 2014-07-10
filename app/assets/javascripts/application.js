@@ -25,6 +25,7 @@
 //= require simulation 
 //= require soil_patch
 //= require smartfarm
+//= require list_blocks
 //= require weather_blocks
 //= require_tree .
 
