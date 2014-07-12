@@ -5,6 +5,18 @@
   </p>
 </div>
 
-
 <div id="farm_soil_profile_map"></div>
 
+<table class="table">
+  <theader>
+    <tr>
+      <th>Marker</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Properties</th>
+    </tr>
+  </theader>
+  <tbody id="soil-samples">
+  </tbody>
+</table>
+<button id="add-soil-sample" type="button" class="btn btn-default" data-char="A" data-content='<%= render partial: "soil_sample" %>'>Add Soil Sample</button>

@@ -1,4 +1,4 @@
-\# Place all the behaviors and hooks related to the matching controller here.
+# Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
@@ -32,6 +32,20 @@ jQuery ->
 
     google.maps.event.addListener locationMapMarker, 'dragend', () ->
       panmap()
+
+    farm.field_bounds.forEach (bounds, i) ->
+      path = []
+      bounds.forEach (coord, j) ->
+        farm.fieldPaths
+        path.push new google.maps.LatLng(coord.latitude, coord.longitude)
+      new google.maps.Polygon
+        map: locationMap
+        path: path
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
+
       
 
     # Field Map controls & data
@@ -80,6 +94,21 @@ jQuery ->
     google.maps.event.addListener drawingManager, 'polygoncomplete', (polygon) ->
       bounds.push(polygon);
       fieldPaths.push(polygon.getPath());
+      new google.maps.Polygon
+        map: locationMap
+        path: polygon.getPath()
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
+      new google.maps.Polygon
+        map: soilMap
+        path: polygon.getPath()
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
+
 
     # Soil Map controls & data
     #-------------------------------
@@ -94,19 +123,96 @@ jQuery ->
       title: farm.name
       position: location
 
+    farm.field_bounds.forEach (bounds, i) ->
+      path = []
+      bounds.forEach (coord, j) ->
+        farm.fieldPaths
+        path.push new google.maps.LatLng(coord.latitude, coord.longitude)
+      new google.maps.Polygon
+        map: soilMap
+        path: path
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
+
+    farm.soil_samples.forEach (sample) ->
+      letter = $('#add-soil-sample').data('char')
+      row = $( $('#add-soil-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      lat = row.find('.latitude')
+      lng = row.find('.longitude')
+      lat.val(sample.latitude)
+      lng.val(sample.longitude)
+      $.each sample, (property) ->
+        row.find(".modal input[name=#{property}]").val(sample[property])
+      marker = new google.maps.Marker
+        map: soilMap
+        position: new google.maps.LatLng(sample.latitude, sample.longitude)
+        icon: "/assets/brown_Marker#{letter}.png"
+        draggable: true
+      reposition = () ->
+        marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition      
+      $('#soil-samples').append(row)
+      $('#add-soil-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        lat.val(marker.position.lat())
+        lng.val(marker.position.lng())
+
+      
+
     drawingOptions =
-      drawingMode: google.maps.drawing.OverlayType.POLYGON
+      drawingMode: google.maps.drawing.OverlayType.MARKER
       drawingControl: true
       drawingControlOptions:
         position: google.maps.ControlPosition.TOP_CENTER
-        drawingModes: [ google.maps.drawing.OverlayType.POLYGON ]
-      polygonOptions:
-        fillColor: '#56493D'
+        drawingModes: [ google.maps.drawing.OverlayType.MARKER ]
+      markerOptions:
+        animation: google.maps.Animation.DROP
+        icon: '/assets/brown_MarkerA.png'
         draggable: true
-        editable: true
     drawingManager = new google.maps.drawing.DrawingManager drawingOptions
     drawingManager.setMap soilMap
 
+    google.maps.event.addListener drawingManager, 'markercomplete', (marker) ->
+      letter = $('#add-soil-sample').data('char')
+      marker.icon = "/assets/brown_Marker#{letter}.png"
+      sample = $( $('#add-soil-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      lat = sample.find('.latitude')
+      lng = sample.find('.longitude')
+      lat.val(marker.position.lat())
+      lng.val(marker.position.lng())
+      reposition = () ->
+        marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition      
+      $('#soil-samples').append(sample)
+      $('#add-soil-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        sample.find('.latitude').val(marker.position.lat())
+        sample.find('.longitude').val(marker.position.lng())
+
+    $('#add-soil-sample').on 'click', () ->
+      letter = $(this).data('char')
+      sample = $( $('#add-soil-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      $('#soil-samples').append(sample) 
+      marker = new google.maps.Marker
+        map: soilMap
+        position: location
+        icon: "/assets/brown_Marker#{letter}.png"
+        animation: google.maps.Animation.DROP
+        draggable: true
+      $(this).data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        sample.find('.latitude').val(marker.position.lat())
+        sample.find('.longitude').val(marker.position.lng())
+      lat = sample.find('.latitude')
+      lng = sample.find('.longitude')
+      reposition = () ->
+        marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition      
 
 
 
@@ -221,8 +327,6 @@ jQuery ->
           ) 
       elevation_context.stroke()
 
-     # bounds.forEach (boundary, i) ->
-     #   if  
 
     createField = (boundary) ->
       field = 
@@ -241,13 +345,14 @@ jQuery ->
           longitude: lng
       field
         
-    $('.edit_farm').on 'submit', (event) ->
+    $('.farm-form').on 'submit', (event) ->
+
       # Submits can be triggered from the "search by address"
       # box, which is probably not the user intent
       if $('#address').is(":focus")
-        event.preventDefault()
         searchByAddress()
-        return
+        event.preventDefault()
+        return false
 
       farm.location = 
         latitude: location.lat()
@@ -261,4 +366,14 @@ jQuery ->
             latitude: coord.lat()
             longitude: coord.lng()
 
+      farm.soil_samples = []
+      $('.soil-sample').each (i, row) ->
+        sample = 
+          latitude: $(row).find('.latitude').val()
+          longitude: $(row).find('.longitude').val()
+        $(row).find('.modal input').each (i, input) ->
+          sample[$(input).attr('name')] = $(input).val()
+        farm.soil_samples.push(sample)
+
       $('#farm_data').val( JSON.stringify(farm) )
+

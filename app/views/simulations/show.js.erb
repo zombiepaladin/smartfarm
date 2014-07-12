@@ -9,6 +9,7 @@ var simulation = {
   weather: {},
   soil: {},
   patches: [],
+  granularity: 100, 		// 100x100 meters
   width: 0,
   height: 0,
   water: undefined
@@ -131,68 +132,88 @@ function initPatches(simulation) {
   });
   
   // 111,111 meters = 1 degree latitude
-  heightInPatches = Math.ceil(111111 * (north - south) / 100);
+  heightInPatches = Math.ceil(111111 * (north - south) / simulation.granularity);
   degreesPerHundredMeterLat = 100/111111;
   halfHeight = degreesPerHundredMeterLat / 2;
 
   // 111,111 * cos(latitude) = 1 degree longitude
-  widthInPatches = Math.ceil(111111 * Math.cos(farm.location.latitude * (Math.PI/180)) * (west - east) / 100);
+  widthInPatches = Math.ceil(111111 * Math.cos(farm.location.latitude * (Math.PI/180)) * (west - east) / simulation.granularity);
   degreesPerHundredMeterLng = 100/(111111 * Math.cos(farm.location.latitude * (Math.PI/180)));
   halfWidth = degreesPerHundredMeterLng / 2;
 
   simulation.width = widthInPatches;
   simulation.height = heightInPatches;
 
+  // Convert farm location into pixel coordinates
+  simulation.location = {
+    x: (farm.location.longitude - east) * (simulation.width / (west - east)),
+    y: simulation.height - (farm.location.latitude - south) * (simulation.height / (north - south))
+  }
+
   // Convert field bounds into pixel coordinates
   simulation.fields = farm.field_bounds.map( function(boundary) {
     return boundary.map( function(corner) {
       return {
         x: (corner.longitude - east) * (simulation.width / (west - east)),
-        y: (corner.latitude - south) * (simulation.height / (north - south))
+        y: simulation.height - (corner.latitude - south) * (simulation.height / (north - south))
       };
     });
   });
 
 
-  postMessage({type: 'size_update', size: {width: simulation.width, height: simulation.height, fields: simulation.fields}});
+  postMessage({type: 'size_update', size: {
+    granularity: simulation.granularity, 
+    width: simulation.width, 
+    height: simulation.height, 
+    location: simulation.location,
+    fields: simulation.fields
+  }});
   
 <% for property in Soil::PROPERTIES %>
   simulation.soil.<%= property %> = new Uint8Array(widthInPatches * heightInPatches );
-  postMessage({type: 'data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 
-  var soil_samples = [
-    {x: 5, y:2, water_content: 50},
-    {x: 12, y:3, water_content: 120},
-    {x: 7, y:5, water_content: 200},
-  ]
+  farm.soil_samples.forEach( function (soil_sample) {
+    soil_sample.x = Math.floor((soil_sample.longitude - east) * (simulation.width / (west - east)));
+    soil_sample.y = simulation.height - Math.floor((soil_sample.latitude - south) * (simulation.height / (north - south)));
+  <% for property in Soil::PROPERTIES %>
+    simulation.soil.<%= property %>[soil_sample.x + soil_sample.y * simulation.width] = soil_sample.<%= property %>;
+  <% end %>
+  });
 
-  simulation.soil.water_content[soil_samples[0].x + soil_samples[0].y * simulation.width] = soil_samples[0].water_content;
   for(i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
     for(j = -i; j <= i; j++) {
       
-      for(k = 0; k < soil_samples.length; k++) {
+      for(k = 0; k < farm.soil_samples.length; k++) {
         var doneFlag = true,
-            dx = soil_samples[k].x - i;
-            dy = soil_samples[k].y + j;
+            dx = farm.soil_samples[k].x - i;
+            dy = farm.soil_samples[k].y + j;
         if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+        <% for property in Soil::PROPERTIES %>
+          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+        <% end %>
           doneFlag = false;
         }
-        dx = soil_samples[k].x + i;      
+        dx = farm.soil_samples[k].x + i;      
         if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+        <% for property in Soil::PROPERTIES %>
+          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+        <% end %>
           doneFlag = false;
         }
-        dy = soil_samples[k].y - i;
-        dx = soil_samples[k].x + j;
+        dy = farm.soil_samples[k].y - i;
+        dx = farm.soil_samples[k].x + j;
         if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+        <% for property in Soil::PROPERTIES %>
+          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+        <% end %>
           doneFlag = false;
         }
-        dy = soil_samples[k].y + i;
+        dy = farm.soil_samples[k].y + i;
         if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          simulation.soil.water_content[dx + dy * simulation.width] = soil_samples[k].water_content;
+        <% for property in Soil::PROPERTIES %>
+          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+        <% end %>
           doneFlag = false;
         }
         if(doneFlag) continue;
@@ -200,7 +221,9 @@ function initPatches(simulation) {
 
     }
   }
-  postMessage({type: 'data_layer_update', layer_name: 'water_content', layer_data: simulation.soil.water_content});
+<% for property in Soil::PROPERTIES %>
+  postMessage({type: 'data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
+<% end %>
 }
 
 //=====================================================

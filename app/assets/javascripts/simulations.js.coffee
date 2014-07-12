@@ -43,6 +43,18 @@ jQuery ->
 
   if $('#simulation-controls').length > 0
 
+    # Create the game object
+    game = 
+      state: 'observer'
+      mouse: {x: 0, y: 0}
+
+    # Track mouse position
+    $(document).on 'mousemove', (me) ->
+      offset = $('#equipment').offset()
+      game.mouse.x = me.pageX - offset.left
+      game.mouse.y = me.pageY - offset.top
+
+
     # Create the simulation object
     simulation = 
       worker: new Worker(window.location.toString() + '.js')
@@ -53,6 +65,7 @@ jQuery ->
       operationContext: undefined
       layerContexts: {}
 
+
     simulation.worker.onmessage = (msg) ->
       console.log(msg.data)
       switch msg.data.type 
@@ -62,7 +75,7 @@ jQuery ->
         when 'data_layer_update' then updateDataLayer(msg.data.layer_name, msg.data.layer_data)
           
 
-    simulation.worker.postMessage({type: 'init'});
+    simulation.worker.postMessage({type: 'init'})
 
     # data layer colors
     layerColors = {}
@@ -82,32 +95,13 @@ jQuery ->
  
     updateSize = (size) ->
       simulation.size = size
-      layerWidth = $('body').width() - 40
+      initializeGame(size)
+      initializeDataLayers(size)
+
+    initializeDataLayers = (size) ->
+
+      # field outlines in data layers
       layers = $('#data-layers')
-      #layers.children('.layer').remove()
-
-      operations = $("<canvas id='operations' class='layer' width=#{size.width * 100} height=#{size.height * 100}>")
-      simulation.operationContext = operations[0].getContext('2d')
-      simulation.operationContext.fillStyle = 'tan'
-      simulation.operationContext.fillRect(0,0,size.width * 100, size.height * 100)
-      simulation.operationContext.strokeStyle = 'yellow'
-      simulation.operationContext.lineWidth = 5
-      simulation.size.fields.forEach (field) ->
-        simulation.operationContext.beginPath();
-        field.forEach (corner) ->
-          simulation.operationContext.lineTo(corner.x * 100, corner.y * 100)
-        simulation.operationContext.closePath()
-        simulation.operationContext.stroke()
-      $('#farm .farm-display').prepend(operations)    
-
-      equipment = $("<canvas id='equipment' class='layer' width=#{size.width * 100} height=#{size.height * 100} style='position: absolute;'>")
-      simulation.equipmentContext = equipment[0].getContext('2d')
-      simulation.equipmentContext.fillRect(50, 50, 100, 100)
-      $('#farm .farm-display').prepend(equipment)
-  
-      $('#farm .layer').css('width', '100%')
-
-
       fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
       ctx = fields[0].getContext('2d');
       simulation.size.fields.forEach (field) ->
@@ -116,9 +110,10 @@ jQuery ->
           ctx.lineTo(corner.x * 50, corner.y * 50)
         ctx.closePath()
         ctx.stroke()
-      layers.prepend(fields)
+      layers.append(fields)
       
       # data layers
+      layerCheckboxes = $('#data-layer-checkboxes')
       attributes = [
         "water_content",
         "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen",
@@ -126,13 +121,16 @@ jQuery ->
         "flat_residue_carbon", "humus_carbon"
       ]
       attributes.forEach (name) ->
-        layer = $("<canvas id='#{name}' class='layer' width=#{size.width} height=#{size.height} style='border: 1px solid red'></canvas>")
+        layer = $("<canvas id='#{name}' class='layer' width=#{size.width} height=#{size.height} style='display: none;'></canvas>")
         simulation.layerContexts[name] = layer[0].getContext('2d');
         layers.prepend(layer)
+        layerCheckboxes.append("<div class='checkbox'><label for='cb_#{name}'><input name='#{name}' id='cb_#{name}' type='checkbox'>#{name.replace('_',' ').replace('_',' ')}</label></div>")
+        
+      $('#data-layer-checkboxes input').on 'change', (event) ->
+        $('#' + $(this).attr('name')).toggle()
+
       window.simulation = simulation
 
-#      $('#data-layers .layer').css('width', '100%');
-      
 
     updateTime = (time) ->
       simtime = new Date(time)
@@ -196,6 +194,71 @@ jQuery ->
           simulation.layerContexts.nitrate.putImageData(brush, x, y)
 
 
+    # Create the game objects
+    game.combine =
+      x: 200 
+      y: 200
+      angle: 15
+      image: new Image()
+    game.combine.image.src = "/assets/combine.png"
+
+
+    initializeGame = () ->
+
+      # In the game, 1px = 1meter 
+      game.width = simulation.size.width * simulation.size.granularity
+      game.height = simulation.size.height * simulation.size.granularity
+      game.hq = 
+        x: simulation.size.location.x * simulation.size.granularity,
+        y: simulation.size.location.y * simulation.size.granularity
+      console.log(game)
+
+      game.ctx = {}
+
+      operations = $("<canvas id='operations' width=#{game.width} height=#{game.height}>")
+      game.ctx.operations = operations[0].getContext('2d')
+      game.ctx.operations.fillStyle = 'tan'
+      game.ctx.operations.fillRect(0,0,game.width, game.height)
+      game.ctx.operations.strokeStyle = 'yellow'
+      game.ctx.lineWidth = 5
+      simulation.size.fields.forEach (field) ->
+        game.ctx.operations.beginPath();
+        field.forEach (corner) ->
+          game.ctx.operations.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity)
+        game.ctx.operations.closePath()
+        game.ctx.operations.stroke()
+      $('#farm .farm-display').prepend(operations)
+
+      game.combine.x = game.hq.x
+      game.combine.y = game.hq.y
+
+      equipment = $("<canvas id='equipment' width=#{game.width} height=#{game.height} style='position: absolute;'>")
+      game.ctx.equipment = equipment[0].getContext('2d')
+      game.ctx.equipment.drawImage(game.combine.image, game.combine.x, game.combine.y)
+
+      $('#farm .farm-display').prepend(equipment)
+
+
+    updateGame = () ->
+      console.log(game.state)
+      switch game.state
+        when 'harvesting'
+          game.combine.x = game.mouse.x
+          game.combine.y = game.mouse.y
+          console.log(game.combine)
+      
+      console.log("render (#{simulation.size.width}, #{simulation.size.height})")
+      # render
+      if simulation.equipmentContext
+        simulation.equipmentContext.save()
+        #simulation.equipmentContext.rotate(game.combine.angle)
+        #simulation.equipmentContext.translate(0, 0)
+        simulation.equipmentContext.drawImage(game.combine.image, game.combine.x, game.combine.y)
+        simulation.equipmentContext.restore()
+        console.log("done")
+
+    $('#harvest').on 'click', () ->
+      game.state = 'harvesting'
   
     run  = $('#simulation-run')
     pause = $('#simulation-pause')
@@ -204,6 +267,7 @@ jQuery ->
     step = () ->
       console.log('step')
       simulation.worker.postMessage({type: 'tick'});
+      updateGame()
 
     run.on 'click', () ->
       console.log('before step')
