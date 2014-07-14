@@ -109,13 +109,13 @@ jQuery ->
       wrapper = () ->
         year = $('#simulation_year').val()
         year = parseInt(year)
-        month = $(#simulation_month').val()
+        month = $('#simulation_month').val()
         month = parseInt(month)
-        day = #('#simulation_day').val()
+        day = $('#simulation_day').val()
         day = parseInt(day)
         date = new Date(year, month - 1, day)
         startOfYear = new Date(year, 0, 0)
-        // 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
+        # 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
         return intepreter.createPrimitive(Math.floor((simulation.clock.time - startOfyear)/86400000))
       intepreter.setProperty(scope, 'get_simulation_day_of_year', interpreter.createNativeFunction(wrapper))
 

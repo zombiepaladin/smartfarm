@@ -22,7 +22,7 @@
 //= require blockly/msg/js/en
 //= require JS-Interpreter/acorn
 //= require JS-Interpreter/interpreter
-//= require simulation 
+//= require simulation_blocks 
 //= require soil_patch
 //= require smartfarm
 //= require list_blocks

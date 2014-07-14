@@ -78,6 +78,7 @@ jQuery ->
       size: {width: 0, height: 0}
       operationContext: undefined
       layerContexts: {}
+      weather: {rainfall: 0, snowfall: 0}
 
 
     simulation.worker.onmessage = (msg) ->
@@ -175,6 +176,7 @@ jQuery ->
       $('#simulation-clock').html( simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2) )
 
     updateWeather = (weather) ->
+      simulation.weather = weather
     
     updateDataLayer = (name, data) ->
       brush = simulation.layerContexts[name].createImageData(1,1)
@@ -218,6 +220,13 @@ jQuery ->
       image: new Image()
     game.drill.image.src = "/assets/drill.png"
 
+    game.weather =
+      rain:
+        image: new Image()
+      snow:
+        image: new Image()
+    game.weather.rain.image.src = "/assets/rain.png"
+
     initializeGame = () ->
 
       # In the game, 1px = 1meter 
@@ -257,8 +266,8 @@ jQuery ->
         game.ctx.terrain.closePath()
         game.ctx.terrain.stroke()
 
-      # Copy to the front buffer
-      game.ctx.front.drawImage(game.buffers.terrain, -game.viewport.x, -game.viewport.y)
+      # Render the game
+      game.ctx.front.drawImage(game.buffers.terrain, 0, 0)
 
       #display front buffer
       $('#farm #farm-display').append(game.buffers.front)
@@ -293,7 +302,6 @@ jQuery ->
             game.ctx.terrain.fillRect(-22, 3,10,2)
             game.ctx.terrain.fillRect(-22, 6,10,2)
             game.ctx.terrain.fillRect(-22, 9,10,2)
-
             game.ctx.terrain.restore()
         when 'planting'
           dy = game.mouse.y + game.viewport.y - game.tractor.y
@@ -345,7 +353,6 @@ jQuery ->
             game.ctx.terrain.fillRect(-18, 6,1,1)
             game.ctx.terrain.fillRect(-18, 9,1,1)
             game.ctx.terrain.restore()
-
         when 'harvesting'
           dy = game.mouse.y + game.viewport.y - game.combine.y
           dx = game.mouse.x + game.viewport.x - game.combine.x
@@ -355,6 +362,7 @@ jQuery ->
           game.combine.angle = Math.atan2(dy, dx) 
           game.combine.x += speed * dx/distance
           game.combine.y += speed * dy/distance
+          # TODO: Recolor harvested swath
       
       # Update the viewport (scroll the game)
       if game.viewport.target.x < game.viewport.width / 2
@@ -404,7 +412,15 @@ jQuery ->
       game.ctx.back.drawImage(game.tractor.image, -5, -5)
       game.ctx.back.restore()
       
-
+      # render precipitation
+      game.ctx.back.save()
+      if(simulation.weather.rainfall > 0 || true) 
+        pattern = game.ctx.back.createPattern(game.weather.rain.image, 'repeat')
+        game.ctx.back.fillStyle = pattern
+        game.ctx.back.translate(0, Math.sin(Date.now()) * 10)
+        #game.ctx.back.rotate(Math.PI/4)
+        game.ctx.back.fillRect(0,0,game.buffers.back.width, game.buffers.back.height)
+      game.ctx.back.restore()
 
       # copy back buffer to front buffer
       game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y)
