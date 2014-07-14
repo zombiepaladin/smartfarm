@@ -2,7 +2,7 @@ class Weather < ActiveRecord::Base
   has_paper_trail
   belongs_to :user
 
-  PROPERTIES = %w{ rainfall snowfall solar_radiation day_length average_temperature low_temperature high_temperature wind_speed wind_direction relative_humidity } 
+  PROPERTIES = %w{ rainfall snowfall solar_radiation day_length average_temperature low_temperature high_temperature wind_speed wind_direction dew_point relative_humidity } 
 
   def icons
     bitmask = 0

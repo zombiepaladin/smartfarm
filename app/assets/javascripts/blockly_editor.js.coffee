@@ -112,7 +112,7 @@ jQuery ->
         attrAccessor(name, interpreter, scope)
 
       # weather attribute getters/setters
-      attributes = ["rainfall", "snowfall", "average_temperature", "high_temperature", "low_temperature", "wind_speed", "wind_direction", "relative_humidity"]
+      attributes = ["rainfall", "snowfall", "average_temperature", "high_temperature", "low_temperature", "wind_speed", "wind_direction", "dew_point", "relative_humidity"]
       attributes.forEach (name) ->
         attrAccessor(name, interpreter, scope)
 
