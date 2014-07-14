@@ -52,6 +52,25 @@ function get_elapsed_time() {
   return simulation.clock.elapsed_time;
 }
 
+function get_simulation_year() {
+  return new Date(simulation.clock.time).getFullYear();
+}
+
+function get_simulation_month() {
+  // month is 0-indexed in JavaScript
+  return (new Date(simulation.clock.time).getMonth()) + 1;
+}
+
+function get_simulation_day_of_month() {
+  return new Date(simulation.clock.time).getDate();
+}
+
+function get_simulation_day_of_year() {
+  var startOfYear = new Date(new Date(simulation.clock.time).fullYear(), 0, 0)
+  // 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
+  return Math.floor((simulation.clock.time - startOfyear)/86400000)
+}
+
 // Weather API
 <% for property in Weather::PROPERTIES %>
 function get_<%= property %>() {
@@ -87,6 +106,8 @@ function initialize(simulation) {
 
 function initClock(simulation) {
   simulation.clock = {
+    start: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
+    end: new Date(<%= @simulation.end_on.strftime("%Y, %-m, %-d")%>).getTime(),
     time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
     elapsed_time: 0,           // in minutes
   }
