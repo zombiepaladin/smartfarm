@@ -11,6 +11,7 @@ class Weather < ActiveRecord::Base
     bitmask += 4 if code.scan(/set_wind_speed/).size > 0
     bitmask += 8 if code.scan(/set_wind_direction/).size > 0
     bitmask += 16 if code.scan(/set_relative_humidity/).size > 0
+    bitmask += 32 if code.scan(/set_solar_radiation/).size > 0
     bitmask
   end
 end

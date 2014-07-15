@@ -117,7 +117,7 @@ jQuery ->
         startOfYear = new Date(year, 0, 0)
         # 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
         return intepreter.createPrimitive(Math.floor((simulation.clock.time - startOfyear)/86400000))
-      intepreter.setProperty(scope, 'get_simulation_day_of_year', interpreter.createNativeFunction(wrapper))
+      interpreter.setProperty(scope, 'get_simulation_day_of_year', interpreter.createNativeFunction(wrapper))
 
       # simulation attribute getters/setters
       attributes = ["latitude", "longitude"]
@@ -125,7 +125,7 @@ jQuery ->
         attrAccessor(name, interpreter, scope)
 
       # weather attribute getters/setters
-      attributes = ["rainfall", "snowfall", "average_temperature", "high_temperature", "low_temperature", "wind_speed", "wind_direction", "dew_point", "relative_humidity"]
+      attributes = ["rainfall", "snowfall", "solar_radiation", "average_temperature", "high_temperature", "low_temperature", "wind_speed", "wind_direction", "dew_point", "relative_humidity"]
       attributes.forEach (name) ->
         attrAccessor(name, interpreter, scope)
 
