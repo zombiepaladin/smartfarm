@@ -1,35 +1,17 @@
-<h1>Listing soils</h1>
+<h1>Soil Models</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Code</th>
-      <th>Workspace</th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
+<div class="well">
+  <i class="fa fa-lightbulb-o"></i> A soil model updates the soil 
+  properties for the land in your simulation, providing the nutrients
+  and water needed to model crop growth, as well as handling the 
+  results of rain and snow.  Read the model descriptions to learn
+  how a specific soil model works.
+</div>
 
-  <tbody>
-    <% @soils.each do |soil| %>
-      <tr>
-        <td><%= soil.user_id %></td>
-        <td><%= soil.name %></td>
-        <td><%= soil.description %></td>
-        <td><%= soil.code %></td>
-        <td><%= soil.workspace %></td>
-        <td><%= link_to 'Show', soil %></td>
-        <td><%= link_to 'Edit', edit_soil_path(soil) %></td>
-        <td><%= link_to 'Destroy', soil, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div id="soil-collection" class="row">
+  <% @soils.each do |soil| %>
+    <%= render soil %>
+  <% end %>
+</div>
 
-<br>
-
-<%= link_to 'New Soil', new_soil_path %>
+<%= link_to 'New Soil Model', new_soil_path %>

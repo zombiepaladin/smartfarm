@@ -1,29 +1,29 @@
-<p id="notice"><%= notice %></p>
+<div class="panel panel-default">
 
-<p>
-  <strong>User:</strong>
-  <%= @soil.user_id %>
-</p>
+  <div class="panel-heading">
+    <%= link_to edit_soil_path(@soil), class: "btn btn-info pull-right" do %>
+      <i class="fa fa-retweet"></i> See Inside
+    <% end %>
+    <h1 class="panel-title"><%= @soil.name %></h1>
+    <p>by <%= link_to @soil.user.username, @soil.user %></p>
+  </div>
 
-<p>
-  <strong>Name:</strong>
-  <%= @soil.name %>
-</p>
+  <div class="panel-body">
+    <div class="row">
 
-<p>
-  <strong>Description:</strong>
-  <%= @soil.description %>
-</p>
+      <div class="col-md-4">
+        <%= image_tag "weather-0.png" %>
+      </div>
 
-<p>
-  <strong>Code:</strong>
-  <%= @soil.code %>
-</p>
+      <div class="col-md-8">
+        <h4>Description</h4>
+        <div>
+          <%= @soil.description %>
+        </div>
+      </div>
 
-<p>
-  <strong>Workspace:</strong>
-  <%= @soil.workspace %>
-</p>
+    </div>
+  </div>
 
-<%= link_to 'Edit', edit_soil_path(@soil) %> |
-<%= link_to 'Back', soils_path %>
+</div>
+

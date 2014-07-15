@@ -2,15 +2,6 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-#weather-iopanel {
-  border: 1px solid #ddd;
-  overflow-y: scroll;
-}
-
-#weather-iopanel .list-group-item-header {
-  background-color: #ddd;
-}
-
 #weather-collection .weather {
   width: 20%;
   margin-left: 15px;
