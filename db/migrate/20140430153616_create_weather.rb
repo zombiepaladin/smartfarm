@@ -4,7 +4,7 @@ class CreateWeather < ActiveRecord::Migration
       t.integer :user_id
       t.string :name
       t.text :description, default: "Unamed Weather"
-      t.text :code
+      t.text :code, default: ""
       t.text :workspace, default: "<xml id=\"workspace\" style=\"display: none\"></xml>"
 
       t.timestamps

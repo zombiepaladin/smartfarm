@@ -5,6 +5,7 @@ class Weather < ActiveRecord::Base
   PROPERTIES = %w{ rainfall snowfall solar_radiation day_length average_temperature low_temperature high_temperature wind_speed wind_direction dew_point relative_humidity } 
 
   def icons
+    return 0 unless code
     bitmask = 0
     bitmask += 1 if code.scan(/set_rainfall/).size > 0
     bitmask += 2 if code.scan(/set_snowfall/).size > 0
