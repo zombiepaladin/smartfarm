@@ -226,6 +226,7 @@ jQuery ->
       snow:
         image: new Image()
     game.weather.rain.image.src = "/assets/rain.png"
+    game.weather.snow.image.src = "/assets/snow.png"
 
     initializeGame = () ->
 
@@ -244,7 +245,13 @@ jQuery ->
       game.hq = 
         x: simulation.size.location.x * simulation.size.granularity,
         y: simulation.size.location.y * simulation.size.granularity
-      game.viewport = {x: 0, y: 0, width: 800, height: 600, target: game.hq}
+      game.viewport = 
+        x: 0 
+        y: 0
+        width: 800
+        height: 600
+        radius: 500
+        target: game.hq
       game.combine.x = game.hq.x
       game.combine.y = game.hq.y
       game.tractor.x = game.hq.x
@@ -413,14 +420,24 @@ jQuery ->
       game.ctx.back.restore()
       
       # render precipitation
-      game.ctx.back.save()
-      if(simulation.weather.rainfall > 0 || true) 
+      if(simulation.weather.rainfall > 0)
+        game.ctx.back.save() 
         pattern = game.ctx.back.createPattern(game.weather.rain.image, 'repeat')
         game.ctx.back.fillStyle = pattern
-        game.ctx.back.translate(0, Math.sin(Date.now()) * 10)
-        #game.ctx.back.rotate(Math.PI/4)
-        game.ctx.back.fillRect(0,0,game.buffers.back.width, game.buffers.back.height)
-      game.ctx.back.restore()
+        game.ctx.back.translate(game.viewport.x + game.viewport.width/2, game.viewport.y + game.viewport.height/2)
+        game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925)
+        game.ctx.back.translate(0, Date.now() % 30)
+        game.ctx.back.fillRect(-game.viewport.radius-30, -game.viewport.radius-30, 2*game.viewport.radius+30, 2*game.viewport.radius+30)
+        game.ctx.back.restore()
+      if(simulation.weather.snowfall > 0) 
+        game.ctx.back.save()
+        pattern = game.ctx.back.createPattern(game.weather.snow.image, 'repeat')
+        game.ctx.back.fillStyle = pattern
+        game.ctx.back.translate(game.viewport.x + game.viewport.width/2, game.viewport.y + game.viewport.height/2)
+        game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925)
+        game.ctx.back.translate(0, Date.now() % 30)
+        game.ctx.back.fillRect(-game.viewport.radius-30, -game.viewport.radius-30, 2*game.viewport.radius+30, 2*game.viewport.radius+30)
+        game.ctx.back.restore()
 
       # copy back buffer to front buffer
       game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y)
