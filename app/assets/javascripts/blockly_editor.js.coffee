@@ -90,7 +90,7 @@ jQuery ->
       wrapper = () ->
         num = $('#simulation_year').val()
         num = parseInt(num)
-        return interpreter.createPrimitive(num);
+        return interpreter.createPrimitive(num+1);
       interpreter.setProperty(scope, 'get_simulation_year', interpreter.createNativeFunction(wrapper))
 
       wrapper = () ->
@@ -103,7 +103,7 @@ jQuery ->
       wrapper = () ->
         num = $('#simulation_day').val()
         num = parseInt(num)
-        return interpreter.createPrimitive(num);
+        return interpreter.createPrimitive(num+1);
       interpreter.setProperty(scope, 'get_simulation_day_of_month', interpreter.createNativeFunction(wrapper))
 
       wrapper = () ->
@@ -112,11 +112,11 @@ jQuery ->
         month = $('#simulation_month').val()
         month = parseInt(month)
         day = $('#simulation_day').val()
-        day = parseInt(day)
-        date = new Date(year, month - 1, day)
+        day = parseInt(day) + 1
+        date = new Date(year, month, day)
         startOfYear = new Date(year, 0, 0)
-        # 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
-        return intepreter.createPrimitive(Math.floor((simulation.clock.time - startOfyear)/86400000))
+        # 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,400,000 ms/day
+        return interpreter.createPrimitive(Math.floor((date - startOfYear)/86400000))
       interpreter.setProperty(scope, 'get_simulation_day_of_year', interpreter.createNativeFunction(wrapper))
 
       # simulation attribute getters/setters
