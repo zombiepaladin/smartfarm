@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require twitter/bootstrap
 // require turbolinks
+//= require best_in_place
 //= require paralleljs/eval.js
 //= require paralleljs/parallel.js
 //= require blockly/blockly_compressed

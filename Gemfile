@@ -33,6 +33,9 @@ gem 'paper_trail', '~> 3.0.0'
 # Authenticate users
 gem 'devise'
 
+# Use cancan for access control
+gem 'cancan'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
@@ -58,5 +61,5 @@ gem 'twitter-bootstrap-rails', github: 'seyhunak/twitter-bootstrap-rails', branc
 # Use inherited resources to simplify resource routes
 gem 'inherited_resources'
 
-# Use mercury for in-place text editing
-gem 'mercury-rails'
+# Use best in place for in-place text editing
+gem 'best_in_place', github: 'bernat/best_in_place'

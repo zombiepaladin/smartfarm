@@ -4,21 +4,31 @@
     <%= link_to edit_soil_path(@soil), class: "btn btn-info pull-right" do %>
       <i class="fa fa-retweet"></i> See Inside
     <% end %>
-    <h1 class="panel-title"><%= @soil.name %></h1>
+    <h1 class="panel-title">
+      <% if can? :edit, @soil %>
+        <%= best_in_place @soil, :name %>
+      <% else %>
+        <%= @soil.name %>
+      <% end %>
+    </h1>
     <p>by <%= link_to @soil.user.username, @soil.user %></p>
   </div>
 
   <div class="panel-body">
     <div class="row">
 
-      <div class="col-md-4">
+      <div class="col-sm-4">
         <%= image_tag "soil-#{@soil.icons}.png" %>
       </div>
 
-      <div class="col-md-8">
+      <div class="col-sm-8">
         <h4>Description</h4>
         <div>
-          <%= @soil.description %>
+          <% if can? :edit, @soil %>
+            <%= best_in_place @soil, :description, type: :textarea %>
+          <% else %>
+            <%= @soil.description %>
+          <% end %>
         </div>
       </div>
 
