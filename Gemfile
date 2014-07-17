@@ -57,3 +57,6 @@ gem 'twitter-bootstrap-rails', github: 'seyhunak/twitter-bootstrap-rails', branc
 
 # Use inherited resources to simplify resource routes
 gem 'inherited_resources'
+
+# Use mercury for in-place text editing
+gem 'mercury-rails'

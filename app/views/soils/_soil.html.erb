@@ -1,6 +1,6 @@
 <div class="thumbnail soil" data-id="<%= soil.id %>">
   <%= link_to soil do %>
-    <%= image_tag "weather-0.png" %>
+    <%= image_tag "soil-#{soil.icons}.png" %>
     <strong><%= soil.name %></strong>
   <% end %>
   <p>by <%= link_to soil.user.username, soil.user %></p>

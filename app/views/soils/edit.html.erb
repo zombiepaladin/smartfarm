@@ -53,6 +53,7 @@
           <h4>Outputs</h4>
         </li>
 
+        <%= io_item("snow_cover", "snow cover (in mm)", 0) %>
         <%= io_item("water_content", "water content (in mm)", 0) %>
         <%= io_item("wilting_point", "wilting point (in mm)", 0) %>
         <%= io_item("percolation_travel_time", "percolation travel time (in mm)", 0) %>
@@ -94,6 +95,8 @@
     </category>
 
     <category name="Soil">
+      <block type="soil_set_snow_cover"></block>
+      <block type="soil_get_snow_cover"></block>
       <block type="soil_set_water_content"></block>
       <block type="soil_get_water_content"></block>
       <block type="soil_set_wilting_point"></block>

@@ -94,7 +94,11 @@ jQuery ->
 
     # data layer colors
     layerColors = {}
+    layerColors["snow_cover"] = [100, 100, 100]
     layerColors["water_content"] = [0, 0, 255]
+    layerColors["wilting_point"] = [100, 100, 100]
+    layerColors["percolation_travel_time"] = [100, 100, 100]
+    layerColors["porosity"] = [100, 100, 100]
     layerColors["nitrate"] = [100, 100, 100]
     layerColors["ammonium"]= [100, 100, 100]
     layerColors["fresh_organic_nitrogen"]= [100, 100, 100]
@@ -135,7 +139,7 @@ jQuery ->
       # data layers
       layerCheckboxes = $('#data-layer-checkboxes')
       attributes = [
-        "water_content",
+        "snow_cover", "water_content", "wilting_point", "percolation_travel_time", "porosity",
         "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen",
         "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus",
         "flat_residue_carbon", "humus_carbon",
@@ -179,6 +183,8 @@ jQuery ->
       simulation.weather = weather
     
     updateDataLayer = (name, data) ->
+      if(name == 'snow_cover') 
+        game.weather.snow_cover.data = data
       brush = simulation.layerContexts[name].createImageData(1,1)
       brushData = brush.data
       brushData[0] = layerColors[name][0]
@@ -211,22 +217,29 @@ jQuery ->
       y: 0
       angle: 0
       image: new Image()
+      stamp: new Image()
     game.plow.image.src = "/assets/plow.png"
+    game.plow.stamp.src = "/assets/plow_trail.png"
 
     game.drill =
       x: 0
       y: 0
       angle: 0
       image: new Image()
+      stamp: new Image()
     game.drill.image.src = "/assets/drill.png"
+    game.drill.stamp.src = "/assets/drill_trail.png"
 
     game.weather =
       rain:
-        image: new Image()
+       image: new Image()
       snow:
+        image: new Image()
+      snow_cover: 
         image: new Image()
     game.weather.rain.image.src = "/assets/rain.png"
     game.weather.snow.image.src = "/assets/snow.png"
+    game.weather.snow_cover.image.src = "/assets/snow_cover.png"
 
     initializeGame = () ->
 
@@ -241,7 +254,6 @@ jQuery ->
         front: game.buffers.front.getContext('2d')
         back: game.buffers.back.getContext('2d')
         terrain: game.buffers.terrain.getContext('2d')
-      game.camera = {x: 0, y: 0}
       game.hq = 
         x: simulation.size.location.x * simulation.size.granularity,
         y: simulation.size.location.y * simulation.size.granularity
@@ -288,6 +300,7 @@ jQuery ->
           dy = game.mouse.y + game.viewport.y - game.tractor.y
           dx = game.mouse.x + game.viewport.x - game.tractor.x
           distance = Math.sqrt(dx*dx + dy*dy)
+          # Note: 1mi/hr = 0.0074506m/minute
           speed = 5
           if distance > 10
             game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8)
@@ -302,13 +315,7 @@ jQuery ->
             y = game.plow.y
             game.ctx.terrain.translate(x, y)
             game.ctx.terrain.rotate(game.plow.angle)
-            game.ctx.terrain.fillRect(-22,-9,10,2)
-            game.ctx.terrain.fillRect(-22,-6,10,2)
-            game.ctx.terrain.fillRect(-22,-3,10,2)
-            game.ctx.terrain.fillRect(-22, 0,10,2)
-            game.ctx.terrain.fillRect(-22, 3,10,2)
-            game.ctx.terrain.fillRect(-22, 6,10,2)
-            game.ctx.terrain.fillRect(-22, 9,10,2)
+            game.ctx.terrain.drawImage(game.plow.stamp,-22,-9)
             game.ctx.terrain.restore()
         when 'planting'
           dy = game.mouse.y + game.viewport.y - game.tractor.y
@@ -328,48 +335,18 @@ jQuery ->
             y = game.drill.y
             game.ctx.terrain.translate(x, y)
             game.ctx.terrain.rotate(game.drill.angle)
-            # furrows
-            game.ctx.terrain.fillRect(-22,-9,10,2)
-            game.ctx.terrain.fillRect(-22,-6,10,2)
-            game.ctx.terrain.fillRect(-22,-3,10,2)
-            game.ctx.terrain.fillRect(-22, 0,10,2)
-            game.ctx.terrain.fillRect(-22, 3,10,2)
-            game.ctx.terrain.fillRect(-22, 6,10,2)
-            game.ctx.terrain.fillRect(-22, 9,10,2)
-            # seedlings
-            game.ctx.terrain.fillStyle = '#503519'
-            game.ctx.terrain.fillRect(-22,-9,1,1)
-            game.ctx.terrain.fillRect(-22,-6,1,1)
-            game.ctx.terrain.fillRect(-22,-3,1,1)
-            game.ctx.terrain.fillRect(-22, 0,1,1)
-            game.ctx.terrain.fillRect(-22, 3,1,1)
-            game.ctx.terrain.fillRect(-22, 6,1,1)
-            game.ctx.terrain.fillRect(-22, 9,1,1)
-            game.ctx.terrain.fillRect(-20,-9,1,1)
-            game.ctx.terrain.fillRect(-20,-6,1,1)
-            game.ctx.terrain.fillRect(-20,-3,1,1)
-            game.ctx.terrain.fillRect(-20, 0,1,1)
-            game.ctx.terrain.fillRect(-20, 3,1,1)
-            game.ctx.terrain.fillRect(-20, 6,1,1)
-            game.ctx.terrain.fillRect(-20, 9,1,1)
-            game.ctx.terrain.fillRect(-18,-9,1,1)
-            game.ctx.terrain.fillRect(-18,-6,1,1)
-            game.ctx.terrain.fillRect(-18,-3,1,1)
-            game.ctx.terrain.fillRect(-18, 0,1,1)
-            game.ctx.terrain.fillRect(-18, 3,1,1)
-            game.ctx.terrain.fillRect(-18, 6,1,1)
-            game.ctx.terrain.fillRect(-18, 9,1,1)
+            game.ctx.terrain.drawImage(game.drill.stamp, -18, -9)
             game.ctx.terrain.restore()
         when 'harvesting'
           dy = game.mouse.y + game.viewport.y - game.combine.y
           dx = game.mouse.x + game.viewport.x - game.combine.x
           distance = Math.sqrt(dx*dx + dy*dy)
-          speed = if (distance-1 < 26) then distance-1 else 26
-          console.log(speed)
-          game.combine.angle = Math.atan2(dy, dx) 
-          game.combine.x += speed * dx/distance
-          game.combine.y += speed * dy/distance
-          # TODO: Recolor harvested swath
+          speed = 5
+          if distance > 10
+            game.combine.angle = Math.atan2(dy, dx) 
+            game.combine.x += speed * dx/distance
+            game.combine.y += speed * dy/distance
+            # TODO: Recolor harvested swath
       
       # Update the viewport (scroll the game)
       if game.viewport.target.x < game.viewport.width / 2
@@ -437,6 +414,19 @@ jQuery ->
         game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925)
         game.ctx.back.translate(0, Date.now() % 30)
         game.ctx.back.fillRect(-game.viewport.radius-30, -game.viewport.radius-30, 2*game.viewport.radius+30, 2*game.viewport.radius+30)
+        game.ctx.back.restore()
+      
+      # render snow cover
+      if(game.weather.snow_cover.data)
+        game.ctx.back.save()
+        pattern = game.ctx.back.createPattern(game.weather.snow_cover.image, 'repeat')
+        game.ctx.back.fillStyle = pattern;
+        granularity = simulation.size.granularity
+        for x in [0...simulation.size.width] by 1
+          for y in [0...simulation.size.height] by 1 
+            console.log(game.weather.snow_cover.data[x + y * simulation.size.width])
+            for i in [0...Math.min(5, Math.ceil(game.weather.snow_cover.data[x + y * simulation.size.width] / 5))] by 1 
+              game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
         game.ctx.back.restore()
 
       # copy back buffer to front buffer
