@@ -21,6 +21,8 @@ jQuery ->
   #=======================================================
 
   if($('.simulation-form').size() > 0) 
+    canvas = $('#thumb')[0]
+    ctx = canvas.getContext('2d')
 
     $('.farm a').on 'click', (event) ->
       event.preventDefault()
@@ -29,6 +31,11 @@ jQuery ->
       farm = 
         id: selected.data('id')
       $('#simulation_farm').val( JSON.stringify(farm) )
+      $.ajax "/farms/#{farm.id}.json", 
+        success: (data) ->
+          console.log(data)
+          data.field_bounds.forEach (bound) ->
+            console.log(bound)
       return false
 
     $('.weather a').on 'click', (event) ->
@@ -47,6 +54,7 @@ jQuery ->
       simulation = {}
       simulation.farm = JSON.parse( $('#simulation_farm').val() )
       simulation.weather = JSON.parse( $('#simulation_weather').val() )
+
 
       $('#simulation_state').val( JSON.stringify(simulation) )
       console.log(simulation)
@@ -87,7 +95,8 @@ jQuery ->
         when 'size_update' then updateSize(msg.data.size)
         when 'time_update' then updateTime(msg.data.time)
         when 'weather_update' then updateWeather(msg.data.weather)
-        when 'data_layer_update' then updateDataLayer(msg.data.layer_name, msg.data.layer_data)
+        when 'soil_data_layer_update' then updateSoilDataLayer(msg.data.layer_name, msg.data.layer_data)
+        when 'crop_data_layer_update' then updateCropDataLayer(msg.data.crop_id, msg.data.layer_name, msg.data.layer_data)
           
 
     simulation.worker.postMessage({type: 'init'})
@@ -111,6 +120,7 @@ jQuery ->
     layerColors["stable_mineral_phosphorus"]= [100, 100, 100]
     layerColors["flat_residue_carbon"]= [100, 100, 100]
     layerColors["humus_carbon"]= [100, 100, 100]
+
     layerColors["biomass_roots"]= [100, 100, 100]
     layerColors["biomass_stems"]= [100, 100, 100]
     layerColors["biomass_leaves"]= [100, 100, 100]
@@ -124,8 +134,8 @@ jQuery ->
 
     initializeDataLayers = (size) ->
 
-      # field outlines in data layers
-      layers = $('#data-layers')
+      # field outlines in soil data
+      soilDataLayers = $('#soil-data-layers')
       fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
       ctx = fields[0].getContext('2d');
       simulation.size.fields.forEach (field) ->
@@ -134,27 +144,39 @@ jQuery ->
           ctx.lineTo(corner.x * 50, corner.y * 50)
         ctx.closePath()
         ctx.stroke()
-      layers.append(fields)
+      soilDataLayers.append(fields)
       
-      # data layers
-      layerCheckboxes = $('#data-layer-checkboxes')
+      # soil data layers
+      soilLayerCheckboxes = $('#soil-data-layer-checkboxes')
       attributes = [
         "snow_cover", "water_content", "wilting_point", "percolation_travel_time", "porosity",
         "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen",
         "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus",
         "flat_residue_carbon", "humus_carbon",
-        "biomass_roots", "biomass_stems", "biomass_leaves", "biomass_storage_organs", "biomass_reproductive_organs"
       ]
       attributes.forEach (name) ->
         layer = $("<canvas id='#{name}' class='layer' width=#{size.width} height=#{size.height} style='display: none;'></canvas>")
         simulation.layerContexts[name] = layer[0].getContext('2d');
-        layers.prepend(layer)
-        layerCheckboxes.append("<div class='checkbox'><label for='cb_#{name}'><input name='#{name}' id='cb_#{name}' type='checkbox'>#{name.replace('_',' ').replace('_',' ')}</label></div>")
+        soilDataLayers.prepend(layer)
+        soilLayerCheckboxes.append("<div class='checkbox'><label for='cb_#{name}'><input name='#{name}' id='cb_#{name}' type='checkbox'>#{name.replace('_',' ').replace('_',' ')}</label></div>")
         
-      $('#data-layer-checkboxes input').on 'change', (event) ->
+      $('#soil-data-layer-checkboxes input').on 'change', (event) ->
         $('#' + $(this).attr('name')).toggle()
 
-      window.simulation = simulation
+      # field outlines in crop data
+      cropDataLayers = $('#crop-data-layers')
+      fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
+      ctx = fields[0].getContext('2d');
+      simulation.size.fields.forEach (field) ->
+        ctx.beginPath();
+        field.forEach (corner) ->
+          ctx.lineTo(corner.x * 50, corner.y * 50)
+        ctx.closePath()
+        ctx.stroke()
+      cropDataLayers.append(fields)
+
+
+#        "biomass_roots", "biomass_stems", "biomass_leaves", "biomass_storage_organs", "biomass_reproductive_organs"
 
 
     updateTime = (time) ->
@@ -182,7 +204,7 @@ jQuery ->
     updateWeather = (weather) ->
       simulation.weather = weather
     
-    updateDataLayer = (name, data) ->
+    updateSoilDataLayer = (name, data) ->
       if(name == 'snow_cover') 
         game.weather.snow_cover.data = data
       brush = simulation.layerContexts[name].createImageData(1,1)
@@ -196,6 +218,8 @@ jQuery ->
           brushData[3] = data[x + offset]
           simulation.layerContexts[name].putImageData(brush, x, y)
 
+    updateCropDataLayer = (id, name, data) ->
+      console.log("updating crop #{id}")
 
     # Create the game objects
     game.combine =
@@ -424,7 +448,6 @@ jQuery ->
         granularity = simulation.size.granularity
         for x in [0...simulation.size.width] by 1
           for y in [0...simulation.size.height] by 1 
-            console.log(game.weather.snow_cover.data[x + y * simulation.size.width])
             for i in [0...Math.min(5, Math.ceil(game.weather.snow_cover.data[x + y * simulation.size.width] / 5))] by 1 
               game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
         game.ctx.back.restore()
@@ -432,17 +455,29 @@ jQuery ->
       # copy back buffer to front buffer
       game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y)
 
-    $('#till').on 'click', () ->
+    $('#manual-till').on 'click', () ->
       game.state = 'tilling'
       game.viewport.target = game.tractor
 
-    $('#plant').on 'click', () ->
+    $('#auto-till').on 'click', () ->
+      $('#field-select-modal').modal().one 'hidden.bs.modal', () ->
+        console.log($('input[name="field_id"]:checked').val())
+
+    $('#manual-plant').on 'click', () ->
       game.state = 'planting'
       game.viewport.target = game.tractor
 
-    $('#harvest').on 'click', () ->
+    $('#manual-harvest').on 'click', () ->
       game.state = 'harvesting'
       game.viewport.target = game.combine
+
+
+    $('#field-select-map polygon').on 'click', () ->
+      index = $(this).data('field-index')
+      boxes = $("input[name=field_id]")
+      boxes.prop('checked', false).parent().removeClass("active")
+      console.log(index)
+      boxes.filter("[value=#{index}]").prop('checked', true).parent().addClass("active")
   
     run  = $('#simulation-run')
     pause = $('#simulation-pause')

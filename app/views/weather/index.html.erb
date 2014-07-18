@@ -9,10 +9,12 @@
   model works.
 </div>
 
+<%= paginate @weather %>
 <div id="weather-collection" class="row">
   <% @weather.each do |weather| %>
     <%= render weather %>
   <% end %>
 </div>
+<%= paginate @weather %>
 
 <%= link_to 'New Weather Model', new_weather_path %>

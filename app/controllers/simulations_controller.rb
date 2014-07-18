@@ -2,6 +2,13 @@ class SimulationsController < InheritedResources::Base
   respond_to :js, only: [:show]
   respond_to :json, only: [:show]
 
+  def show
+    @simulation = Simulation.find(params[:id])
+    data = JSON.parse @simulation.state
+    @farm = Farm.find data["farm"]["id"] if data["farm"]
+    show!
+  end
+
   def create
     @simulation = Simulation.new(resource_params)
     @simulation.user = current_user
@@ -13,6 +20,7 @@ class SimulationsController < InheritedResources::Base
     data = JSON.parse @simulation.state
     @farm = Farm.find data["farm"]["id"] if data["farm"]
     @weather = Weather.find data["weather"]["id"] if data["weather"]
+    edit!
   end
 
 private

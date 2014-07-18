@@ -12,25 +12,7 @@
   <div class="tab-content">
 
     <div class="tab-pane active" id="details">
-      <div class="form_group">
-        <%= f.label :name %>
-        <%= f.text_field :name, class: "form-control" %>
-      </div>
-
-      <div class="form_group">
-        <%= f.label :start_on %>
-        <%= f.date_field :start_on, class: "form-control" %>
-      </div>
-
-      <div class="form_group">
-        <%= f.label :end_on %>
-        <%= f.date_field :end_on, class: "form-control" %>
-      </div>
-
-      <div class="form-group">
-        <%= f.label :description %>
-        <%= f.text_area :description, class: "form-control" %>
-      </div>
+      <%= render partial: "details", locals: {f: f} %>
     </div>
 
     <div class="tab-pane" id="farm">

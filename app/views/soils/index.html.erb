@@ -8,10 +8,12 @@
   how a specific soil model works.
 </div>
 
+<%= paginate @soils %>
 <div id="soil-collection" class="row">
   <% @soils.each do |soil| %>
     <%= render soil %>
   <% end %>
 </div>
+<%= paginate @soils %>
 
 <%= link_to 'New Soil Model', new_soil_path %>

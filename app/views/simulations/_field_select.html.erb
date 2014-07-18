@@ -1,0 +1,34 @@
+<div id="field-select-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labeled-by="fieldSelectionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="fieldSelectionLabel">Field Selection</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div id="field-select-map" class="col-sm-8">
+            <%= @farm.to_svg.html_safe %>
+          </div>
+          <div class="col-sm-4">
+            <div class="btn-group-vertical" data-toggle="buttons">
+            <% @farm.to_svg.scan(/polygon/).length.times do |index| %>
+              <label class="btn btn-default">
+                <input name="field_id" type="radio" value="<%= index %>">Field <%= index %>
+              </label>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default" data-dismiss="modal">
+            <input name="field_id" type="radio" value="-1">Cancel
+          </label>
+        </div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+

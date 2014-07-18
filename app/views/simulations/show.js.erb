@@ -40,6 +40,15 @@ onmessage = function(msg) {
       update(simulation);
       postMessage({type: 'time_update', time: simulation.clock.time});
       break;
+
+    case 'till': 
+      tillPatch(msg.data.patch_index)
+
+    case 'plant':
+      plantCropInPatch(msg.data.crop_id, msg.data.patch_index, msg.data.seed_biomass)
+
+    case 'spray':
+
   }
 
 
@@ -94,6 +103,18 @@ function set_<%= property %>(value) {
 }
 <% end %>
 
+// Crop API
+var patch_index = 0
+var crop_index = 0
+<% for property in Crop::PROPERTIES %>
+function get_<%= property %>() {
+  return simulation.crops[crop_index].<%= property %>[patch_index];
+}
+
+function set_<%= property %>(value) {
+  simulation.crops[crop_index].<%=property %>[patch_indeex] = value;
+}
+<% end %>
 
 //=====================================================
 // Simulation initialization methods
@@ -244,7 +265,7 @@ function initPatches(simulation) {
     }
   }
 <% for property in Soil::PROPERTIES %>
-  postMessage({type: 'data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
+  postMessage({type: 'soil_data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 }
 
@@ -282,7 +303,15 @@ function updateSoil() {
     }
   }
 <% for property in Soil::PROPERTIES %>
-  postMessage({type: 'data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
+  postMessage({type: 'soil_data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
 <% end %>
 }
 
+//=====================================================
+// Simulation interaction methods
+
+function tillPatch(patchIndex) {
+}
+
+function plantCropInPatch(cropID, patchIndex, seedBiomass) {
+}

@@ -34,7 +34,8 @@
 <ul class="nav nav-tabs">
   <li class="active"><a href="#farm" data-toggle="tab">Farm Operations</a></li>
   <li><a href="#details" data-toggle="tab">Details</a></li>
-  <li><a href="#data" data-toggle="tab">Data Layers</a></li>
+  <li><a href="#soil-data" data-toggle="tab">Soil Data</a></li>
+  <li><a href="#crop-data" data-toggle="tab">Crop Data</a></li>
 </ul>
 
 <div class="tab-content">
@@ -44,9 +45,12 @@
 
       <div class="col-md-1">
         <div class="button-group-vertical">
-          <button id="till" role="button">Till</Plant>
-          <button id="plant" role="button">Plant</Plant>
-          <button id="harvest" role="button">Harvest</Plant> 
+          <button id="manual-till" role="button">Manual Till</Plant>
+          <button id="auto-till" role="button">Auto Till</Plant>
+          <button id="manual-plant" role="button">Manual Plant</Plant>
+          <button id="auto-plant" role="button">Auto Plant</Plant>
+          <button id="manual-harvest" role="button">Manual Harvest</Plant> 
+          <button id="auto-harvest" role="button">Auto Harvest</Plant> 
         </div>
       </div>
 
@@ -81,15 +85,29 @@
 
   </div>
 
-  <div class="tab-pane" id="data">
+  <div class="tab-pane" id="soil-data">
     <div class="row">
       <div class="col-md-2">
-        <div id="data-layer-checkboxes">
+        <div id="soil-data-layer-checkboxes">
           <h4>Legend</h4>
         </div>
       </div>
       <div class="col-md-10">
-        <div id="data-layers">
+        <div id="soil-data-layers" class="data-layers">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="crop-data">
+    <div class="row">
+      <div class="col-md-2">
+        <div id="crop-data-layer-checkboxes">
+          <h4>Legend</h4>
+        </div>
+      </div>
+      <div class="col-md-10">
+        <div id="crop-data-layers" class="data-layers">
         </div>
       </div>
     </div>
@@ -105,3 +123,5 @@
 
 <%= link_to 'Edit', edit_simulation_path(@simulation) %> |
 <%= link_to 'Back', simulations_path %>
+
+<%= render "field_select" %>

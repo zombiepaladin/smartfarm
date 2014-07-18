@@ -1,6 +1,11 @@
 class WeatherController < InheritedResources::Base
   respond_to :json, only: [:show, :update]
 
+  def index
+    @weather = Weather.page params[:page]
+    index!
+  end
+
   def create
     @weather = Weather.new(resource_params)
     @weather.user = current_user

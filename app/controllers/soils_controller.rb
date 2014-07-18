@@ -1,6 +1,11 @@
 class SoilsController < InheritedResources::Base
   respond_to :json, only: [:show, :update]
 
+  def index
+    @soils = Soil.page params[:page]
+    index!
+  end
+
   def create
     @soil = Soil.new(resource_params)
     @soil.user = current_user

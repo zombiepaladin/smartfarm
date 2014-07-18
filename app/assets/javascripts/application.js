@@ -15,19 +15,19 @@
 //= require twitter/bootstrap
 // require turbolinks
 //= require best_in_place
-//= require paralleljs/eval.js
-//= require paralleljs/parallel.js
 //= require blockly/blockly_compressed
 //= require blockly/blocks_compressed
 //= require blockly/javascript_compressed
 //= require blockly/msg/js/en
 //= require JS-Interpreter/acorn
 //= require JS-Interpreter/interpreter
+//= require list_blocks
 //= require simulation_blocks 
 //= require soil_patch
 //= require smartfarm
-//= require list_blocks
 //= require weather_blocks
+//= require soil_blocks
+//= require crop_blocks
 //= require_tree .
 
 

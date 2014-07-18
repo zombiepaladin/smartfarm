@@ -139,6 +139,13 @@ jQuery ->
       attributes.forEach (name) ->
         attrAccessor(name, interpreter, scope)
 
+      # crop attribute getters/setters
+      attributes = [
+        "leaf_and_stem_biomass", "reproductive_organ_biomass", "storage_organ_biomass", "root_biomass", "standing_residue_biomass"
+      ]
+      attributes.forEach (name) ->
+        attrAccessor(name, interpreter, scope)
+
     interpreter = undefined
     nextStep = () ->
       if interpreter

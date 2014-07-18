@@ -4,7 +4,13 @@
     <%= link_to edit_crop_path(@crop), class: "btn btn-info pull-right" do %>
       <i class="fa fa-retweet"></i> See Inside
     <% end %>
-    <h1 class="panel-title"><%= @crop.name %></h1>
+    <h1 class="panel-title">
+      <% if can? :edit, @crop %>
+        <%= best_in_place @crop, :name %>
+      <% else %>
+        <%= @crop.name %>
+      <% end %>
+    </h1>
     <p>by <%= link_to @crop.user.username, @crop.user %></p>
   </div>
 

@@ -63,3 +63,6 @@ gem 'inherited_resources'
 
 # Use best in place for in-place text editing
 gem 'best_in_place', github: 'bernat/best_in_place'
+
+# Use kaminari for pagination
+gem 'kaminari'
