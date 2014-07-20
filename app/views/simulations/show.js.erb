@@ -42,7 +42,7 @@ onmessage = function(msg) {
       break;
 
     case 'till': 
-      tillPatch(msg.data.patch_index)
+      tillField(msg.data.field)
 
     case 'plant':
       plantCropInPatch(msg.data.crop_id, msg.data.patch_index, msg.data.seed_biomass)
@@ -195,13 +195,33 @@ function initPatches(simulation) {
 
   // Convert field bounds into pixel coordinates
   simulation.fields = farm.field_bounds.map( function(boundary) {
-    return boundary.map( function(corner) {
-      return {
-        x: (corner.longitude - east) * (simulation.width / (west - east)),
-        y: simulation.height - (corner.latitude - south) * (simulation.height / (north - south))
-      };
-    });
+    return {
+      patches: [],
+      bounds: boundary.map( function(corner) {
+        return {
+          x: (corner.longitude - east) * (simulation.width / (west - east)),
+          y: simulation.height - (corner.latitude - south) * (simulation.height / (north - south))
+        };
+      })
+    };
   });
+
+  // Calculate the %area of each patch covered by each field
+  for(x = 0; x < simulation.width; x++) {
+    for(y = 0; y < simulation.height; y++) {
+      simulation.fields.forEach( function(field, i) {
+        var clipped = clipPolygon(field.bounds, {left: x, right: x+1, top: y, bottom: y+1});
+        var area = 0;
+        var j = clipped.length - 1;
+        for(i = 0; i < clipped.length; i++) {
+          area += (clipped[j].x + clipped[i].x) * (clipped[j].y-clipped[i].y);
+          j = i;
+        }
+        area = Math.abs(area * 0.5);
+        if(area > 0) field.patches.push({x:x, y:y, ratio:area});
+      });
+    }
+  }
 
 
   postMessage({type: 'size_update', size: {
@@ -310,8 +330,12 @@ function updateSoil() {
 //=====================================================
 // Simulation interaction methods
 
-function tillPatch(patchIndex) {
+function tillField(fieldIndex) {
+  fields[fieldIndex]
+
 }
 
 function plantCropInPatch(cropID, patchIndex, seedBiomass) {
 }
+
+<%= render "liang_barsky" %>

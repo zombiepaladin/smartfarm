@@ -33,7 +33,6 @@ jQuery ->
       $('#simulation_farm').val( JSON.stringify(farm) )
       $.ajax "/farms/#{farm.id}.json", 
         success: (data) ->
-          console.log(data)
           data.field_bounds.forEach (bound) ->
             console.log(bound)
       return false
@@ -138,9 +137,10 @@ jQuery ->
       soilDataLayers = $('#soil-data-layers')
       fields = $("<canvas id='fields' class='layer' width=#{size.width * 50} height=#{size.height * 50}>")
       ctx = fields[0].getContext('2d');
+      console.log(simulation.size);
       simulation.size.fields.forEach (field) ->
         ctx.beginPath();
-        field.forEach (corner) ->
+        field.bounds.forEach (corner) ->
           ctx.lineTo(corner.x * 50, corner.y * 50)
         ctx.closePath()
         ctx.stroke()
@@ -169,7 +169,7 @@ jQuery ->
       ctx = fields[0].getContext('2d');
       simulation.size.fields.forEach (field) ->
         ctx.beginPath();
-        field.forEach (corner) ->
+        field.bounds.forEach (corner) ->
           ctx.lineTo(corner.x * 50, corner.y * 50)
         ctx.closePath()
         ctx.stroke()
@@ -226,6 +226,7 @@ jQuery ->
       x: 0 
       y: 0
       angle: 0
+      active: false
       image: new Image()
     game.combine.image.src = "/assets/combine.png"
 
@@ -240,6 +241,7 @@ jQuery ->
       x: 0
       y: 0
       angle: 0
+      active: false
       image: new Image()
       stamp: new Image()
     game.plow.image.src = "/assets/plow.png"
@@ -249,6 +251,7 @@ jQuery ->
       x: 0
       y: 0
       angle: 0
+      active: false
       image: new Image()
       stamp: new Image()
     game.drill.image.src = "/assets/drill.png"
@@ -304,10 +307,99 @@ jQuery ->
       game.ctx.terrain.lineWidth = 5
       simulation.size.fields.forEach (field) ->
         game.ctx.terrain.beginPath();
-        field.forEach (corner) ->
+        field.bounds.forEach (corner) ->
           game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity)
         game.ctx.terrain.closePath()
         game.ctx.terrain.stroke()
+
+      # Setup game input
+      game.path = []
+      game.tracking = false
+
+      touchEvents = {};
+      touchEvents.touchMapper = 
+        "touchstart" : "mousedown"
+        "touchmove" : "mousemove"
+        "touchend" : "mouseup"
+
+      touchHandler = (event) ->
+        if (event.touches.length > 1)
+          return # Punt on multitouch events.
+        touchPoint = event.changedTouches[0]
+        mappedEvent = touchMapper[event.type]
+        if(mappedEvent == null) # We don't handle this event type (whatever it is). Punt
+          return
+        alert("HERE")
+        simulatedEvent = document.createEvent("MouseEvent")
+        simulatedEvent.initMouseEvent(mappedEvent, true, true, window, 1, touchPoint.screenX, touchPoint.screenY, touchPoint.clientX, touchPoint.clientY, false, false, false, false, 0, null);
+        touchPoint.target.dispatchEvent(simulatedEvent)
+        event.preventDefault()
+
+      $('#farm-display')[0].ontouchstart = touchHandler
+      $('#farm-display')[0].ontouchmove = Blockly.TouchEvents.touchHandler;
+      $('#farm-display')[0].ontouchend = Blockly.TouchEvents.touchHandler;
+
+
+      # Mouse down
+      $('#farm-display').on 'mousedown', (me) ->
+        inputDown(me.pageX, me.pageY)
+        me.preventDefault
+        false
+
+      # Mouse move
+      $('#farm-display').on 'mousemove', (me) ->
+        inputMove(me.pageX, me.pageY)
+        me.preventDefault()
+        false
+
+
+      # Mouse up
+      $('#farm-display').on 'mouseup', (me) ->
+        inputUp(me.pageX, me.pageY)
+        me.preventDefault()
+        false
+
+
+      # Generic input down handler
+      inputDown = (x, y) ->
+        if(game.state == 'tilling' || game.state == 'planting' || game.state == 'harvesting')
+          offset = $('#farm-display').offset()
+          game.path = []
+          game.path.push
+            x: x - offset.left + game.viewport.x
+            y: y - offset.top + game.viewport.y
+          game.tracking = true
+
+
+      inputMove = (x, y) ->
+        if(game.tracking && (game.state == 'tilling' || game.state == 'planting' || game.state == 'harvesting'))
+          offset = $('#farm-display').offset()
+          game.path.push
+            x: x - offset.left + game.viewport.x
+            y: y - offset.top + game.viewport.y
+
+
+      inputUp = (x, y) ->
+        if(game.tracking && (game.state == 'tilling' || game.state == 'planting' || game.state == 'harvesting'))
+          offset = $('#farm-display').offset()
+          game.path.push
+            x: x - offset.left + game.viewport.x
+            y: y - offset.top + game.viewport.y
+          game.tracking = false
+
+      # Mouse leave
+      $('#farm-display').on 'mouseleave', (me) ->
+        if(game.tracking && (game.state == 'tilling' || game.state == 'planting' || game.state == 'harvesting'))
+          game.path.push
+            x: me.pageX - offset.left + game.viewport.x
+            y: me.pageY - offset.top + game.viewport.y
+          game.tracking = false
+        me.preventDefault()
+        false
+
+      # Start the game loop
+      game.animation_frame = window.requestAnimationFrame () ->
+        renderGame()
 
       # Render the game
       game.ctx.front.drawImage(game.buffers.terrain, 0, 0)
@@ -321,56 +413,91 @@ jQuery ->
 
       switch game.state
         when 'tilling'
-          dy = game.mouse.y + game.viewport.y - game.tractor.y
-          dx = game.mouse.x + game.viewport.x - game.tractor.x
-          distance = Math.sqrt(dx*dx + dy*dy)
-          # Note: 1mi/hr = 0.0074506m/minute
-          speed = 5
-          if distance > 10
+          dy = 0
+          dx = 0
+          while(game.path.length > 0)
+            dy = game.path[0].y - game.tractor.y
+            dx = game.path[0].x - game.tractor.x
+            distance = Math.sqrt(dx*dx + dy*dy)
+            if(distance < 12)
+              game.plow.active = true
+              game.path.shift()
+            else
+              break
+          if(game.path.length == 0)
+            game.plow.active = false
+          else
+            # Note: 1mi/hr = 0.0074506m/minute
+            speed = 5
             game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8)
             game.tractor.x += speed * Math.cos(game.tractor.angle)
             game.tractor.y += speed * Math.sin(game.tractor.angle)
             game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x
             game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y
             game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16) 
-            game.ctx.terrain.save()
-            game.ctx.terrain.fillStyle = '#3d1f00'
-            x = game.plow.x
-            y = game.plow.y
-            game.ctx.terrain.translate(x, y)
-            game.ctx.terrain.rotate(game.plow.angle)
-            game.ctx.terrain.drawImage(game.plow.stamp,-22,-9)
-            game.ctx.terrain.restore()
+            if(game.plow.active)
+              game.ctx.terrain.save()
+              game.ctx.terrain.fillStyle = '#3d1f00'
+              x = game.plow.x
+              y = game.plow.y
+              game.ctx.terrain.translate(x, y)
+              game.ctx.terrain.rotate(game.plow.angle)
+              game.ctx.terrain.drawImage(game.plow.stamp,-22,-9)
+              game.ctx.terrain.restore()
         when 'planting'
-          dy = game.mouse.y + game.viewport.y - game.tractor.y
-          dx = game.mouse.x + game.viewport.x - game.tractor.x
-          distance = Math.sqrt(dx*dx + dy*dy)
-          speed = 5
-          if distance > 10
+          dy = 0
+          dx = 0
+          while(game.path.length > 0)
+            dy = game.path[0].y - game.tractor.y
+            dx = game.path[0].x - game.tractor.x
+            distance = Math.sqrt(dx*dx + dy*dy)
+            if(distance < 12)
+              game.drill.active = true
+              game.path.shift()
+            else
+              break
+          if(game.path.length == 0)
+            game.drill.active = false
+          else
+            # Note: 1mi/hr = 0.0074506m/minute
+            speed = 5
             game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8)
             game.tractor.x += speed * Math.cos(game.tractor.angle)
             game.tractor.y += speed * Math.sin(game.tractor.angle)
             game.drill.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x
             game.drill.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y
             game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16) 
-            game.ctx.terrain.save()
-            game.ctx.terrain.fillStyle = '#3d1f00'
-            x = game.drill.x
-            y = game.drill.y
-            game.ctx.terrain.translate(x, y)
-            game.ctx.terrain.rotate(game.drill.angle)
-            game.ctx.terrain.drawImage(game.drill.stamp, -18, -9)
-            game.ctx.terrain.restore()
+            if(game.drill.active)
+              game.ctx.terrain.save()
+              game.ctx.terrain.fillStyle = '#3d1f00'
+              x = game.drill.x
+              y = game.drill.y
+              game.ctx.terrain.translate(x, y)
+              game.ctx.terrain.rotate(game.plow.angle)
+              game.ctx.terrain.drawImage(game.drill.stamp,-22,-9)
+              game.ctx.terrain.restore()
         when 'harvesting'
-          dy = game.mouse.y + game.viewport.y - game.combine.y
-          dx = game.mouse.x + game.viewport.x - game.combine.x
-          distance = Math.sqrt(dx*dx + dy*dy)
-          speed = 5
-          if distance > 10
-            game.combine.angle = Math.atan2(dy, dx) 
-            game.combine.x += speed * dx/distance
-            game.combine.y += speed * dy/distance
-            # TODO: Recolor harvested swath
+          dy = 0
+          dx = 0
+          while(game.path.length > 0)
+            dy = game.path[0].y - game.combine.y
+            dx = game.path[0].x - game.combine.x
+            distance = Math.sqrt(dx*dx + dy*dy)
+            if(distance < 12)
+              game.combine.active = true
+              game.path.shift()
+            else
+              break
+          if(game.path.length == 0)
+            game.combine.active = false
+          else
+            # Note: 1mi/hr = 0.0074506m/minute
+            speed = 5
+            game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8)
+            game.combine.x += speed * Math.cos(game.combine.angle)
+            game.combine.y += speed * Math.sin(game.combine.angle)
+            #if(game.combine.active)
+              #TODO: recolor harvested swath
       
       # Update the viewport (scroll the game)
       if game.viewport.target.x < game.viewport.width / 2
@@ -452,16 +579,37 @@ jQuery ->
               game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
         game.ctx.back.restore()
 
+      # render equipment path
+      game.ctx.back.save()
+      game.ctx.back.strokeStyle = 'red'
+      game.ctx.back.beginPath()
+      game.ctx.back.moveTo(game.path[0].x, game.path[0].y) if game.path.length > 0
+      game.path.forEach (point) ->
+        game.ctx.back.lineTo(point.x, point.y)
+      game.ctx.back.stroke()
+      game.ctx.back.restore()
+
       # copy back buffer to front buffer
       game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y)
 
     $('#manual-till').on 'click', () ->
       game.state = 'tilling'
       game.viewport.target = game.tractor
+      game.path = []
 
     $('#auto-till').on 'click', () ->
       $('#field-select-modal').modal().one 'hidden.bs.modal', () ->
-        console.log($('input[name="field_id"]:checked').val())
+        field_id = $('input[name="field_id"]:checked').val()
+        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat')
+        game.ctx.terrain.save()
+        game.ctx.terrain.fillStyle = pattern
+        game.ctx.terrain.beginPath();
+        simulation.size.fields[field_id].bounds.forEach (corner) ->
+          game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity)
+        game.ctx.terrain.closePath()
+        game.ctx.terrain.fill()
+        game.ctx.terrain.restore()
+        simulation.postMessage({type: 'till', field: field_id})
 
     $('#manual-plant').on 'click', () ->
       game.state = 'planting'

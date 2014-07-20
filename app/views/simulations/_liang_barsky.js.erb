@@ -1,0 +1,146 @@
+//
+// This routine uses the Liang-Barsky algorithm for polygon clipping as
+// desribed in Foley & van Dam.  It's more efficient than the above
+// Sutherland-Hodgman, but produces redundent turning vertices at the
+// corners of the clip region.  This makes rendering as a series of
+// triangles very awkward.
+//
+
+var INFINITY = 2147483647;
+
+function clipPolygon(sourcePoly, clipRect) {
+  var xIn, xOut, yIn, yOut,          // Coordinates of entry and exit points
+    tOut1, tIn2, tOut2,            // Parameter values of same
+    tInX, tOutX, tInY, tOutY,      // Parameter values for intersection
+    deltaX, deltaY;                // Direction of edge
+
+  var clippedPoly = []
+  var copiedPoly = sourcePoly.map( function(vertex) { // Shallow copy of source
+    return {x: vertex.x, y: vertex.y}
+  });
+  copiedPoly.push({x: sourcePoly[0].x, y: sourcePoly[0].y}); // Close polygon
+
+  for(var i = 0; i < sourcePoly.length; i++) {  // for each edge 
+
+    deltaX = copiedPoly[i+1].x - copiedPoly[i].x;  // determine direction of edge
+    deltaY = copiedPoly[i+1].y - copiedPoly[i].y;  
+
+    // use this to determine which bounding lines for the clip region the
+    // containing line hits first
+    if((deltaX > 0) || (deltaX == 0 && copiedPoly[i].x > clipRect.right)) {
+      xIn = clipRect.left; xOut = clipRect.right;
+    } else {
+      xIn = clipRect.right; xOut = clipRect.left;
+    }
+    if((deltaY > 0) || (deltaY == 0 && copiedPoly[i].y > clipRect.bottom)) {
+      yIn = clipRect.top; yOut = clipRect.bottom;
+    } else {
+      yIn = clipRect.bottom; yOut = clipRect.top;
+    }
+
+    // find the t values for the x and y exit points
+    if(deltaX != 0) {
+      tOutX = ((xOut - copiedPoly[i].x)<<8) / deltaX;
+    } else if(copiedPoly[i].x <= clipRect.right && clipRect.left <= copiedPoly[i].x)
+      tOutX = INFINITY;
+    else
+      tOutX = -INFINITY;
+
+    if(deltaY != 0) {
+      tOutY = ((yOut - copiedPoly[i].y)<<8) / deltaY;
+    } else if(copiedPoly[i].y <= clipRect.bottom && clipRect.top <= copiedPoly[i].y)
+      tOutY = INFINITY;
+    else
+      tOutY = -INFINITY;
+
+    // Order the two exit points
+    if(tOutX < tOutY) {
+      tOut1 = tOutX; tOut2 = tOutY;
+    } else {
+      tOut1 = tOutY; tOut2 = tOutX;
+    }
+
+    if(tOut2 > 0) {
+
+      if(deltaX != 0)
+        tInX = ((xIn - copiedPoly[i].x)<<8) / deltaX;
+      else
+        tInX = -INFINITY;
+
+      if(deltaY != 0)
+        tInY = ((yIn - copiedPoly[i].y)<<8) / deltaY;
+      else
+        tInY = -INFINITY;
+
+      if(tInX < tInY)
+        tIn2 = tInY;
+      else
+        tIn2 = tInX;
+
+      if(tOut1 < tIn2) {  // no visible segment
+        if(0 < tOut1 && tOut1 <= (1<<8)) {
+          // line crosses over intermediate corner region
+          if(tInX < tInY) {
+            clippedPoly.push({
+              x: xOut,
+              y: yIn
+            });
+          } else {
+            clippedPoly.push({
+              x: xIn,
+              y: yOut
+            });
+          }
+        }
+      } else {
+
+        // line crosses though window
+        if(0 < tOut1 && tIn2 <= (1<<8)) {
+          if(0 <= tIn2) {  // visible segment
+            if(tInX > tInY) {
+              clippedPoly.push({
+                x: xIn,
+                y: copiedPoly[i].y + ((tInX * deltaY)>>8)
+              });
+            } else {
+              clippedPoly.push({
+                x: copiedPoly[i].x + ((tInY * deltaX)>>8),
+                y: yIn
+              });
+            }
+          }
+
+          if((1<<8) >= tOut1) {
+            if(tOutX < tOutY) {
+              clippedPoly.push({
+                x: xOut,
+                y: copiedPoly[i].y + ((tOutX * deltaY)>>8)
+              });
+            } else {
+              clippedPoly.push({
+                x: copiedPoly[i].x + ((tOutY * deltaX)>>8),
+                y: yOut
+              });
+            }
+          } else {
+            clippedPoly.push({
+              x: copiedPoly[i+1].x,
+              y: copiedPoly[i+1].y
+            });
+          }
+        }
+
+      }
+
+      if(0 < tOut2 && tOut2 <= (1<<8)) {
+        clippedPoly.push({
+        x: xOut,
+        y: yOut
+        });
+      }
+
+    }
+  } 
+
+  return clippedPoly;
+}

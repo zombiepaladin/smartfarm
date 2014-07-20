@@ -50,3 +50,13 @@
 .tab-content {
   padding: 15px;
 }
+
+#field-select-map polygon {
+  stroke: black;
+  fill: transparent;
+  cursor: pointer;
+}
+
+#field-select-map polygon:hover {
+  fill: yellow;
+}
