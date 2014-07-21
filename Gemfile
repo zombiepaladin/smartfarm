@@ -49,6 +49,8 @@ end
 
 # Use Capistrano for deployment
 gem 'capistrano', '~> 3.1', group: :development
+gem 'capistrano-rvm'
+gem 'capistrano-bundler', '~> 1.1.2'
 gem 'capistrano-rails', '~> 1.1',  group: :development
 
 # Use debugger
@@ -57,7 +59,7 @@ gem 'capistrano-rails', '~> 1.1',  group: :development
 gem 'nifty-generators', group: :development
 
 # Use twitter bootstrap for layout
-gem 'twitter-bootstrap-rails', github: 'seyhunak/twitter-bootstrap-rails', branch: 'bootstrap3', group: :development
+gem 'twitter-bootstrap-rails', github: 'seyhunak/twitter-bootstrap-rails', branch: 'bootstrap3'
 
 # Use inherited resources to simplify resource routes
 gem 'inherited_resources'

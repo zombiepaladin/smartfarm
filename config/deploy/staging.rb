@@ -4,10 +4,15 @@
 # is considered to be the first unless any hosts have the primary
 # property set.  Don't declare `role :all`, it's a meta role.
 
+set :rvm_type, :user
+set :rvm_ruby_version, '2.0.0-p247'
+
 #role :app, %w{.com}
 #role :web, %w{deploy@example.com}
 #role :db,  %w{deploy@example.com}
 set :asset_roles, %w{:web :app}
+
+set :rails_env, 'production'
 
 # Extended Server Syntax
 # ======================
