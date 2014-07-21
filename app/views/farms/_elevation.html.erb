@@ -1,8 +1,24 @@
 <div class="bs-callout bs-callout-info">
   <h4>Establishing your farm's elevation</h4>
   <p>
-    You need to provide your farm's elevation. This can be done in multiple ways: 
+    You need to provide your farm's elevation. 
   </p>
 </div>
 
-<canvas id="elevation_bitmap"></canvas>
+<div id="farm_elevation_map"></canvas>
+
+<table class="table">
+  <theader>
+    <tr>
+      <th>Marker</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Properties</th>
+    </tr>
+  </theader>
+  <tbody id="elevation-samples">
+  </tbody>
+</table>
+<button id="add-elevation-sample" type="button" class="btn btn-default" data-char="A" data-content='<%= render partial: "elevation_sample" %>'>Add Elevation Sample</button>
+
+

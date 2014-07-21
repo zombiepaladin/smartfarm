@@ -102,6 +102,13 @@ jQuery ->
         draggable: false
         editable: false
       new google.maps.Polygon
+        map: elevationMap
+        path: polygon.getPath()
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
+      new google.maps.Polygon
         map: soilMap
         path: polygon.getPath()
         fillColor: '#00ff00'
@@ -109,6 +116,30 @@ jQuery ->
         draggable: false
         editable: false
 
+    # Elevation Map controls & data
+    #-------------------------------
+    elevationMap = new google.maps.Map $('#farm_elevation_map')[0],
+      center: location
+      zoom: 14
+      mapTypeId: google.maps.MapTypeId.TERRAIN
+
+    elevationMapMarker = new google.maps.Marker
+      map: elevationMap
+      title: farm.name
+      postion: location
+
+    farm.field_bounds.forEach (bounds, i) ->
+      path = []
+      bounds.forEach (coord, j) ->
+        farm.fieldPaths
+        path.push new google.maps.LatLng(coord.latitude, coord.longitude)
+      new google.maps.Polygon
+        map: elevationMap
+        path: path
+        fillColor: '#00ff00'
+        strokeColor: '#00cc00'
+        draggable: false
+        editable: false
 
     # Soil Map controls & data
     #-------------------------------
@@ -158,9 +189,7 @@ jQuery ->
       $('#add-soil-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
       google.maps.event.addListener marker, 'dragend', () ->
         lat.val(marker.position.lat())
-        lng.val(marker.position.lng())
-
-      
+        lng.val(marker.position.lng())    
 
     drawingOptions =
       drawingMode: google.maps.drawing.OverlayType.MARKER
@@ -222,8 +251,12 @@ jQuery ->
     panmap = () ->
       locationMapMarker.setPosition location
       fieldMapMarker.setPosition location
+      elevationMapMarker.setPosition location
+      soilMapMarker.setPosition location
       locationMap.panTo location
       fieldMap.panTo location
+      elevationMap.panTo location
+      soilMap.panTo location
 
     resetMap = (map) ->
       zoom = map.getZoom()
@@ -241,6 +274,11 @@ jQuery ->
       event.preventDefault()
       $(this).tab('show')
       resetMap fieldMap
+
+    $('#elevation-tab').on 'click', (event) ->
+      event.preventDefault()
+      $(this).tab('show')
+      resetMap elevationMap
 
     $('#soil-tab').on 'click', (event) ->
       event.preventDefault()
@@ -280,6 +318,8 @@ jQuery ->
       farm.name = $('#farm_name').val()
       locationMapMarker.setTitle farm.name
       fieldMapMarker.setTitle farm.name
+      elevationMapMarker.setTitle farm.name
+      soilMapMarker.setTitle farm.name
     
     $('#farm_latitude').on 'change', () -> 
       farm.latitude = $('#farm_latitude').val()
@@ -289,9 +329,6 @@ jQuery ->
       farm.latitude = $('#farm_longitude').val()
       panmap()
     
-
-    elevation_canvas = $('#elevation_bitmap')[0]
-    elevation_context = elevation_canvas.getContext('2d')
 
     # Draw fields to map(s)
     drawFields = () ->
