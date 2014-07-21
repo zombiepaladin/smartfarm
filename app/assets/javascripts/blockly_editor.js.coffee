@@ -141,7 +141,7 @@ jQuery ->
 
       # crop attribute getters/setters
       attributes = [
-        "leaf_and_stem_biomass", "reproductive_organ_biomass", "storage_organ_biomass", "root_biomass", "standing_residue_biomass"
+        "leaf_biomass", "stem_biomass", "reproductive_organ_biomass", "storage_organ_biomass", "root_biomass", "standing_residue_biomass"
       ]
       attributes.forEach (name) ->
         attrAccessor(name, interpreter, scope)
@@ -164,4 +164,9 @@ jQuery ->
       interpreter = new Interpreter(Blockly.JavaScript.workspaceToCode(), setupJavaScriptInterpreter)
       interpreter.run()
 
+    # Add a plant button
+    plantButton = $('button#plant')
+    plantButton.on 'click', () ->
+      interpreter = new Interpreter(Blockly.JavaScript.workspaceToCode() + ';\nplant();\n', setupJavaScriptInterpreter)
+      interpreter.run()
   

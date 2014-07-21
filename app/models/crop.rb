@@ -3,5 +3,5 @@ class Crop < ActiveRecord::Base
   
   belongs_to :user
 
-  PROPERTIES = %w{ stem_and_leaf_biomass reproductive_organ_biomass storage_organ_biomass root_biomass standing_residue_biomass }
+  PROPERTIES = %w{ stem_biomass leaf_biomass reproductive_organ_biomass storage_organ_biomass root_biomass standing_residue_biomass }
 end

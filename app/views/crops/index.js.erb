@@ -1,0 +1,9 @@
+$('#crops').html('<%= escape_javascript render(@crops) %>');
+$('.pagination').replaceWith('<%= escape_javascript(paginate(@crops, remote: true)).to_s %>');
+$('#crops a').on('click', function(event) {
+  event.preventDefault();
+  crop_id = $(this).parent().data('id');
+  $('input[name="crop_id"]').val(crop_id);
+  $('#crop-select-modal').modal('hide');
+  return false;
+});

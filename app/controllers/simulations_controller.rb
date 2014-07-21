@@ -4,6 +4,7 @@ class SimulationsController < InheritedResources::Base
 
   def show
     @simulation = Simulation.find(params[:id])
+    @crops = Crop.page 
     data = JSON.parse @simulation.state
     @farm = Farm.find data["farm"]["id"] if data["farm"]
     show!

@@ -1,4 +1,4 @@
-# Place all the behaviors and hooks related to the matching controller here.
+\# Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 wrapAngle = (angle) ->
@@ -83,8 +83,8 @@ jQuery ->
       interval: undefined
       paused: true
       size: {width: 0, height: 0}
-      operationContext: undefined
-      layerContexts: {}
+      soilLayerContexts: {}
+      cropLayerContexts: {}
       weather: {rainfall: 0, snowfall: 0}
 
 
@@ -95,6 +95,7 @@ jQuery ->
         when 'time_update' then updateTime(msg.data.time)
         when 'weather_update' then updateWeather(msg.data.weather)
         when 'soil_data_layer_update' then updateSoilDataLayer(msg.data.layer_name, msg.data.layer_data)
+        when 'crop_initialize' then initializeCropDataLayers(msg.data.crop_id, msg.data.crop_name)
         when 'crop_data_layer_update' then updateCropDataLayer(msg.data.crop_id, msg.data.layer_name, msg.data.layer_data)
           
 
@@ -120,11 +121,12 @@ jQuery ->
     layerColors["flat_residue_carbon"]= [100, 100, 100]
     layerColors["humus_carbon"]= [100, 100, 100]
 
-    layerColors["biomass_roots"]= [100, 100, 100]
-    layerColors["biomass_stems"]= [100, 100, 100]
-    layerColors["biomass_leaves"]= [100, 100, 100]
-    layerColors["biomass_storage_organs"]= [100, 100, 100]
-    layerColors["biomass_reproductive_organs"]= [100, 100, 100]
+    layerColors["root_biomass"]= [0, 100, 0]
+    layerColors["stem_biomass"]= [0, 100, 0]
+    layerColors["leaf_biomass"]= [0, 100, 0]
+    layerColors["storage_organ_biomass"]= [0, 100, 0]
+    layerColors["reproductive_organ_biomass"]= [0, 100, 0]
+    layerColors["standing_residue_biomass"]= [0, 100, 0]
  
     updateSize = (size) ->
       simulation.size = size
@@ -156,7 +158,7 @@ jQuery ->
       ]
       attributes.forEach (name) ->
         layer = $("<canvas id='#{name}' class='layer' width=#{size.width} height=#{size.height} style='display: none;'></canvas>")
-        simulation.layerContexts[name] = layer[0].getContext('2d');
+        simulation.soilLayerContexts[name] = layer[0].getContext('2d');
         soilDataLayers.prepend(layer)
         soilLayerCheckboxes.append("<div class='checkbox'><label for='cb_#{name}'><input name='#{name}' id='cb_#{name}' type='checkbox'>#{name.replace('_',' ').replace('_',' ')}</label></div>")
         
@@ -174,9 +176,20 @@ jQuery ->
         ctx.closePath()
         ctx.stroke()
       cropDataLayers.append(fields)
-
-
-#        "biomass_roots", "biomass_stems", "biomass_leaves", "biomass_storage_organs", "biomass_reproductive_organs"
+      
+    initializeCropDataLayers = (id, name) ->
+      simulation.cropLayerContexts[id] = {}
+      cropDataLayers = $('#crop-data-layers')
+      cropLayerCheckboxes = $('#crop-data-layer-checkboxes')
+      cropLayerCheckboxes.append("<h5>#{name}</h5>")
+      attributes = ["root_biomass", "stem_biomass", "leaf_biomass", "storage_organ_biomass", "reproductive_organ_biomass", "standing_residue_biomass"]
+      attributes.forEach (name) ->
+        layer = $("<canvas id='#{id}_#{name}' class='layer' width=#{simulation.size.width} height=#{simulation.size.height} style='display: none;'></canvas>")
+        simulation.cropLayerContexts[id][name] = layer[0].getContext('2d');
+        cropDataLayers.prepend(layer)
+        cropLayerCheckboxes.append("<div class='checkbox'><label for='cb_#{id}_#{name}'><input name='#{id}_#{name}' id='cb_#{id}_#{name}' type='checkbox'>#{name.replace('_',' ').replace('_',' ')}</label></div>")
+      $('#crop-data-layer-checkboxes input').on 'change', (event) ->
+        $('#' + $(this).attr('name')).toggle()
 
 
     updateTime = (time) ->
@@ -207,19 +220,30 @@ jQuery ->
     updateSoilDataLayer = (name, data) ->
       if(name == 'snow_cover') 
         game.weather.snow_cover.data = data
-      brush = simulation.layerContexts[name].createImageData(1,1)
+      brush = simulation.soilLayerContexts[name].createImageData(1,1)
       brushData = brush.data
       brushData[0] = layerColors[name][0]
       brushData[1] = layerColors[name][1]
       brushData[2] = layerColors[name][2]
-      for y in [0..simulation.size.height] by 1
+      for y in [0...simulation.size.height] by 1
         offset = y * simulation.size.width
-        for x in [0..simulation.size.width] by 1
+        for x in [0...simulation.size.width] by 1
           brushData[3] = data[x + offset]
-          simulation.layerContexts[name].putImageData(brush, x, y)
+          simulation.soilLayerContexts[name].putImageData(brush, x, y)
 
     updateCropDataLayer = (id, name, data) ->
-      console.log("updating crop #{id}")
+      brush = simulation.cropLayerContexts[id][name].createImageData(1,1)
+      brushData = brush.data
+      brushData[0] = layerColors[name][0]
+      brushData[1] = layerColors[name][1]
+      brushData[2] = layerColors[name][2]
+      for y in [0...simulation.size.height] by 1
+        offset = y * simulation.size.width
+        for x in [0...simulation.size.width] by 1          
+          brushData[3] = data[x + offset]          
+          simulation.cropLayerContexts[id][name].putImageData(brush, x, y)
+          if(data[x + offset] > 0)
+            growCrop(x, y, name, data[x + offset])
 
     # Create the game objects
     game.combine =
@@ -254,8 +278,10 @@ jQuery ->
       active: false
       image: new Image()
       stamp: new Image()
+      seed: new Image()
     game.drill.image.src = "/assets/drill.png"
     game.drill.stamp.src = "/assets/drill_trail.png"
+    game.drill.seed.src = "/assets/drill_seed.png"
 
     game.weather =
       rain:
@@ -268,6 +294,18 @@ jQuery ->
     game.weather.snow.image.src = "/assets/snow.png"
     game.weather.snow_cover.image.src = "/assets/snow_cover.png"
 
+    game.crop = { image: [] }
+    game.crop.image[1] = new Image()
+    game.crop.image[1].src = "/assets/crop_1.png"
+    game.crop.image[2] = new Image()
+    game.crop.image[2].src = "/assets/crop_2.png"
+    game.crop.image[3] = new Image()
+    game.crop.image[3].src = "/assets/crop_3.png"
+    game.crop.image[4] = new Image()
+    game.crop.image[4].src = "/assets/crop_4.png"
+    game.crop.image[5] = new Image()
+    game.crop.image[5].src = "/assets/crop_5.png"
+
     initializeGame = () ->
 
       # In the game, 1px = 1meter 
@@ -277,10 +315,12 @@ jQuery ->
         front: $("<canvas width=800 height=600>")[0]
         back: $("<canvas width=#{game.width} height=#{game.height}>")[0]
         terrain: $("<canvas width=#{game.width} height=#{game.height}>")[0]
+        vegitation: $("<canvas width=#{game.width} height=#{game.height}>")[0]
       game.ctx = 
         front: game.buffers.front.getContext('2d')
         back: game.buffers.back.getContext('2d')
         terrain: game.buffers.terrain.getContext('2d')
+        vegitation: game.buffers.vegitation.getContext('2d')
       game.hq = 
         x: simulation.size.location.x * simulation.size.granularity,
         y: simulation.size.location.y * simulation.size.granularity
@@ -469,13 +509,17 @@ jQuery ->
             game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16) 
             if(game.drill.active)
               game.ctx.terrain.save()
-              game.ctx.terrain.fillStyle = '#3d1f00'
               x = game.drill.x
               y = game.drill.y
               game.ctx.terrain.translate(x, y)
-              game.ctx.terrain.rotate(game.plow.angle)
-              game.ctx.terrain.drawImage(game.drill.stamp,-22,-9)
+              game.ctx.terrain.rotate(game.drill.angle)
+              game.ctx.terrain.drawImage(game.drill.stamp,-16,-9)
               game.ctx.terrain.restore()
+              game.ctx.vegitation.save()
+              game.ctx.vegitation.translate(x, y)
+              game.ctx.vegitation.rotate(game.drill.angle)
+              game.ctx.vegitation.drawImage(game.drill.seed, -16, -9)
+              game.ctx.vegitation.restore()
         when 'harvesting'
           dy = 0
           dx = 0
@@ -579,6 +623,9 @@ jQuery ->
               game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
         game.ctx.back.restore()
 
+      # render crops
+      game.ctx.back.drawImage(game.buffers.vegitation, 0, 0)
+
       # render equipment path
       game.ctx.back.save()
       game.ctx.back.strokeStyle = 'red'
@@ -591,6 +638,44 @@ jQuery ->
 
       # copy back buffer to front buffer
       game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y)
+
+    growCrop = (patchX, patchY, category, amount) ->
+      granularity = simulation.size.granularity
+      offsetX = patchX * granularity
+      offsetY = patchY * granularity
+      if(category == 'leaf_biomass' || category == 'stem_biomass')
+        if(amount > 800) 
+          pattern = game.ctx.vegitation.createPattern(game.crop.image[5], 'repeat')
+          game.ctx.vegitation.save()
+          game.ctx.vegitation.fillStyle = pattern
+          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity)
+          game.ctx.vegitation.restore()
+        else if (amount > 400) 
+          pattern = game.ctx.vegitation.createPattern(game.crop.image[4], 'repeat')
+          game.ctx.vegitation.save()
+          game.ctx.vegitation.fillStyle = pattern
+          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity)
+          game.ctx.vegitation.restore()
+        else if (amount > 200) 
+          pattern = game.ctx.vegitation.createPattern(game.crop.image[3], 'repeat')
+          game.ctx.vegitation.save()
+          game.ctx.vegitation.fillStyle = pattern
+          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity)
+          game.ctx.vegitation.restore()
+        else if (amount > 100)
+          pattern = game.ctx.vegitation.createPattern(game.crop.image[2], 'repeat')
+          game.ctx.vegitation.save()
+          game.ctx.vegitation.fillStyle = pattern
+          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity)
+          game.ctx.vegitation.restore()
+        else if (amount > 50)
+          pattern = game.ctx.vegitation.createPattern(game.crop.image[1], 'repeat')
+          game.ctx.vegitation.save()
+          game.ctx.vegitation.fillStyle = pattern
+          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity)
+          game.ctx.vegitation.restore()
+          console.log("using pattern 1")
+      console.log("Grow", patchX, patchY, category, amount);
 
     $('#manual-till').on 'click', () ->
       game.state = 'tilling'
@@ -612,8 +697,40 @@ jQuery ->
         simulation.postMessage({type: 'till', field: field_id})
 
     $('#manual-plant').on 'click', () ->
-      game.state = 'planting'
-      game.viewport.target = game.tractor
+      $('#crop-select-modal').modal().one 'hidden.bs.modal', () ->
+        crop_id = $('input[name="crop_id"]').val()
+        if(crop_id != -1)
+          game.state = 'planting'
+          game.viewport.target = game.tractor
+          game.path = []
+
+    $('#auto-plant').on 'click', () ->
+      $('#crop-select-modal').modal().one 'hidden.bs.modal', () ->
+        crop_id = $('input[name="crop_id"]').val()
+        if(crop_id != -1)
+          $('#field-select-modal').modal().one 'hidden.bs.modal', () ->
+            field_id = $('input[name="field_id"]:checked').val()
+            if(field_id != -1)
+              pattern = game.ctx.terrain.createPattern(game.drill.stamp, 'repeat')
+              game.ctx.terrain.save()
+              game.ctx.terrain.fillStyle = pattern
+              game.ctx.terrain.beginPath();
+              simulation.size.fields[field_id].bounds.forEach (corner) ->
+                game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity)
+              game.ctx.terrain.closePath()
+              game.ctx.terrain.fill()
+              game.ctx.terrain.restore()
+              simulation.worker.postMessage({type: 'plant', crop: crop_id, field: field_id})
+
+    $('#crop-select-modal-cancel').on 'click', () ->
+      $('input[name="crop_id"]').val(-1);
+
+    $('#crops a').on 'click', (event) ->
+      event.preventDefault()
+      crop_id = $(this).parent().data('id')
+      $('input[name="crop_id"]').val(crop_id)
+      $('#crop-select-modal').modal('hide')
+      return false
 
     $('#manual-harvest').on 'click', () ->
       game.state = 'harvesting'

@@ -1,0 +1,115 @@
+clock = {};
+weather = {};
+patches: [];
+
+// ====================================================
+// Message Handler
+// Processes messages from the simulation thread
+// These are:
+//  (1) initialization messages, (re)setting up the simulation
+//  (2) tick messages, advancing the simulation, and
+//  (3) various agricultural operations carryed out by the user,
+//      such as planting
+//
+onmessage = function(msg) { 
+
+
+  switch(msg.data.type) {
+
+    case 'initialize:
+      clock = msg.clock;
+      weather = msg.data.weather;
+      initialize(msg.data.patch_count);
+      break;
+
+    case 'update':
+      clock = msg.clock;
+      weather = msg.data.weather;
+      update();
+      break;
+
+    case 'plant':
+      plant(msg.planted_patches);
+      break;
+  }
+
+}
+
+//=====================================================
+// Simulation API
+
+function get_elapsed_time() {
+  return clock.elapsed_time;
+}
+
+function get_simulation_year() {
+  return new Date(clock.time).getFullYear();
+}
+
+function get_simulation_month() {
+  // month is 0-indexed in JavaScript
+  return (new Date(clock.time).getMonth()) + 1;
+}
+
+function get_simulation_day_of_month() {
+  return new Date(clock.time).getDate();
+}
+
+function get_simulation_day_of_year() {
+  var startOfYear = new Date(new Date(simulation.clock.time).fullYear(), 0, 0)
+  // 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
+  return Math.floor((clock.time - startOfyear)/86400000)
+}
+
+// Weather API
+<% for property in Weather::PROPERTIES %>
+function get_<%= property %>() {
+  return weather.<%= property %>;
+}
+<% end %>
+
+// Crop API
+var patch_index = 0
+<% for property in Crop::PROPERTIES %>
+function get_<%= property %>() {
+  return patches.<%= property %>[patch_index];
+}
+
+function set_<%= property %>(value) {
+  patches.<%=property %>[patch_index] = value;
+}
+<% end %>
+
+//====================================================
+// Initialize function
+function initialize(patchCount) {
+
+  // Create crop data buffers
+<% for property in Crop::PROPERTIES %>
+  patches.<%= property %> = new Uint8Array(patchCount);
+<% end %>
+
+  // Send UI (through simulation) the new data layers
+<% for property in Crop::PROPERTIES %>
+  postMessage({type: 'crop_data_layer_update', crop: '<%= @crop.id %>', layer_name:'<%= property %>', layer_data: patches.<%= property %>});
+<% end %>
+
+}
+
+//====================================================
+// Update function
+
+function update() {
+
+  for(i =0; i < patches.length; i++) {
+    patch_index = i;
+
+    // Run crop code
+    <%= @crop.code.html_safe %>
+
+  }
+
+<% for property in Crop::PROPERTIES %>
+  postMessage({type: 'crop_data_layer_update', crop: '<%= @crop.id %>', layer_name:'<%= property %>', layer_data: patches.<%= property %>});
+<% end %>
+}

@@ -2,8 +2,12 @@
   <div class="btn-groupy">
     <button id="run" role="button" class="btn btn-success">
       <i class="fa fa-play-circle-o"></i>
-      Run Crop Simulation
+      Run
     </button>
+    <!--button id="plant" role="button" class="btn btn-success">
+      <i class="fa fa-exclamation"></i>
+      Plant
+    </button-->
     <button id="save" role="button" class="btn btn-info">
       <i class="fa fa-floppy-o"></i>
       Save Crop
@@ -67,7 +71,8 @@
           <h4>Outputs</h4>
         </li>
 
-        <%= io_item("leaf_and_stem_biomass", "leaf and stem biomass (kg)", 0) %>
+        <%= io_item("leaf_biomass", "leaf biomass (kg)", 0) %>
+        <%= io_item("stem_biomass", "stem biomass (kg)", 0) %>
         <%= io_item("reproductive_organ_biomass", "reproductive organ biomass (kg)", 0) %>
         <%= io_item("storage_organ_biomass", "storage organ biomass (kg)", 0) %>
         <%= io_item("root_biomass", "root biomass (kg)", 0) %>

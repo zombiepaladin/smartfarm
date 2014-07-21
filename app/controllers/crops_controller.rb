@@ -1,5 +1,11 @@
 class CropsController < InheritedResources::Base
-  respond_to :js, only: [:show]
+  respond_to :js, only: [:index, :show]
+  respond_to :json, only: [:show]
+
+  def index
+    @crops = Crop.page params[:page]
+    index!
+  end
 
   def create
     @crop = Crop.new(resource_params)

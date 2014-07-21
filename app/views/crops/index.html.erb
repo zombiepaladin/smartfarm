@@ -1,9 +1,9 @@
 <h1>Crops</h1>
 
+<%= paginate @crops, remote: true %>
 <div class="row">
-  <% @crops.each do |crop| %>
-    <%= render crop %>
-  <% end %>
+  <%= render @crops %>
 </div>
+<%= paginate @crops %>
 
 <%= link_to 'New Crop', new_crop_path %>

@@ -1,0 +1,26 @@
+<!-- crop select modal -->
+<div id="crop-select-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labeled-by="cropSelectionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="cropSelectionLabel">Crop Selection</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+           Which crop do you want to plant?
+        </p>
+        <%= paginate @crops, remote: true, params: {controller: :crops, action: :index} %>
+        <div id="crops" class="row">
+          <%= render @crops %>
+        </div>
+        <%= paginate @crops, remote: true, params: {controller: :crops, action: :index} %>
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" name="crop_id" value="-1" >
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="crop-select-modal-ok" type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
