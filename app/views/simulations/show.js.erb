@@ -387,6 +387,17 @@ function plantFieldWithCrop(fieldIndex, cropID) {
     });
  
 
+  } else {
+
+      // plant the crop
+      simulation.fields[fieldIndex].patches.forEach( function(patch) {
+        simulation.crops[cropID].root_biomass[patch.index] = 25 * patch.ratio
+        simulation.crops[cropID].leaf_biomass[patch.index] = 25 * patch.ratio
+      });
+    <% for property in Crop::PROPERTIES %>
+      postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
+    <% end %>
+
   }
 }
 
