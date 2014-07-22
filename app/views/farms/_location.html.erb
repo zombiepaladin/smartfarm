@@ -7,13 +7,13 @@
         </p>
       </div>
       <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="form-group">
             <%= f.label :latitude %>
             <%= f.text_field :latitude, class: "form-control" %>
           </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="form-group">
             <%= f.label :longitude %>
             <%= f.text_field :longitude, class: "form-control" %>
@@ -22,7 +22,16 @@
         <div class="col-sm-1">
           <h3>OR</h3>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-3">
+          <br/>
+          <button id="capture-location" type="button" class="btn btn-default">Use Device Location</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1">
+          <h3>OR</h3>
+        </div>
+        <div class="col-sm-11">
           <div class="form-group">
             <%= label_tag "Search by Address" %>
             <div class="input-group">
@@ -32,7 +41,7 @@
               </span>
             </div>
           </div>
-        </div>
+        </div>        
       </div>
       <label>Drag on Map</label>
       <div id="farm-map"></div>

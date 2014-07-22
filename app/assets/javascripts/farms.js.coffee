@@ -46,7 +46,13 @@ jQuery ->
         draggable: false
         editable: false
 
-      
+    $('#capture-location').on 'click', (event) ->
+      event.preventDefault()
+      navigator.geolocation.getCurrentPosition (position) ->
+        location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+        locationMapMarker.setPosition( location )
+        panmap()
+            
 
     # Field Map controls & data
     #------------------------------------
@@ -81,7 +87,6 @@ jQuery ->
       bounds.forEach (coord, j) ->
         farm.fieldPaths
         path.push new google.maps.LatLng(coord.latitude, coord.longitude)
-        console.log(coord.latitude, coord.longitude)
       fieldPolygon = new google.maps.Polygon
         map: fieldMap
         path: path
@@ -143,6 +148,35 @@ jQuery ->
         draggable: false
         editable: false
 
+    farm.elevation_samples.forEach (sample) ->
+      console.log(sample)
+      letter = $('#add-elevation-sample').data('char')
+      row = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      lat = row.find('.latitude')
+      lng = row.find('.longitude')
+      elv = row.find('.elevation')
+      lat.val(sample.latitude)
+      lng.val(sample.longitude)
+      elv.val(sample.elevation)
+      marker = new google.maps.Marker
+        map: elevationMap
+        position: new google.maps.LatLng(sample.latitude, sample.longitude)
+        icon: "/assets/blue_Marker#{letter}.png"
+        draggable: true
+      row.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        row.remove()
+      reposition = () ->
+        marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition      
+      $('#elevation-samples').append(row)
+      $('#add-elevation-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        lat.val(marker.position.lat())
+        lng.val(marker.position.lng())    
+
     drawingOptions =
       drawingMode: google.maps.drawing.OverlayType.MARKER
       drawingControl: true
@@ -151,19 +185,23 @@ jQuery ->
         drawingModes: [ google.maps.drawing.OverlayType.MARKER ]
       markerOptions:
         animation: google.maps.Animation.DROP
-        icon: '/assets/brown_MarkerA.png'
+        icon: '/assets/blue_MarkerA.png'
         draggable: true
     drawingManager = new google.maps.drawing.DrawingManager drawingOptions
     drawingManager.setMap elevationMap
 
     google.maps.event.addListener drawingManager, 'markercomplete', (marker) ->
       letter = $('#add-elevation-sample').data('char')
-      marker.icon = "/assets/brown_Marker#{letter}.png"
+      marker.icon = "/assets/blue_Marker#{letter}.png"
       sample = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
       lat = sample.find('.latitude')
       lng = sample.find('.longitude')
       lat.val(marker.position.lat())
       lng.val(marker.position.lng())
+      sample.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        sample.remove()
       reposition = () ->
         marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
       lat.on 'change', reposition
@@ -177,11 +215,15 @@ jQuery ->
     $('#add-elevation-sample').on 'click', () ->
       letter = $(this).data('char')
       sample = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      sample.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        sample.remove()
       $('#elevation-samples').append(sample)
       marker = new google.maps.Marker
         map: elevationMap
         position: location
-        icon: "/assets/brown_Marker#{letter}.png"
+        icon: "/assets/blue_Marker#{letter}.png"
         animation: google.maps.Animation.DROP
         draggable: true
       $(this).data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
@@ -202,11 +244,15 @@ jQuery ->
         sample.find('.latitude').val(position.coords.latitude)
         sample.find('.longitude').val(position.coords.longitude)
         sample.find('.elevation').val(position.coords.altitude)
+        sample.find('.remove').on 'click', (event) ->
+          event.preventDefault()
+          marker.setMap(null)
+          sample.remove()
         $('#elevation-samples').append(sample)
         marker = new google.maps.Marker
           map: elevationMap
           position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
-          icon: "/assets/brown_Marker#{letter}.png"
+          icon: "/assets/blue_Marker#{letter}.png"
           animation: google.maps.Animation.DROP
           draggable: true
         $('#add-elevation-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
@@ -220,6 +266,7 @@ jQuery ->
           marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
         lat.on 'change', reposition
         lng.on 'change', reposition
+  
 
 
     # Soil Map controls & data
@@ -262,6 +309,10 @@ jQuery ->
         position: new google.maps.LatLng(sample.latitude, sample.longitude)
         icon: "/assets/brown_Marker#{letter}.png"
         draggable: true
+      row.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        row.remove()
       reposition = () ->
         marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
       lat.on 'change', reposition
@@ -293,6 +344,10 @@ jQuery ->
       lng = sample.find('.longitude')
       lat.val(marker.position.lat())
       lng.val(marker.position.lng())
+      sample.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        sample.remove()
       reposition = () ->
         marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
       lat.on 'change', reposition
@@ -313,6 +368,10 @@ jQuery ->
         icon: "/assets/brown_Marker#{letter}.png"
         animation: google.maps.Animation.DROP
         draggable: true
+      sample.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        marker.setMap(null)
+        sample.remove()
       $(this).data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
       google.maps.event.addListener marker, 'dragend', () ->
         sample.find('.latitude').val(marker.position.lat())
@@ -337,6 +396,10 @@ jQuery ->
           icon: "/assets/brown_Marker#{letter}.png"
           animation: google.maps.Animation.DROP
           draggable: true
+        sample.find('.remove').on 'click', (event) ->
+          event.preventDefault()
+          marker.setMap(null)
+          sample.remove()
         $('#add-soil-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
         google.maps.event.addListener marker, 'dragend', () ->
           sample.find('.latitude').val(marker.position.lat())
@@ -508,6 +571,14 @@ jQuery ->
           farm.field_bounds[i][j] =
             latitude: coord.lat()
             longitude: coord.lng()
+
+      farm.elevation_samples = []
+      $('.elevation-sample').each (i, row) ->
+        sample = 
+          latitude: $(row).find('.latitude').val()
+          longitude: $(row).find('.longitude').val()
+          elevation: $(row).find('.elevation').val()
+        farm.elevation_samples.push(sample)
 
       farm.soil_samples = []
       $('.soil-sample').each (i, row) ->
