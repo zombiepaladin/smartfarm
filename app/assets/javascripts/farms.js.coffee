@@ -116,6 +116,8 @@ jQuery ->
         draggable: false
         editable: false
 
+
+
     # Elevation Map controls & data
     #-------------------------------
     elevationMap = new google.maps.Map $('#farm_elevation_map')[0],
@@ -140,6 +142,60 @@ jQuery ->
         strokeColor: '#00cc00'
         draggable: false
         editable: false
+
+    drawingOptions =
+      drawingMode: google.maps.drawing.OverlayType.MARKER
+      drawingControl: true
+      drawingControlOptions:
+        position: google.maps.ControlPosition.TOP_CENTER
+        drawingModes: [ google.maps.drawing.OverlayType.MARKER ]
+      markerOptions:
+        animation: google.maps.Animation.DROP
+        icon: '/assets/brown_MarkerA.png'
+        draggable: true
+    drawingManager = new google.maps.drawing.DrawingManager drawingOptions
+    drawingManager.setMap elevationMap
+
+    google.maps.event.addListener drawingManager, 'markercomplete', (marker) ->
+      letter = $('#add-elevation-sample').data('char')
+      marker.icon = "/assets/brown_Marker#{letter}.png"
+      sample = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      lat = sample.find('.latitude')
+      lng = sample.find('.longitude')
+      lat.val(marker.position.lat())
+      lng.val(marker.position.lng())
+      reposition = () ->
+        marker.setPosition new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition
+      $('#elevation-samples').append(sample)
+      $('#add-elevation-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        sample.find('.latitude').val(marker.position.lat())
+        sample.find('.longitude').val(marker.position.lng())
+
+    $('#add-elevation-sample').on 'click', () ->
+      letter = $(this).data('char')
+      sample = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+      $('#elevation-samples').append(sample)
+      marker = new google.maps.Marker
+        map: elevationMap
+        position: location
+        icon: "/assets/brown_Marker#{letter}.png"
+        animation: google.maps.Animation.DROP
+        draggable: true
+      $(this).data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+      google.maps.event.addListener marker, 'dragend', () ->
+        sample.find('.latitude').val(marker.position.lat())
+        sample.find('.longitude').val(marker.position.lng())
+      lat = sample.find('.latitude')
+      lng = sample.find('.longitude')
+      reposition = () ->
+        marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
+      lat.on 'change', reposition
+      lng.on 'change', reposition
+
+
 
     # Soil Map controls & data
     #-------------------------------
