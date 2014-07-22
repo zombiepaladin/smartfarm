@@ -195,6 +195,31 @@ jQuery ->
       lat.on 'change', reposition
       lng.on 'change', reposition
 
+    $('#capture-elevation-sample').on 'click', () ->
+      navigator.geolocation.getCurrentPosition (position) ->
+        letter = $('#add-elevation-sample').data('char')
+        sample = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+        sample.find('.latitude').val(position.coords.latitude)
+        sample.find('.longitude').val(position.coords.longitude)
+        sample.find('.elevation').val(position.coords.altitude)
+        $('#elevation-samples').append(sample)
+        marker = new google.maps.Marker
+          map: elevationMap
+          position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+          icon: "/assets/brown_Marker#{letter}.png"
+          animation: google.maps.Animation.DROP
+          draggable: true
+        $('#add-elevation-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+        google.maps.event.addListener marker, 'dragend', () ->
+          sample.find('.latitude').val(marker.position.lat())
+          sample.find('.longitude').val(marker.position.lng())
+          sample.find('.elevation').val(position.coords.altitude)
+        lat = sample.find('.latitude')
+        lng = sample.find('.longitude')
+        reposition = () ->
+          marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
+        lat.on 'change', reposition
+        lng.on 'change', reposition
 
 
     # Soil Map controls & data
@@ -298,6 +323,31 @@ jQuery ->
         marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
       lat.on 'change', reposition
       lng.on 'change', reposition      
+
+    $('#capture-soil-sample').on 'click', () ->
+      navigator.geolocation.getCurrentPosition (position) ->
+        letter = $('#add-soil-sample').data('char')
+        sample = $( $('#add-soil-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
+        sample.find('.latitude').val(position.coords.latitude)
+        sample.find('.longitude').val(position.coords.longitude)
+        $('#soil-samples').append(sample)
+        marker = new google.maps.Marker
+          map: soilMap
+          position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+          icon: "/assets/brown_Marker#{letter}.png"
+          animation: google.maps.Animation.DROP
+          draggable: true
+        $('#add-soil-sample').data('char', String.fromCharCode( letter.charCodeAt(0) + 1) )
+        google.maps.event.addListener marker, 'dragend', () ->
+          sample.find('.latitude').val(marker.position.lat())
+          sample.find('.longitude').val(marker.position.lng())
+          sample.find('.elevation').val(position.coords.altitude)
+        lat = sample.find('.latitude')
+        lng = sample.find('.longitude')
+        reposition = () ->
+          marker.setPosition  new google.maps.LatLng( lat.val(), lng.val() )
+        lat.on 'change', reposition
+        lng.on 'change', reposition
 
 
 

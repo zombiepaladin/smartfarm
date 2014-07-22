@@ -1,7 +1,10 @@
 <div class="bs-callout bs-callout-info">
   <h4>Establishing your farm's elevation</h4>
   <p>
-    You need to provide your farm's elevation. 
+    You need to provide your farm's elevation. This can be done by clicking on the specific locations of elevation measurements in the map below, 
+    and then manually entering the elevation measures.  You can also manually create the elevation points with the "Add Elevation Marker" button.  
+    Alternatively, if your device has equipped GPS, you can use it to capture location (and possibly elevation) data with the "Use Device Position"
+    button, after physically moving to where you wish to take an elevation measurement.
   </p>
 </div>
 
@@ -19,6 +22,8 @@
   <tbody id="elevation-samples">
   </tbody>
 </table>
-<button id="add-elevation-sample" type="button" class="btn btn-default" data-char="A" data-content='<%= render partial: "elevation_sample" %>'>Add Elevation Sample</button>
 
+<button id="add-elevation-sample" type="button" class="btn btn-default" data-char="A" data-content='<%= render partial: "elevation_sample" %>'>Add Elevation Marker</button>
+
+<button id="capture-elevation-sample" type="button" class="btn btn-default">Use Device Position</button>
 

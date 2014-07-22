@@ -1,7 +1,12 @@
 <div class="bs-callout bs-callout-info">
   <h4>Establishing your farm's soil characteristics</h4>
   <p>
-     You need to provide the soil profiles your farm.
+     You need to provide the soil profiles your farm.  You can click the map below to mark locations soil sample were taken, or manually
+     enter the locations with the "Add Soil Sample" button.  Alternatively, if you have a GPS-enabled device the "Use Device Location" 
+     button can be used mark the locations as you collect your soil samples.
+  </p>
+  <p>
+    Once locations are marked, you need to enter the results of the soil sample test with the "Soil Properties" button for each row.
   </p>
 </div>
 
@@ -19,4 +24,7 @@
   <tbody id="soil-samples">
   </tbody>
 </table>
+
 <button id="add-soil-sample" type="button" class="btn btn-default" data-char="A" data-content='<%= render partial: "soil_sample" %>'>Add Soil Sample</button>
+
+<button id="capture-soil-sample" type="button" class="btn btn-default">Use Device Location</button>
