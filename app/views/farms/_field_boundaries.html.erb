@@ -1,37 +1,33 @@
-      <div class="bs-callout bs-callout-info">
-        <h4>Establishing your farm's field boundaries</h4>
-        <p>
-          You need to provide the bounds of your farm. This can be done by clicking along the edges
-          of the field in the map below.  To finish a field, click on the first point.  You can then 
-          begin a new field.
+<div class="bs-callout bs-callout-info">
+  <h4>Establishing your farm's field boundaries</h4>
+  <p>
+    You need to provide the bounds of your farm. This can be done by clicking along the edges
+    of the field in the map below.  To finish a field, click on the first point.  You can then 
+    begin a new field.
 
-          Switch to the hand tool to move existing points or fields.
-        </p>
-      </div>
+    Switch to the hand tool to move existing points or fields.
+  </p>
+</div>
 
-      <div id="farm_field_map"></div>
+<div id="farm_field_map"></div>
 
-      <table class="table field-boundary" style="display: none;">                
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="boundary-corner">
-            <td>
-              <%= text_field_tag :field_bounds, "", placeholder: "latitude", class: "form_control" %> 
-            </td>
-            <td>
-              <%= text_field_tag :field_bounds, "", placeholder: "longitude", class: "form_control" %> 
-            </td>
-            <td>
-              <button class="btn btn-xs btn-danger"><i class="fa fa-o-cross"></i>Remove</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<table class="table">                
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Corner</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="field-boundaries">
+  </tbody>
+</table>
+
+<button id="begin-field" type="button" class="btn btn-default" data-index="1">Begin Field</button>
+
+<button id="add-boundary-corner" type="button" class="btn btn-default" data-index="1" data-content='<%= render partial: "boundary_corner" %>'>Add Boundary Corner</button>
+
+<button id="capture-boundary-corner" type="button" class="btn btn-default">Use Device Location</button>
 

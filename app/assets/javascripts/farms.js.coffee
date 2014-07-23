@@ -84,9 +84,22 @@ jQuery ->
             
     farm.field_bounds.forEach (bounds, i) ->
       path = []
+      fieldBounds = $('#field-boundaries')
       bounds.forEach (coord, j) ->
-        farm.fieldPaths
+        row = $( $('#add-boundary-corner').data('content'))
+        row.find('.field-index').html(i+1)
+        row.find('.corner-index').html(j+1)
+        lat = row.find('.latitude')
+        lng = row.find('.longitude')
+        lat.val(coord.latitude)
+        lng.val(coord.longitude)
+        fieldBounds.append(row)
+        console.log(row)
         path.push new google.maps.LatLng(coord.latitude, coord.longitude)
+        row.find('.remove').on 'click', (event) ->
+          event.preventDefault()
+          fieldPaths[i].removeAt(j)
+          row.remove()
       fieldPolygon = new google.maps.Polygon
         map: fieldMap
         path: path
@@ -94,6 +107,9 @@ jQuery ->
         draggable: true
         editable: true
       fieldPaths.push(fieldPolygon.getPath())
+      $('#begin-field').data('index', i+1)
+      $('#add-boundary-corner').data('index', 0)
+
 
     bounds = []
     google.maps.event.addListener drawingManager, 'polygoncomplete', (polygon) ->
@@ -121,6 +137,33 @@ jQuery ->
         draggable: false
         editable: false
 
+    $('#begin-field').on 'click', () ->
+      index = parseInt( $(this).data('index') )
+      fieldPolygon = new google.maps.Polygon
+        map: fieldMap
+        path: []
+        fillColor: '#00ff00'
+        draggable: true
+        editable: true
+      fieldPaths.push(fieldPolygon.getPath())
+      $(this).data('index', index + 1)
+
+    $('#add-elevation-sample').on 'click', () ->
+      field_index = $('#begin-field').data('index')
+      corner_index = $('#add-boundary-corner').data('index')
+      sample = $('#add-boundary-corner').data('content')
+      row.find('field-index').html(field_index)
+      row.find('corner-index').html(corner_index)
+      row.find('.remove').on 'click', (event) ->
+        event.preventDefault()
+        fieldPaths[field_index].removeAt(corner_index)
+        row.remove()
+      reposition = () ->
+        lat = row.find('.latitude')
+        lng = row.find('.longitude')
+        fieldPaths[field_index].setAt(corner_index, new google.maps.LatLng( lat.val(), lng.val() ))
+      lat.on 'change', reposition
+      lng.on 'change', reposition      
 
 
     # Elevation Map controls & data
@@ -149,7 +192,6 @@ jQuery ->
         editable: false
 
     farm.elevation_samples.forEach (sample) ->
-      console.log(sample)
       letter = $('#add-elevation-sample').data('char')
       row = $( $('#add-elevation-sample').data('content').replace('A', letter).replace('A', letter).replace('A', letter).replace('A', letter) )
       lat = row.find('.latitude')

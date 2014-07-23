@@ -6,18 +6,6 @@
   width: 100%;
 }
 
-.field-bounds {
-  counter-reset: corner;
-}
-
-tr.boundary-corner::before {
-  counter-increment: corner;
-  content: counter(corner);
-  display: table-cell;
-  padding-top: 8px;
-  text-align: center;
-}
-
 #farm-collection .farm {
   width: 20%;
   margin-left: 15px;

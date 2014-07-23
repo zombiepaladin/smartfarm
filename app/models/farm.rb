@@ -23,7 +23,7 @@ private
   def generate_svg
     width = 300
     height = 200
-    svg = "<svg width='#{width}' height='#{height}'>"
+    svg = "<svg viewbox='0 0 #{width} #{height}'>"
 
     farm_data = JSON.parse data
     north = farm_data["location"]["latitude"]
@@ -31,34 +31,37 @@ private
     east = farm_data["location"]["longitude"]
     west = farm_data["location"]["longitude"]
 
-    # Find the outer boundaries of the simulations
-    for bound in farm_data["field_bounds"]
-      for corner in bound
-        north = corner["latitude"] > north ? corner["latitude"] : north;
-        south = corner["latitude"] < south ? corner["latitude"] : south;
-        west = corner["longitude"] > west ? corner["longitude"] : west;
-        east = corner["longitude"] < east ? corner["longitude"] : east;
-      end
-    end
+    if farm_data["field_bounds"]
 
-    # Convert field bounds into pixel coordinates
-    farm_data["field_bounds"].each_with_index do |bound, index|
-      points = []
-      left = width
-      right = 0
-      top = 0
-      bottom = height
-      for corner in bound
-        x = (corner["longitude"] - east) * (width / (west - east))
-        y = height - (corner["latitude"] - south) * (height / (north - south))
-        left = x < left ? x : left
-        right = x > right ? x : right
-        top = y > top ? y : top
-        bottom = y < bottom ? y : bottom
-        points << "#{x},#{y}"
+      # Find the outer boundaries of the simulation
+      for bound in farm_data["field_bounds"]
+        for corner in bound
+          north = corner["latitude"] > north ? corner["latitude"] : north;
+          south = corner["latitude"] < south ? corner["latitude"] : south;
+          west = corner["longitude"] > west ? corner["longitude"] : west;
+          east = corner["longitude"] < east ? corner["longitude"] : east;
+        end
       end
-      svg << "<polygon data-field-index='#{ index }' points='#{ points.join(" ") }' style='stroke:black;stroke-width:5' />"
-      svg << "<text x='#{left + ((right - left) / 2)}' y='#{bottom + ((top - bottom) / 2)}' font-family='Veranda' font-size='55'>#{ index }</text>"
+
+      # Convert field bounds into pixel coordinates
+      farm_data["field_bounds"].each_with_index do |bound, index|
+        points = []
+        left = width
+        right = 0
+        top = 0
+        bottom = height
+        for corner in bound
+          x = (corner["longitude"] - east) * (width / (west - east))
+          y = height - (corner["latitude"] - south) * (height / (north - south))
+          left = x < left ? x : left
+          right = x > right ? x : right
+          top = y > top ? y : top
+          bottom = y < bottom ? y : bottom
+          points << "#{x},#{y}"
+        end
+        svg << "<polygon data-field-index='#{ index }' points='#{ points.join(" ") }' style='stroke:black;stroke-width:5' />"
+        svg << "<text x='#{left + ((right - left) / 2)}' y='#{bottom + ((top - bottom) / 2)}' font-family='Veranda' font-size='55'>#{ index }</text>"
+      end
     end
     svg << "</svg>"
   end

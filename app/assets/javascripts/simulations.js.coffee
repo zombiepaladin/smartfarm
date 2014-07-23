@@ -20,30 +20,22 @@ jQuery ->
   # New simulation form controls
   #=======================================================
 
-  if($('.simulation-form').size() > 0) 
-    canvas = $('#thumb')[0]
-    ctx = canvas.getContext('2d')
+  if($('#simulation-form').size() > 0) 
+    $(".farm [data-id='#{ $('#simulation_farm_id').data('id') }']").detach().appendTo('#selected-farms')
+    $(".weather [data-id='#{ $('#simulation_weather_id').data('id') }']").appendTo('#selected-weather')
 
     $('.farm a').on 'click', (event) ->
       event.preventDefault()
       $('#selected-farms').children().detach().appendTo("#unselected-farms")
       selected = $(this).parent().detach().appendTo('#selected-farms')
-      farm = 
-        id: selected.data('id')
-      $('#simulation_farm').val( JSON.stringify(farm) )
-      $.ajax "/farms/#{farm.id}.json", 
-        success: (data) ->
-          data.field_bounds.forEach (bound) ->
-            console.log(bound)
+      $('#simulation_farm_id').val( selected.data('id') )
       return false
 
     $('.weather a').on 'click', (event) ->
       event.preventDefault()
       $('#selected-weather').children().detach().appendTo("#unselected-weater")
       selected = $(this).parent().detach().appendTo('#selected-weather')
-      weather = 
-        id: selected.data('id')
-      $('#simulation_weather').val( JSON.stringify(weather) )
+      $('#simulation_weather_id').val( selected.data('id') )
       return false
 
     saveButton = $('button#save');
@@ -51,8 +43,8 @@ jQuery ->
 
       #event.preventDefault()
       simulation = {}
-      simulation.farm = JSON.parse( $('#simulation_farm').val() )
-      simulation.weather = JSON.parse( $('#simulation_weather').val() )
+      simulation.farm = {id: $('#simulation_farm_id').val()}
+      simulation.weather = {id: $('#simulation_weather_id').val()}
 
 
       $('#simulation_state').val( JSON.stringify(simulation) )

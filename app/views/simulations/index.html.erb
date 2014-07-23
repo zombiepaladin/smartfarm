@@ -1,35 +1,12 @@
-<h1>Listing simulations</h1>
+<h1>Simulations</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Name</th>
-      <th>Start on</th>
-      <th>End on</th>
-      <th>Description</th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
+<%= paginate @simulations %>
 
-  <tbody>
-    <% @simulations.each do |simulation| %>
-      <tr>
-        <td><%= simulation.user_id %></td>
-        <td><%= simulation.name %></td>
-        <td><%= simulation.start_on %></td>
-        <td><%= simulation.end_on %></td>
-        <td><%= simulation.description %></td>
-        <td><%= link_to 'Show', simulation %></td>
-        <td><%= link_to 'Edit', edit_simulation_path(simulation) %></td>
-        <td><%= link_to 'Destroy', simulation, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div id="simulation-collection" class="row">
+  <%= render @simulations %>
+</div>
 
-<br>
+<%= paginate @simulations %>
 
-<%= link_to 'New Simulation', new_simulation_path %>
+<%= link_to 'New Simulation', new_simulation_path, class: 'btn btn-default' %>
+

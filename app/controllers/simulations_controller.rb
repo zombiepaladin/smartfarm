@@ -2,6 +2,11 @@ class SimulationsController < InheritedResources::Base
   respond_to :js, only: [:show]
   respond_to :json, only: [:show]
 
+  def index
+    @simulations = Simulation.page
+    index!
+  end
+
   def show
     @simulation = Simulation.find(params[:id])
     @crops = Crop.page 
@@ -19,15 +24,13 @@ class SimulationsController < InheritedResources::Base
   def edit
     @simulation = Simulation.find(params[:id])
     data = JSON.parse @simulation.state
-    @farm = Farm.find data["farm"]["id"] if data["farm"]
-    @weather = Weather.find data["weather"]["id"] if data["weather"]
     edit!
   end
 
 private
 
   def resource_params
-    params.require(:simulation).permit(:name, :start_on, :end_on, :description, :farm, :weather, :state)
+    params.require(:simulation).permit(:name, :start_on, :end_on, :description, :farm_id, :weather_id, :state)
   end
 
 end

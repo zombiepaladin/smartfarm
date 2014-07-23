@@ -60,3 +60,19 @@
 #field-select-map polygon:hover {
   fill: yellow;
 }
+
+#simulation-collection .simulation {
+  width: 20%;
+  margin-left: 15px;
+  margin-right: 15px;
+  float: left;
+  stroke: 'green';
+  fill: 'green';
+}
+
+.simulation svg {
+  width: 100%;
+  stroke: green;
+  fill: green;
+}
+  

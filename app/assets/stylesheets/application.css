@@ -52,4 +52,6 @@ nav.navbar {
   float: left;
 }
 
-
+ul.errors > li{
+  color: red;
+}

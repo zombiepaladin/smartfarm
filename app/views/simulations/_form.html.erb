@@ -1,4 +1,10 @@
-<%= form_for(@simulation, html: {class: "simulation-form"}) do |f| %>
+<ul class="errors">
+<% @simulation.errors.full_messages.each do |msg| %>
+  <li><%= msg %></li>
+<% end %>
+</ul>
+
+<%= form_for(@simulation, html: {id: "simulation-form", class: "simulation-form"}) do |f| %>
 
   <button id="save" type="submit" role="button" class="pull-right btn-success"><i class="fa fa-floppy-o"></i></button>
 
@@ -26,8 +32,8 @@
   </div>
 
   <%= f.hidden_field :state %>
-  <%= f.hidden_field :farm %>
-  <%= f.hidden_field :weather %>
+  <%= f.hidden_field :farm_id %>
+  <%= f.hidden_field :weather_id %>
 
 <% end %>
 
