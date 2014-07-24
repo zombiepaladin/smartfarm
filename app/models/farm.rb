@@ -10,13 +10,21 @@ class Farm < ActiveRecord::Base
   end
 
   def static_map_url
-    ["http://maps.googleapis.com/maps/api/staticmap?", #key=AIzaSyAWk3UQFfLP1-q-VrLd46sKcZ-RyYMDfTM",
+    bounds = JSON.parse(data)["field_bounds"] || []
+    bounds.reject!(&:empty?)
+    paths = bounds.collect do |field| 
+      "path=color:0x000000ff|#{(field.collect{ |corner| "#{ corner["latitude"] },#{ corner["longitude"] }"} + ["#{field[0]["latitude"]},#{field[0]["longitude"]}"] ).join("|") }".html_safe
+    end
+    args = ["http://maps.googleapis.com/maps/api/staticmap?", #key=AIzaSyAWk3UQFfLP1-q-VrLd46sKcZ-RyYMDfTM",
        "markers=color:red|#{latitude},#{longitude}",
        "zoom=13",
        "maptype=terrain",
        "size=600x300"
-      ].join("&")
-   end
+      ]
+     (args + paths).join("&")
+  end
+
+
 
 private
 

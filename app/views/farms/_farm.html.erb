@@ -1,13 +1,6 @@
 <%= div_for farm, class: "thumbnail", data: {id: farm.id} do %>
   <%= link_to farm do %>
-    <img src="<%=
-      ["http://maps.googleapis.com/maps/api/staticmap?", #key=AIzaSyAWk3UQFfLP1-q-VrLd46sKcZ-RyYMDfTM",
-       "markers=color:red|#{farm.latitude},#{farm.longitude}",
-       "zoom=13",
-       "maptype=terrain",
-       "size=600x300"
-      ].join("&")
-    %>" alt="<%= farm.name %>" >
+    <img src="<%= farm.static_map_url %>" alt="<%= farm.name %>" >
     <strong><%= farm.name %></strong>
   <% end %>
   <%= link_to('&times; Remove'.html_safe, farm, method: :delete, remote: true, confirm: "Are you sure you want to delete #{farm.name}?", class: "btn btn-danger btn-sm pull-right") if can? :delete, farm %>
