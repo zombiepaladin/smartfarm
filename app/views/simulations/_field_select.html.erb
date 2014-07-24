@@ -9,11 +9,11 @@
       <div class="modal-body">
         <div class="row">
           <div id="field-select-map" class="col-sm-8">
-            <%= @farm.to_svg.html_safe %>
+            <%= @simulation.farm.to_svg.html_safe %>
           </div>
           <div class="col-sm-4">
             <div class="btn-group-vertical" data-toggle="buttons">
-            <% @farm.to_svg.scan(/polygon/).length.times do |index| %>
+            <% @simulation.farm.to_svg.scan(/polygon/).length.times do |index| %>
               <label class="btn btn-default">
                 <input name="field_id" type="radio" value="<%= index %>">Field <%= index %>
               </label>

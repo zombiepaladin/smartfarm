@@ -1,8 +1,9 @@
-<div class="thumbnail soil" data-id="<%= soil.id %>">
+<%= div_for soil, class: "thumbnail", data: {id: soil.id} do %>
   <%= link_to soil do %>
     <%= image_tag "soil-#{soil.icons}.png" %>
     <strong><%= soil.name %></strong>
   <% end %>
+  <%= link_to('&times; Remove'.html_safe, soil, method: :delete, remote: true, confirm: "Are you sure you want to delete #{soil.name}?", class: "btn btn-danger btn-sm pull-right") if can? :delete, soil %>
   <p>by <%= link_to soil.user.username, soil.user %></p>
-</div>
+<% end %>
 

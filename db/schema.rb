@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140723140925) do
+ActiveRecord::Schema.define(version: 20140724023719) do
 
   create_table "crops", force: true do |t|
     t.integer  "user_id"
@@ -47,6 +47,7 @@ ActiveRecord::Schema.define(version: 20140723140925) do
     t.string   "weather"
     t.integer  "farm_id"
     t.integer  "weather_id"
+    t.integer  "soil_id"
   end
 
   create_table "soils", force: true do |t|

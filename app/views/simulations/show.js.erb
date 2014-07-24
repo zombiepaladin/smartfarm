@@ -242,54 +242,56 @@ function initPatches(simulation) {
 <% end %>
 
   // Save soil point values to data buffers
-  farm.soil_samples.forEach( function (soil_sample) {
-    soil_sample.x = Math.floor((soil_sample.longitude - east) * (simulation.width / (west - east)));
-    soil_sample.y = simulation.height - Math.floor((soil_sample.latitude - south) * (simulation.height / (north - south)));
-  <% for property in Soil::PROPERTIES %>
-    simulation.soil.<%= property %>[soil_sample.x + soil_sample.y * simulation.width] = soil_sample.<%= property %>;
-  <% end %>
-  });
+  if(farm.soil_samples) {
+    farm.soil_samples.forEach( function (soil_sample) {
+      soil_sample.x = Math.floor((soil_sample.longitude - east) * (simulation.width / (west - east)));
+      soil_sample.y = simulation.height - Math.floor((soil_sample.latitude - south) * (simulation.height / (north - south)));
+    <% for property in Soil::PROPERTIES %>
+      simulation.soil.<%= property %>[soil_sample.x + soil_sample.y * simulation.width] = soil_sample.<%= property %>;
+    <% end %>
+    });
+  
 
-  // Interpolate soil point values across data buffers
-  // TODO: Replace this simple interpolation with better interpolation methods
-  for(i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
-    for(j = -i; j <= i; j++) {
+    // Interpolate soil point values across data buffers
+    // TODO: Replace this simple interpolation with better interpolation methods
+    for(i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
+      for(j = -i; j <= i; j++) {
       
-      for(k = 0; k < farm.soil_samples.length; k++) {
-        var doneFlag = true,
-            dx = farm.soil_samples[k].x - i;
-            dy = farm.soil_samples[k].y + j;
-        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-        <% for property in Soil::PROPERTIES %>
-          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-        <% end %>
-          doneFlag = false;
+        for(k = 0; k < farm.soil_samples.length; k++) {
+          var doneFlag = true,
+              dx = farm.soil_samples[k].x - i;
+              dy = farm.soil_samples[k].y + j;
+          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          <% for property in Soil::PROPERTIES %>
+            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+          <% end %>
+            doneFlag = false;
+          }
+          dx = farm.soil_samples[k].x + i;      
+          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          <% for property in Soil::PROPERTIES %>
+            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+          <% end %>
+            doneFlag = false;
+          }
+          dy = farm.soil_samples[k].y - i;
+          dx = farm.soil_samples[k].x + j;
+          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          <% for property in Soil::PROPERTIES %>
+            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+          <% end %>
+            doneFlag = false;
+          }
+          dy = farm.soil_samples[k].y + i;
+          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+          <% for property in Soil::PROPERTIES %>
+            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+          <% end %>
+            doneFlag = false;
+          }
+          if(doneFlag) continue;
         }
-        dx = farm.soil_samples[k].x + i;      
-        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-        <% for property in Soil::PROPERTIES %>
-          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-        <% end %>
-          doneFlag = false;
-        }
-        dy = farm.soil_samples[k].y - i;
-        dx = farm.soil_samples[k].x + j;
-        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-        <% for property in Soil::PROPERTIES %>
-          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-        <% end %>
-          doneFlag = false;
-        }
-        dy = farm.soil_samples[k].y + i;
-        if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-        <% for property in Soil::PROPERTIES %>
-          simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-        <% end %>
-          doneFlag = false;
-        }
-        if(doneFlag) continue;
       }
-
     }
   }
 
@@ -329,7 +331,7 @@ function updateSoil() {
   for(x = 0; x < simulation.width; x++) {
     for(y = 0; y < simulation.height; y++) {
       index = x + simulation.width * y;
-      <%= Soil.find(data["soil"]["id"]).code.html_safe %>
+      <%= @simulation.soil.code.html_safe %>
     }
   }
 <% for property in Soil::PROPERTIES %>

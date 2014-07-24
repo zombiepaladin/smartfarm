@@ -26,8 +26,8 @@ jQuery ->
 
     $('.farm a').on 'click', (event) ->
       event.preventDefault()
-      $('#selected-farms').children().detach().appendTo("#unselected-farms")
-      selected = $(this).parent().detach().appendTo('#selected-farms')
+      $('#selected-farm').children().detach().appendTo("#unselected-farms")
+      selected = $(this).parent().detach().appendTo('#selected-farm')
       $('#simulation_farm_id').val( selected.data('id') )
       return false
 
@@ -37,6 +37,17 @@ jQuery ->
       selected = $(this).parent().detach().appendTo('#selected-weather')
       $('#simulation_weather_id').val( selected.data('id') )
       return false
+
+    $('.soil a').on 'click', (event) ->
+      event.preventDefault()
+      $('#selected-soil').children().detach().appendTo("#unselected-soils")
+      selected = $(this).parent().detach().appendTo('#selected-soil')
+      $('#simulation_soil_id').val( selected.data('id') )
+      return false
+
+    $('.farm .btn').remove()
+    $('.weather .btn').remove()
+    $('.soil .btn').remove()
 
     saveButton = $('button#save');
     saveButton.on 'click', (event) ->
@@ -244,14 +255,14 @@ jQuery ->
       angle: 0
       active: false
       image: new Image()
-    game.combine.image.src = "/assets/combine.png"
+    game.combine.image.src = "/images/combine.png"
 
     game.tractor =
       x: 0
       y: 0
       angle: 0
       image: new Image()
-    game.tractor.image.src = "/assets/tractor.png"
+    game.tractor.image.src = "/images/tractor.png"
 
     game.plow =
       x: 0
@@ -260,8 +271,8 @@ jQuery ->
       active: false
       image: new Image()
       stamp: new Image()
-    game.plow.image.src = "/assets/plow.png"
-    game.plow.stamp.src = "/assets/plow_trail.png"
+    game.plow.image.src = "/images/plow.png"
+    game.plow.stamp.src = "/images/plow_trail.png"
 
     game.drill =
       x: 0
@@ -271,9 +282,9 @@ jQuery ->
       image: new Image()
       stamp: new Image()
       seed: new Image()
-    game.drill.image.src = "/assets/drill.png"
-    game.drill.stamp.src = "/assets/drill_trail.png"
-    game.drill.seed.src = "/assets/drill_seed.png"
+    game.drill.image.src = "/images/drill.png"
+    game.drill.stamp.src = "/images/drill_trail.png"
+    game.drill.seed.src = "/images/drill_seed.png"
 
     game.weather =
       rain:
@@ -282,21 +293,21 @@ jQuery ->
         image: new Image()
       snow_cover: 
         image: new Image()
-    game.weather.rain.image.src = "/assets/rain.png"
-    game.weather.snow.image.src = "/assets/snow.png"
-    game.weather.snow_cover.image.src = "/assets/snow_cover.png"
+    game.weather.rain.image.src = "/images/rain.png"
+    game.weather.snow.image.src = "/images/snow.png"
+    game.weather.snow_cover.image.src = "/images/snow_cover.png"
 
     game.crop = { image: [] }
     game.crop.image[1] = new Image()
-    game.crop.image[1].src = "/assets/crop_1.png"
+    game.crop.image[1].src = "/images/crop_1.png"
     game.crop.image[2] = new Image()
-    game.crop.image[2].src = "/assets/crop_2.png"
+    game.crop.image[2].src = "/images/crop_2.png"
     game.crop.image[3] = new Image()
-    game.crop.image[3].src = "/assets/crop_3.png"
+    game.crop.image[3].src = "/images/crop_3.png"
     game.crop.image[4] = new Image()
-    game.crop.image[4].src = "/assets/crop_4.png"
+    game.crop.image[4].src = "/images/crop_4.png"
     game.crop.image[5] = new Image()
-    game.crop.image[5].src = "/assets/crop_5.png"
+    game.crop.image[5].src = "/images/crop_5.png"
 
     initializeGame = () ->
 

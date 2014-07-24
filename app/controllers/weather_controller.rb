@@ -1,4 +1,5 @@
 class WeatherController < InheritedResources::Base
+  respond_to :js, only: [:index, :destroy]
   respond_to :json, only: [:show, :update]
 
   def index
@@ -25,6 +26,11 @@ class WeatherController < InheritedResources::Base
     else
       render text: "Unable to save #{@weather.name}: #{@weather.errors.full_messages.join(', ')}" 
     end
+  end
+
+  def destroy
+    @weather = Weather.find(params[:id])
+    @weather.destroy
   end
 
 private

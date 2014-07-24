@@ -1,5 +1,7 @@
 <h1>Simulations</h1>
 
+<%= link_to 'New Simulation', new_simulation_path, class: 'btn btn-info pull-right' %>
+
 <%= paginate @simulations %>
 
 <div id="simulation-collection" class="row">
@@ -8,5 +10,4 @@
 
 <%= paginate @simulations %>
 
-<%= link_to 'New Simulation', new_simulation_path, class: 'btn btn-default' %>
 

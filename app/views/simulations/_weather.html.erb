@@ -22,14 +22,17 @@
 
    <div class="col-md-8">
       <h4>
-        Farms
-        <div class="btn-group">
+        Weather
+        <!--div class="btn-group">
           <button type="button" class="btn btn-success">My Weather Models</button>
           <button type="button" class="btn btn-default">All Weather Models</button>
-        </div>
+        </div-->
       </h4>
+      <div id="weather-pagination">
+        <%= paginate @weather, remote: true, params: {controller: "weather", action: "index"} %>
+      </div>
       <div id="unselected-weather">
-        <%= render Weather.all %>
+        <%= render @weather %>
       </div>
   </div>
 </div>

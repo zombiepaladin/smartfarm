@@ -1,4 +1,5 @@
 class SoilsController < InheritedResources::Base
+  respond_to :js, only: [:index, :destroy]
   respond_to :json, only: [:show, :update]
 
   def index
@@ -26,6 +27,12 @@ class SoilsController < InheritedResources::Base
       render text: "Unable to save #{@soil.name}: #{@soil.errors.full_messages.join(', ')}"
     end
   end
+
+  def destroy
+    @soil = Soil.find(params[:id])
+    @soil.destroy
+  end
+
 
 private
 

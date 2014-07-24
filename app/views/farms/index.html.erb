@@ -1,9 +1,12 @@
 <h1>Farms</h1>
 
+<%= link_to 'New Farm', new_farm_path, class: "btn btn-info pull-right", role: "button" %>
+
+<%= paginate @farms %>
+
 <div id="farm-collection" class="row">
-  <% @farms.each do |farm| %>
-    <%= render farm %>
-  <% end %>
+    <%= render @farms %>
 </div>
 
-<%= link_to 'New Farm', new_farm_path %>
+<%= paginate @farms %>
+

@@ -1,7 +1,8 @@
-<div class="thumbnail weather" data-id="<%= weather.id %>">
+<%= div_for weather, class: "thumbnail", data: {id: weather.id} do %>
   <%= link_to weather do %>      
     <%= image_tag "weather-#{weather.icons}.png" %>
     <strong><%= weather.name %></strong>
   <% end %>
+  <%= link_to('&times; Remove'.html_safe, weather, method: :delete, remote: true, confirm: "Are you sure you want to delete #{weather.name}?", class: "btn btn-danger btn-sm pull-right") if can? :delete, weather %>
   <p>by <%= link_to weather.user.username, weather.user %></p>
-</div>
+<% end %>

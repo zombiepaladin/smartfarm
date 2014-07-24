@@ -1,5 +1,5 @@
 class CropsController < InheritedResources::Base
-  respond_to :js, only: [:index, :show]
+  respond_to :js, only: [:index, :show, :delete]
   respond_to :json, only: [:show]
 
   def index
@@ -26,6 +26,11 @@ class CropsController < InheritedResources::Base
     else
       render json: "{'message':'Failed', 'errors':'#{@crop.errors.full_messages.join(",")}'}"
     end
+  end
+
+  def destroy
+    @crop = Crop.find(params[:id])
+    @crop.destroy
   end
 
   private

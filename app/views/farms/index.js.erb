@@ -1,0 +1,12 @@
+
+$('#unselected-farms').html('<%= escape_javascript render(@farms) %>');
+$('#farm-pagination').html('<%= escape_javascript(paginate(@farms, remote: true)).to_s %>');
+$('.farm a').on('click', function(event) {
+  event.preventDefault();
+  $('#selected-farm').children().detach().appendTo('#unselected-farms');
+  selected_farm = $(this).parent().detach();
+  selected_farm.detach().appendTo('#selected-farm');
+  $('#simulation_farm_id').val( selected_farm.data('id') );
+  return false;
+});
+$('.farm .btn').remove();

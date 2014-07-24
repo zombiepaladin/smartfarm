@@ -6,7 +6,7 @@ class Ability
 
     can :read, :all
 
-    can :edit, :all, user_id: user.id
+    can :manage, :all, user_id: user.id
 
     # Define abilities for the passed in user here. For example:
     #

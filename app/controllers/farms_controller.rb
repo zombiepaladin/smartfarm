@@ -1,5 +1,11 @@
 class FarmsController < InheritedResources::Base
+  respond_to :js, only: [:index, :delete]
   respond_to :json, only: :show
+
+  def index
+    @farms = Farm.page params[:page]
+    index!
+  end
 
   def create
     @farm = Farm.new(resource_params)
@@ -22,6 +28,11 @@ class FarmsController < InheritedResources::Base
     # TODO: Create a clone if we aren't the owner
     @farm = Farm.find(params[:id])
     update!
+  end
+
+  def destroy
+    @farm = Farm.find(params[:id])
+    @farm.destroy
   end
 
 private

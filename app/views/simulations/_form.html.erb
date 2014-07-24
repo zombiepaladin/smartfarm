@@ -1,8 +1,8 @@
-<ul class="errors">
+<div class="alert alert-danger">
 <% @simulation.errors.full_messages.each do |msg| %>
-  <li><%= msg %></li>
+  <p><%= msg %></p>
 <% end %>
-</ul>
+</div>
 
 <%= form_for(@simulation, html: {id: "simulation-form", class: "simulation-form"}) do |f| %>
 
@@ -12,6 +12,7 @@
     <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
     <li><a href="#farm" data-toggle="tab">Farm</a></li>
     <li><a href="#weather" data-toggle="tab">Weather</a></li>
+    <li><a href="#soil" data-toggle="tab">Soil</a></li>
   </ul>
 
 
@@ -29,11 +30,16 @@
       <%= render "weather" %>
     </div>
 
+    <div class="tab-pane" id="soil">
+      <%= render "soil" %>
+    </div>
+
   </div>
 
   <%= f.hidden_field :state %>
   <%= f.hidden_field :farm_id %>
   <%= f.hidden_field :weather_id %>
+  <%= f.hidden_field :soil_id %>
 
 <% end %>
 

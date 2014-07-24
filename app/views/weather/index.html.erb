@@ -9,6 +9,8 @@
   model works.
 </div>
 
+<%= link_to 'New Weather Model', new_weather_path, class: 'btn btn-info pull-right', role: 'button' %>
+
 <%= paginate @weather %>
 <div id="weather-collection" class="row">
   <% @weather.each do |weather| %>
@@ -17,4 +19,3 @@
 </div>
 <%= paginate @weather %>
 
-<%= link_to 'New Weather Model', new_weather_path %>

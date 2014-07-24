@@ -14,7 +14,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">Farm to Simulate</h4>
       </div>
-      <div id="selected-farms" class="panel-body">
+      <div id="selected-farm" class="panel-body">
         <%= render @simulation.farm if @simulation.farm %>
       </div>
     </div>
@@ -23,13 +23,16 @@
    <div class="col-md-8">
       <h4>
         Farms
-        <div class="btn-group">
+        <!--div class="btn-group">
           <button type="button" class="btn btn-success">My Farms</button>
           <button type="button" class="btn btn-default">All Farms</button>
-        </div>
+        </div-->
       </h4>
+      <div id="farm-pagination">
+        <%= paginate @farms, remote: true, params: {controller: "farms", action: "index"} %>
+      </div>
       <div id="unselected-farms">
-        <%= render Farm.all %>
+        <%= render @farms %>
       </div>
   </div>
 </div>

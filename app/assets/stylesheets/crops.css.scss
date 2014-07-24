@@ -1,3 +1,14 @@
 // Place all the styles related to the crops controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#crop-collection .crop {
+  width: 20%;
+  margin-left: 15px;
+  margin-right: 15px;
+  float: left;
+}
+
+.crop .btn {
+  margin-top: 10px;
+}

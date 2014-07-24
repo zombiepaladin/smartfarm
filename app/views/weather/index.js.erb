@@ -1,0 +1,12 @@
+$('#unselected-weather').html('<%= escape_javascript render(@weather) %>');
+$('#weather-pagination').html('<%= escape_javascript(paginate(@weather, remote: true)).to_s %>');
+$('.weather a').on('click', function(event) {
+  event.preventDefault();
+  $('#selected-weather').children().detach().appendTo('#unselected-weather');
+  selected_weather = $(this).parent().detach();
+  selected_weather.detach().appendTo('#selected-weather');
+  $('#simulation_weather_id').val( selected_weather.data('id') );
+  return false;
+});
+$('.weather .btn').remove();
+

@@ -1,9 +1,12 @@
-<h1>Crops</h1>
+<h1>Crop Models</h1>
+
+<%= link_to 'New Crop Model', new_crop_path, class: 'btn btn-info pull-right', role: 'button' %>
 
 <%= paginate @crops, remote: true %>
-<div class="row">
+
+<div id="crop-collection" class="row">
   <%= render @crops %>
 </div>
+
 <%= paginate @crops %>
 
-<%= link_to 'New Crop', new_crop_path %>

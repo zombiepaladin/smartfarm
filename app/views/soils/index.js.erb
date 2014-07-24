@@ -1,0 +1,11 @@
+$('#unselected-soils').html('<%= escape_javascript render(@soils) %>');
+$('#soil-pagination').html('<%= escape_javascript(paginate(@soils, remote: true)).to_s %>');
+$('.soil a').on('click', function(event) {
+  event.preventDefault();
+  $('#selected-soil').children().detach().appendTo('#unselected-soils');
+  selected_soil = $(this).parent().detach();
+  selected_soil.detach().appendTo('#selected-soil');
+  $('#simulation_soil_id').val( selected_soil.data('id') );
+  return false;
+});
+$('.soil .btn').remove();

@@ -1,0 +1,39 @@
+<div class="bs-callout bs-callout-info">
+  <h4>Picking your soil model</h4>
+  <p>
+    Before you can run your simulation, you need to identify the soil model you wish to use
+    within your simulation.  You can choose from all the soil models that have been uploaded 
+    into the SmartFarm site, or you can <%= link_to 'create your own', new_soil_path %> and then
+    come back to create your simulation.
+  </p>
+</div>
+
+ <div class="row">
+  <div class="col-md-4">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h4 class="panel-title">Soil model to use</h4>
+      </div>
+      <div id="selected-soil" class="panel-body">
+        <%= render @simulation.soil if @simulation.soil %>
+      </div>
+    </div>
+  </div>
+
+   <div class="col-md-8">
+      <h4>
+        Soils
+        <!--div class="btn-group">
+          <button type="button" class="btn btn-success">My Soil Models</button>
+          <button type="button" class="btn btn-default">All Soil Models</button>
+        </div-->
+      </h4>
+      <div id="soil-pagination">
+        <%= paginate @soils, remote: true, params: {controller: 'soils', action: 'index'} %>
+      </div>
+      <div id="unselected-soils">
+        <%= render @soils %>
+      </div>
+  </div>
+</div>
+
