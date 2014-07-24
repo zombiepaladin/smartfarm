@@ -58,6 +58,10 @@ onmessage = function(msg) {
 //=====================================================
 // Simulation API
 
+window = {
+  alert: function(msg) { postMessage({type: 'alert', value: msg}) }
+}
+
 function get_elapsed_time() {
   return simulation.clock.elapsed_time;
 }
@@ -156,7 +160,7 @@ function initWeather(simulation) {
 
 // Initialize the patch grid (grid cells are at simulation granularity in size)
 function initPatches(simulation) {
-  var farm = <%= Farm.find(data["farm"]["id"]).data.html_safe %>,
+  var farm = <%= @simulation.farm.data.html_safe %>,
       north = farm.location.latitude, 
       south = farm.location.latitude, 
       east = farm.location.longitude, 
@@ -317,7 +321,7 @@ function update(simulation) {
 //-----------------------------------------------------
 function updateWeather() {
 
-  <%= Weather.find(data["weather"]["id"]).code.html_safe %>
+  <%= @simulation.weather.code.html_safe %>
 
   postMessage({
     type: 'weather_update',
