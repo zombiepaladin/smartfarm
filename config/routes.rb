@@ -1,4 +1,5 @@
 Smartfarm::Application.routes.draw do
+  get "references/index"
   resources :soils
 
   resources :simulations
@@ -6,6 +7,8 @@ Smartfarm::Application.routes.draw do
   resources :farms
 
   resources :weather
+
+  resources :references
 
   resources :crops 
   post '/crops/:id' => 'crops#update'

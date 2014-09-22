@@ -18,9 +18,9 @@ ActiveRecord::Schema.define(version: 20140724023719) do
     t.string   "name",        default: "Unnamed Crop"
     t.text     "description"
     t.text     "code"
+    t.text     "workspace",   default: "<xml id=\"workspace\" style=\"display: none\"></xml>"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "workspace"
   end
 
   create_table "farms", force: true do |t|
@@ -91,10 +91,10 @@ ActiveRecord::Schema.define(version: 20140724023719) do
 
   create_table "weather", force: true do |t|
     t.integer  "user_id"
-    t.string   "name"
-    t.text     "description", default: "Unamed Weather"
-    t.text     "code"
-    t.text     "workspace",   default: "<block type=\"weather\"></block>"
+    t.string   "name",        default: "Unamed Weather"
+    t.text     "description"
+    t.text     "code",        default: ""
+    t.text     "workspace",   default: "<xml id=\"workspace\" style=\"display: none\"></xml>"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

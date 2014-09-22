@@ -1,1 +1,27 @@
-<h1>Welcome</h1>
+<div class="welcome">
+	Welcome
+</div>
+<div class="imgHolder">
+	<%= image_tag("farmland.jpg", :alt => "farmland", :class => "farmland") %>
+</div>
+<div class="descriptionHolder">
+	<div class="description">
+		<span class="about">About Smartfarm</span><br><br>
+		<i class="fa fa-lightbulb-o"></i>
+		The Smartfarm software allows students to simulate a farm,
+		planning their own agricultural practices, planting crops,
+		applying chemicals, irrigating, rotating, tilling, harvesting, etc. 
+		But that’s just the surface level, as students can (and are encouraged to)
+		investigate and reprogram the models driving the simulation using a
+		Scratch-like programming interface.  By modifying the models underlying
+		the simulation, students can use inquiry to explore how nutrients and
+		pollutants move through an ecosystem, experiment with altering crop
+		characteristics, and develop scientific and statistical modeling skills.
+	</div>
+	<% if !user_signed_in? %>
+		<div class="login">
+				<a href="users/sign_up" class="sign">Sign up</a>
+				<a href="users/sign_in" class="sign">Sign in</a>
+		</div>
+	<% end %>
+</div>
