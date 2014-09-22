@@ -15,7 +15,7 @@
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server 'linux.cis.ksu.edu', user: 'nhb7817', roles: %w{web app db}, primary: true
+server 'linux.cis.ksu.edu', user: 'tomlin', roles: %w{web app db}, primary: true
 
 set :deploy_to, "/web/smartfarm"
 
