@@ -28,4 +28,8 @@ Smartfarm::Application.configure do
   config.assets.debug = true
 
   config.action_mailer.default_url_options = { host: 'linux.cis.ksu.edu:3008' }
+  
+  
+  # Disable request forgery protection in test environment.
+  config.action_controller.allow_forgery_protection = false
 end

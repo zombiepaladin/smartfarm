@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.2'
+gem 'rails', '4.1.1'
 
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
@@ -69,3 +69,12 @@ gem 'best_in_place', github: 'bernat/best_in_place'
 
 # Use kaminari for pagination
 gem 'kaminari'
+
+
+gem 'tzinfo-data'
+
+# Dane: for javascript AJAX calls
+#gem 'rack-cors', :require => 'rack/cors'
+
+
+gem 'acts-as-taggable-on'

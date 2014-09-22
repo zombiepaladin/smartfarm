@@ -1,6 +1,39 @@
 <h1>Farms</h1>
 
-<%= link_to 'New Farm', new_farm_path, class: "btn btn-info pull-right", role: "button" %>
+<% if params[:tag] %>
+	<div id="tag_cloud">
+		<%= link_to params[:tag], tag_path(params[:tag]), class: "tagClass" %>
+	</div>
+<% else %>
+	<div id="tag_cloud">
+		<div id="tag_cloud_some">
+			<% tag_cloud Farm.tag_counts_on(:tags).limit(@maxTagsShown), %[s m l] do |tag, css_class| %>
+				<%= link_to tag.name, tag_path(tag.name), class: "#{css_class} tagClass" %>
+			<% end %>
+			
+			<% if Farm.tag_counts.count() > @maxTagsShown %>
+				<a href="javascript:void(0)" style="text-decoration: underline;" onclick="$('#tag_cloud_all').show(); $('#tag_cloud_some').hide();">Show more tags</a>
+			<% end %>
+			
+		</div>
+		<% if Farm.tag_counts.count() > @maxTagsShown %>
+			<div id="tag_cloud_all">
+				<% tag_cloud Farm.tag_counts_on(:tags), %[s m l] do |tag, css_class| %>
+					<%= link_to tag.name, tag_path(tag.name), class: "#{css_class} tagClass" %>
+				<% end %>
+				
+				<a href="javascript:void(0)" style="text-decoration: underline;" onclick="$('#tag_cloud_some').show(); $('#tag_cloud_all').hide();">Show less tags</a>
+				
+				<script> 
+					$('#tag_cloud_some').show(); $('#tag_cloud_all').hide(); 
+				</script>
+				
+			</div>
+		<% end %>
+	</div>
+<% end %>
+
+<%= link_to 'New Farm', new_farm_path, class: "btn btn-info pull-right farm-btn farm-new-btn", role: "button" %>
 
 <%= paginate @farms %>
 

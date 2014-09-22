@@ -1,10 +1,17 @@
 class FarmsController < InheritedResources::Base
   respond_to :js, only: [:index, :delete]
   respond_to :json, only: :show
+  
+  before_action :set_max_tags_shown, only: [:index, :show]
 
   def index
-    @farms = Farm.page params[:page]
-    index!
+	if params[:tag]
+		@farms = Farm.tagged_with(params[:tag]).page params[:page]
+		index!
+	else
+		@farms = Farm.page params[:page]
+		index!
+	end
   end
 
   def create
@@ -38,7 +45,12 @@ class FarmsController < InheritedResources::Base
 private
 
   def resource_params
-    params.require(:farm).permit(:name, :latitude, :longitude, :description, :data)
+    params.require(:farm).permit(:name, :latitude, :longitude, :description, :data, :tag_list)
+  end
+  
+  def set_max_tags_shown
+	@maxTagsShown = 20 #20
+	@maxTagsShownPerFarm = 8 #8
   end
   
 end

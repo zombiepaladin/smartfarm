@@ -1,14 +1,15 @@
 Smartfarm::Application.routes.draw do
-  get "references/index"
   resources :soils
 
   resources :simulations
+  
+  resources :references
 
   resources :farms
+  get 'tags/:tag', to: 'farms#index', as: :tag
+  #get 'tags/', to: 'farms#index'	#in case they put nothing
 
   resources :weather
-
-  resources :references
 
   resources :crops 
   post '/crops/:id' => 'crops#update'
