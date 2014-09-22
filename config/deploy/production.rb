@@ -17,7 +17,7 @@
 
 server 'linux.cis.ksu.edu', user: 'nhb7817', roles: %w{web app db}, primary: true
 
-set :deploy_to, "/web/smartfarm"
+set :deploy_to, "~/smartfarm"
 
 set :ssh_options, {
   keys: %w(~/.ssh/id_rsa),

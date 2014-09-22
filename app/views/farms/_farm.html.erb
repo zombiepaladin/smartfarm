@@ -5,4 +5,11 @@
   <% end %>
   <%= link_to('&times; Remove'.html_safe, farm, method: :delete, remote: true, confirm: "Are you sure you want to delete #{farm.name}?", class: "btn btn-danger btn-sm pull-right") if can? :delete, farm %>
   <p>by <%= link_to farm.user.username, farm.user %></p>
+
+	<div>
+		<%= raw farm.tag_counts_on(:tags).limit(@maxTagsShownPerFarm).map { |t| link_to t, tag_path(t.name), class: "tagClass" }.join(', ') %>
+		<% if farm.tag_counts.count() > @maxTagsShownPerFarm %>
+			<%= link_to "...", farm %>
+		<% end %>
+	</div>
 <% end %>

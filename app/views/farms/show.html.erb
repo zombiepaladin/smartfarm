@@ -25,6 +25,10 @@
         </div>
 
       </div>
+	  
+	  <div class="col-md-8">
+		<%= raw @farm.tag_list.map { |t| link_to t, tag_path(t), class: "tagClass" }.join(', ') %>
+	  </div>
 
     </div>
   </div>
