@@ -19,18 +19,23 @@ class WeatherController < InheritedResources::Base
   end
 
   def update
-    #TODO: Create a clone if we aren't the owner
-    @weather = Weather.find(params[:id])
-    if @weather.update(resource_params)
-      render text: "Successfully saved #{@weather.name}"
-    else
-      render text: "Unable to save #{@weather.name}: #{@weather.errors.full_messages.join(', ')}" 
-    end
+    #Create a clone if we aren't the owner
+	if Weather.find(params[:id]).user.id != current_user.id
+		@weather = Weather.find(params[:id]).dup
+		@weather.user = current_user
+	else
+		@weather = Weather.find(params[:id])
+	end
+	if @weather.update(resource_params)
+	  render text: "Successfully saved #{@weather.name}"
+	else
+	  render text: "Unable to save #{@weather.name}: #{@weather.errors.full_messages.join(', ')}" 
+	end
   end
 
   def destroy
-    @weather = Weather.find(params[:id])
-    @weather.destroy
+	@weather = Weather.find(params[:id])
+	@weather.destroy
   end
 
 private

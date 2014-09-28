@@ -20,5 +20,14 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource)
     session[:previous_url] || root_path
   end
+  
+  
+  
+  before_action :set_max_tags_shown		#, only: [:index, :show]
+  
+  def set_max_tags_shown
+	@maxTagsShown = 20
+	@maxTagsShownPerFarm = 8
+  end
 
 end
