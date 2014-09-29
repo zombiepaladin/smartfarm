@@ -1,8 +1,6 @@
 class FarmsController < InheritedResources::Base
   respond_to :js, only: [:index, :delete]
   respond_to :json, only: :show
-  
-  before_action :set_max_tags_shown, only: [:index, :show]
 
   def index
 	if params[:tag]
@@ -32,25 +30,26 @@ class FarmsController < InheritedResources::Base
   end
 
   def update
-    # TODO: Create a clone if we aren't the owner
-    @farm = Farm.find(params[:id])
-    update!
+	
+    #Create a clone if we aren't the owner
+	if Farm.find(params[:id]).user.id != current_user.id
+		@farm = Farm.find(params[:id]).dup
+		@farm.user = current_user
+	else
+		@farm = Farm.find(params[:id])
+	end
+	update!
   end
 
   def destroy
-    @farm = Farm.find(params[:id])
-    @farm.destroy
+	@farm = Farm.find(params[:id])
+	@farm.destroy
   end
 
 private
 
   def resource_params
     params.require(:farm).permit(:name, :latitude, :longitude, :description, :data, :tag_list)
-  end
-  
-  def set_max_tags_shown
-	@maxTagsShown = 20 #20
-	@maxTagsShownPerFarm = 8 #8
   end
   
 end

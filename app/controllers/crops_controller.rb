@@ -19,18 +19,23 @@ class CropsController < InheritedResources::Base
   end
 
   def update
-    # TODO: Create a clone if we aren't the owner
-    @crop = Crop.find(params[:id])
-    if @crop.update(resource_params)
-      render text: "Successfully saved #{@crop.name}"
-    else
-      render json: "{'message':'Failed', 'errors':'#{@crop.errors.full_messages.join(",")}'}"
-    end
+    #Create a clone if we aren't the owner
+	if Crop.find(params[:id]).user.id != current_user.id
+		@crop = Crop.find(params[:id]).dup
+		@crop.user = current_user
+	else
+		@crop = Crop.find(params[:id])
+	end
+	if @crop.update(resource_params)
+	  render text: "Successfully saved #{@crop.name}"
+	else
+	  render json: "{'message':'Failed', 'errors':'#{@crop.errors.full_messages.join(",")}'}"
+	end
   end
 
   def destroy
     @crop = Crop.find(params[:id])
-    @crop.destroy
+	@crop.destroy
   end
 
   private

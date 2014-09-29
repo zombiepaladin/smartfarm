@@ -24,7 +24,7 @@ postMessage({start_time: '<%= @simulation.start_on.to_s %>'});
 // These are: 
 //  (1) initialization messages, (re)setting up the simulation
 //  (2) tick messages, advancing the simulation, and
-//  (3) various agricultural operations carryed out by the user, 
+//  (3) various agricultural operations carried out by the user, 
 //      such as planting
 //
 onmessage = function(msg) {
@@ -43,13 +43,16 @@ onmessage = function(msg) {
       break;
 
     case 'till': 
-      tillField(msg.data.field)
-
+      tillField(msg.data.field);
+	  break;
+	  
     case 'plant':
       plantFieldWithCrop(msg.data.field, msg.data.crop)
-
+	  break;
+	  
     case 'spray':
-
+	  // do stuff
+	  break;
   }
 
 

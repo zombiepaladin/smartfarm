@@ -19,18 +19,23 @@ class SoilsController < InheritedResources::Base
   end
 
   def update
-    #TODO: Create a clone if we aren't the owner
-    @soil = Soil.find(params[:id])
-    if @soil.update(resource_params)
-      render text: "Successfully saved #{@soil.name}"
-    else
-      render text: "Unable to save #{@soil.name}: #{@soil.errors.full_messages.join(', ')}"
-    end
+    #Create a clone if we aren't the owner
+	if Soil.find(params[:id]).user.id != current_user.id
+		@soil = Soil.find(params[:id]).dup
+		@soil.user = current_user
+	else
+		@soil = Soil.find(params[:id])
+	end
+	if @soil.update(resource_params)
+	  render text: "Successfully saved #{@soil.name}"
+	else
+	  render text: "Unable to save #{@soil.name}: #{@soil.errors.full_messages.join(', ')}"
+	end
   end
 
   def destroy
-    @soil = Soil.find(params[:id])
-    @soil.destroy
+	@soil = Soil.find(params[:id])
+	@soil.destroy
   end
 
 
