@@ -18,9 +18,9 @@ ActiveRecord::Schema.define(version: 20140921221335) do
     t.string   "name",        default: "Unnamed Crop"
     t.text     "description"
     t.text     "code"
+    t.text     "workspace",   default: "<xml id=\"workspace\" style=\"display: none\"></xml>"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "workspace"
   end
 
   create_table "farms", force: true do |t|
