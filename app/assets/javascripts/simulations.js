@@ -468,10 +468,18 @@ jQuery(function() {
         if (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting') {
           offset = $('#farm-display').offset();
           game.path = [];
-          game.path.push({
-            x: x - offset.left + game.viewport.x,
-            y: y - offset.top + game.viewport.y
-          });
+		  
+		  var myX = x - offset.left + game.viewport.x;
+		  var myY = y - offset.top + game.viewport.y;
+		  //if (myX > game.width) myX = game.width;
+		  //if (myY > game.height) myY = game.height;
+		   
+		  //if (myX <= game.width && myY <= game.height) {
+			  game.path.push({
+				x: myX,
+				y: myY
+			  });
+		  //}
           return game.tracking = true;
         }
       };
@@ -616,14 +624,18 @@ jQuery(function() {
             game.combine.y += speed * Math.sin(game.combine.angle);
           }
       }
-      if (game.viewport.target.x < game.viewport.width / 2) {
+	  if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
+		game.viewport.x = 0;
+      } else if (game.viewport.target.x < game.viewport.width / 2) {
         game.viewport.x = 0;
       } else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
         game.viewport.x = game.width - game.viewport.width;
       } else {
         game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
       }
-      if (game.viewport.target.y < game.viewport.height / 2) {
+	  if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
+		return game.viewport.y = 0;
+      } else if (game.viewport.target.y < game.viewport.height / 2) {
         return game.viewport.y = 0;
       } else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
         return game.viewport.y = game.height - game.viewport.height;
@@ -834,6 +846,13 @@ jQuery(function() {
     run = $('#simulation-run');
     pause = $('#simulation-pause');
     restart = $('#simulation-restart');
+	
+	// Hide these buttons until run is clicked
+	pause.hide();
+	restart.hide();
+	
+	// Add an option to skip ahead a month?
+	
     step = function() {
       console.log('step');
       simulation.worker.postMessage({
@@ -845,15 +864,31 @@ jQuery(function() {
     run.on('click', function() {
       console.log('before step');
       simulation.interval = setInterval(step, 100);
+	  
+		// Hide the run button
+		run.hide();
+		// Show these buttons when run is clicked
+		pause.show();
+		restart.show();
+	  
       return simulation.paused = false;
     });
     pause.on('click', function() {
       clearInterval(simulation.interval);
+		//alert("paused");
+		
+		run.show(); // Show the run button
+		pause.hide(); // Hide the pause button
+		
       return simulation.paused = true;
     });
     return restart.on('click', function() {
       clearInterval(simulation.interval);
       simulation.paused = true;
+	  
+		run.show(); // Show the run button
+		pause.hide(); // Hide the pause button
+	  
       return simulation.worker.postMessage({
         type: 'init'
       });
