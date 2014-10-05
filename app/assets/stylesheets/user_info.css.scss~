@@ -1,15 +1,8 @@
-// Place all the styles related to the log in page here.
+// Place all the styles related to user information here
+// This includes but is not limited to sign in, sign up, forgot password, etc.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-.signin
-{
-	display: block;
-	width: 100%;
-	text-align: left;
-	margin: 0px 0px 10px 0px;
-	font-size: 35px;
-}
 .information
 {
 	padding: 19px 19px 19px 19px;

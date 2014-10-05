@@ -2,8 +2,6 @@
 
 <h1>Sign up</h1>
 
-<div class="infoHolder">
-
 <div class="information">
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
 	<%= devise_error_messages! %>
@@ -34,7 +32,6 @@
 	</div>
 <% end %>
 </div>
-
-</div>
+<br />
 
 <%= render "devise/shared/links" %>

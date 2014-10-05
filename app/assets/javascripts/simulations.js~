@@ -385,8 +385,6 @@ jQuery(function() {
       }
       return _results;
     };
-
-    //the object to hold our combine (tiller)
     game.combine = {
       x: 0,
       y: 0,
@@ -394,20 +392,14 @@ jQuery(function() {
       active: false,
       image: new Image()
     };
-    //the image for our combine
     game.combine.image.src = "/images/combine.png";
-	
-    //the object to hold our tractor
     game.tractor = {
       x: 0,
       y: 0,
       angle: 0,
       image: new Image()
     };
-    //the image for our tractor
     game.tractor.image.src = "/images/tractor.png";
-	
-    //the object to hold our plow
     game.plow = {
       x: 0,
       y: 0,
@@ -416,12 +408,8 @@ jQuery(function() {
       image: new Image(),
       stamp: new Image()
     };
-    //the image for our plow
     game.plow.image.src = "/images/plow.png";
-    //the image for the trail left from the plow (tilled dirt)
     game.plow.stamp.src = "/images/plow_trail.png";
-	
-    //the object for our drill
     game.drill = {
       x: 0,
       y: 0,
@@ -431,12 +419,9 @@ jQuery(function() {
       stamp: new Image(),
       seed: new Image()
     };
-    //the images for our drill, trail from the drill, and seed for the drill
     game.drill.image.src = "/images/drill.png";
     game.drill.stamp.src = "/images/drill_trail.png";
     game.drill.seed.src = "/images/drill_seed.png";
-	
-    //the object for our weather
     game.weather = {
       rain: {
         image: new Image()
@@ -448,16 +433,12 @@ jQuery(function() {
         image: new Image()
       }
     };
-    //the images for the weather
     game.weather.rain.image.src = "/images/rain.png";
     game.weather.snow.image.src = "/images/snow.png";
     game.weather.snow_cover.image.src = "/images/snow_cover.png";
-	
-    //the object for our crop (an array of images)
     game.crop = {
       image: []
     };
-    //the images for our crops
     game.crop.image[1] = new Image();
     game.crop.image[1].src = "/images/crop_1.png";
     game.crop.image[2] = new Image();
@@ -468,8 +449,6 @@ jQuery(function() {
     game.crop.image[4].src = "/images/crop_4.png";
     game.crop.image[5] = new Image();
     game.crop.image[5].src = "/images/crop_5.png";
-
-
     initializeGame = function() {
       var inputDown, inputMove, inputUp, touchEvents, touchHandler;
       game.width = simulation.size.width * simulation.size.granularity;
