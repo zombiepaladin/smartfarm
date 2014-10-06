@@ -982,16 +982,27 @@ jQuery(function() {
 	// Add an option to skip ahead a month?
 	
     step = function() {
-      console.log('step');
-      simulation.worker.postMessage({
-        type: 'tick'
-      });
-      updateGame();
-      return renderGame();
+		if (simulation.paused != true) // !!!
+		{
+			console.log('step');
+			simulation.worker.postMessage({
+				type: 'tick'
+			});
+			updateGame();
+		}
+		return renderGame();
     };
+	
+	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation itself.
+	simulation.paused = true;
+	simulation.interval = setInterval(step, 100);
+	
     run.on('click', function() {
       console.log('before step');
-      simulation.interval = setInterval(step, 100);
+		if (!simulation.interval) // !!!
+		{
+			simulation.interval = setInterval(step, 100);
+		}
 	  
 		// Hide the run button
 		run.hide();
@@ -1002,8 +1013,7 @@ jQuery(function() {
       return simulation.paused = false;
     });
     pause.on('click', function() {
-      clearInterval(simulation.interval);
-		//alert("paused");
+		//clearInterval(simulation.interval); // !!!
 		
 		run.show(); // Show the run button
 		pause.hide(); // Hide the pause button
@@ -1011,7 +1021,7 @@ jQuery(function() {
       return simulation.paused = true;
     });
     return restart.on('click', function() {
-      clearInterval(simulation.interval);
+      //clearInterval(simulation.interval); // !!!
       simulation.paused = true;
 	  
 		// Remove the old canvas element before adding the new one.
