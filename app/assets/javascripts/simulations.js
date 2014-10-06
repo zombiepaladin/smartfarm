@@ -564,19 +564,17 @@ jQuery(function() {
         var offset;
         if (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting') {
           offset = $('#farm-display').offset();
-          game.path = [];
+          //game.path = []; // erases old path when you start a new one.
 		  
-		  var myX = x - offset.left + game.viewport.x;
-		  var myY = y - offset.top + game.viewport.y;
-		  //if (myX > game.width) myX = game.width;
-		  //if (myY > game.height) myY = game.height;
-		   
-		  //if (myX <= game.width && myY <= game.height) {
+			var myX = x - offset.left + game.viewport.x;
+			var myY = y - offset.top + game.viewport.y;
+			if (myX <= game.width && myY <= game.height) {
 			  game.path.push({
 				x: myX,
 				y: myY
 			  });
-		  //}
+
+			}
           return game.tracking = true;
         }
       };
@@ -584,20 +582,32 @@ jQuery(function() {
         var offset;
         if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
           offset = $('#farm-display').offset();
-          return game.path.push({
-            x: x - offset.left + game.viewport.x,
-            y: y - offset.top + game.viewport.y
-          });
+			
+			var myX = x - offset.left + game.viewport.x;
+			var myY = y - offset.top + game.viewport.y;
+
+			if (myX <= game.width && myY <= game.height) {
+				game.path.push({
+					x: myX,
+					y: myY
+				});
+			}
         }
       };
       inputUp = function(x, y) {
         var offset;
         if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
           offset = $('#farm-display').offset();
-          game.path.push({
-            x: x - offset.left + game.viewport.x,
-            y: y - offset.top + game.viewport.y
-          });
+         
+			var myX = x - offset.left + game.viewport.x;
+			var myY = y - offset.top + game.viewport.y;
+
+			if (myX <= game.width && myY <= game.height) {
+				game.path.push({
+					x: myX,
+					y: myY
+				});
+			}
           return game.tracking = false;
         }
       };
@@ -852,8 +862,27 @@ jQuery(function() {
       }
       return console.log("Grow", patchX, patchY, category, amount);
     };
+	
+	$('#clear-game-path').on('click', function() {
+      return game.path = [];
+    });
+	
+	function displayCurrentButtonSelected() {
+		$('#manual-till').removeClass('simulation-button-selected');
+		$('#manual-plant').removeClass('simulation-button-selected');
+		$('#manual-harvest').removeClass('simulation-button-selected');
+	
+		if (game.state == 'tilling')
+			$('#manual-till').addClass('simulation-button-selected');
+		else if (game.state == 'planting')	
+			$('#manual-plant').addClass('simulation-button-selected');
+		else if (game.state == 'harvesting')	
+			$('#manual-harvest').addClass('simulation-button-selected');
+	}
+	
     $('#manual-till').on('click', function() {
       game.state = 'tilling';
+	  displayCurrentButtonSelected();
       game.viewport.target = game.tractor;
       return game.path = [];
     });
@@ -883,6 +912,7 @@ jQuery(function() {
         crop_id = $('input[name="crop_id"]').val();
         if (crop_id !== -1) {
           game.state = 'planting';
+		  displayCurrentButtonSelected();
           game.viewport.target = game.tractor;
           return game.path = [];
         }
@@ -930,6 +960,7 @@ jQuery(function() {
     });
     $('#manual-harvest').on('click', function() {
       game.state = 'harvesting';
+	  displayCurrentButtonSelected();
       return game.viewport.target = game.combine;
     });
     $('#field-select-map polygon').on('click', function() {
@@ -983,6 +1014,8 @@ jQuery(function() {
       clearInterval(simulation.interval);
       simulation.paused = true;
 	  
+		// Remove the old canvas element before adding the new one.
+		$('#farm-display').html('');
 		run.show(); // Show the run button
 		pause.hide(); // Hide the pause button
 	  

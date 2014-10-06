@@ -91,4 +91,26 @@
   stroke: green;
   fill: green;
 }
-  
+
+.simulation-box-wrapper, .simulation-buttons-wrapper
+{
+	display: inline-block;
+	width: 800px;
+}
+.simulation-buttons-wrapper
+{
+	width: 170px;
+}
+.simulation-button
+{
+	margin-bottom: 5px;
+	display: inline-block;
+	width: 100%;
+}
+
+.simulation-button-selected
+{
+	background-color: green;
+	color: white;
+	font-weight: bold;
+}
