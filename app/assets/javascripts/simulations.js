@@ -47,33 +47,42 @@ jQuery(function() {
     //adds and removes farms between #seleced-farm
     //and #unselected-farms on click
     $('.farm a').on('click', function(event) {
-      var selected;
-      event.preventDefault();
-      $('#selected-farm').children().detach().appendTo("#unselected-farms");
-      selected = $(this).parent().detach().appendTo('#selected-farm');
-      $('#simulation_farm_id').val(selected.data('id'));
+      if ($(this).parent().hasClass('thumbnail'))
+      {
+        var selected;
+        event.preventDefault();
+        $('#selected-farm').children().detach().appendTo("#unselected-farms");
+        selected = $(this).parent().detach().appendTo('#selected-farm');
+        $('#simulation_farm_id').val(selected.data('id'));
+      }
       return false;
     });
 
     //adds and removes weather patterns between #selected-weather
     //and #unselected-weather on click
     $('.weather a').on('click', function(event) {
-      var selected;
-      event.preventDefault();
-      $('#selected-weather').children().detach().appendTo("#unselected-weater"); //weather? typo?
-      selected = $(this).parent().detach().appendTo('#selected-weather');
-      $('#simulation_weather_id').val(selected.data('id'));
+      if ($(this).parent().hasClass('thumbnail'))
+      {
+        var selected;
+        event.preventDefault();
+        $('#selected-weather').children().detach().appendTo("#unselected-weater"); //weather? typo?
+        selected = $(this).parent().detach().appendTo('#selected-weather');
+        $('#simulation_weather_id').val(selected.data('id'));
+      }
       return false;
     });
 
     //adds and removes soil models between #selected-soil
     //and #unselected-soils on click
     $('.soil a').on('click', function(event) {
-      var selected;
-      event.preventDefault();
-      $('#selected-soil').children().detach().appendTo("#unselected-soils");
-      selected = $(this).parent().detach().appendTo('#selected-soil');
-      $('#simulation_soil_id').val(selected.data('id'));
+      if ($(this).parent().hasClass('thumbnail'))
+      {
+        var selected;
+        event.preventDefault();
+        $('#selected-soil').children().detach().appendTo("#unselected-soils");
+        selected = $(this).parent().detach().appendTo('#selected-soil');
+        $('#simulation_soil_id').val(selected.data('id'));
+      }
       return false;
     });
 

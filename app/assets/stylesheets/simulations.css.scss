@@ -106,11 +106,33 @@
 	margin-bottom: 5px;
 	display: inline-block;
 	width: 100%;
+	background-color: #f5f5f5;
+	border: 1px solid #e3e3e3;
+	border-radius: 4px;
 }
 
 .simulation-button-selected
 {
-	background-color: green;
-	color: white;
-	font-weight: bold;
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
 }
+#simulation-clock
+{
+	font-size: 25px;
+}
+#simulation-clock, #simulation-run, #simulation-pause, #simulation-restart
+{
+	margin-top: 10px;
+}
+#clear-game-path
+{
+	margin-bottom: 20px;
+}
+.button-group-label
+{
+	font-size: 15px;
+	text-align: center;
+	margin-bottom: 10px;
+}
+	
