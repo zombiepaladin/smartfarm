@@ -991,7 +991,7 @@ jQuery(function() {
 	// Add an option to skip ahead a month?
 	
     step = function() {
-		if (simulation.paused != true) // !!!
+		if (simulation.paused != true) // !!! if paused, do not update game data.
 		{
 			console.log('step');
 			simulation.worker.postMessage({
@@ -999,7 +999,7 @@ jQuery(function() {
 			});
 			updateGame();
 		}
-		return renderGame();
+		return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
     };
 	
 	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation itself.
@@ -1008,7 +1008,7 @@ jQuery(function() {
 	
     run.on('click', function() {
       console.log('before step');
-		if (!simulation.interval) // !!!
+		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
 		{
 			simulation.interval = setInterval(step, 100);
 		}
@@ -1022,7 +1022,7 @@ jQuery(function() {
       return simulation.paused = false;
     });
     pause.on('click', function() {
-		//clearInterval(simulation.interval); // !!!
+		//clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
 		
 		run.show(); // Show the run button
 		pause.hide(); // Hide the pause button
@@ -1030,11 +1030,10 @@ jQuery(function() {
       return simulation.paused = true;
     });
     return restart.on('click', function() {
-      //clearInterval(simulation.interval); // !!!
+      //clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
       simulation.paused = true;
 	  
-		// Remove the old canvas element before adding the new one.
-		$('#farm-display').html('');
+		$('#farm-display').html(''); // Remove the old canvas element before adding the new one.
 		run.show(); // Show the run button
 		pause.hide(); // Hide the pause button
 	  
