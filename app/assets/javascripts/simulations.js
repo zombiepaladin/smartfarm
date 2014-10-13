@@ -740,7 +740,9 @@ jQuery(function() {
             game.combine.y += speed * Math.sin(game.combine.angle);
           }
       }
-	  if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
+	  if (game.path.length <= 0) {
+		// do not auto-move the viewport when the tractor is not moving
+	  } else if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
 		game.viewport.x = 0;
       } else if (game.viewport.target.x < game.viewport.width / 2) {
         game.viewport.x = 0;
@@ -749,7 +751,9 @@ jQuery(function() {
       } else {
         game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
       }
-	  if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
+	  if (game.path.length <= 0) {
+		// do not auto-move the viewport when the tractor is not moving
+	  } else if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
 		return game.viewport.y = 0;
       } else if (game.viewport.target.y < game.viewport.height / 2) {
         return game.viewport.y = 0;
@@ -1005,6 +1009,158 @@ jQuery(function() {
 	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation itself.
 	simulation.paused = true;
 	simulation.interval = setInterval(step, 100);
+	
+	
+	
+	
+	//window.onload = function(){
+	//================================
+	// PAN VIEWPORT:
+	var panmenu = $('#simulation-pan-arrow-menu');
+	var panviewportup = $('#simulation-pan-up');
+	var panviewportdown = $('#simulation-pan-down');
+	var panviewportleft = $('#simulation-pan-left');
+	var panviewportright = $('#simulation-pan-right');
+	var panviewportcenter = $('#simulation-pan-center');
+	var movementIncrement = 10;
+	
+	/*
+	panviewportup.on('click', function() {
+		if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
+	});
+	panviewportdown.on('click', function() {
+		if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
+	});
+	panviewportleft.on('click', function() {
+		if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
+	});
+	panviewportright.on('click', function() {
+		if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+	});
+	*/
+	
+	// Will continually pan viewport while arrow button is held down
+	var intervalId;
+	var intervalDelayStartId; // delay before starting loop so users can "tap" the movement arrows and move the viewport only one increment
+	panviewportup.mousedown(function() {
+		if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
+		intervalDelayStartId = setTimeout(function(){
+			intervalId = setInterval(function(){
+				if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
+			}, 100);
+		}, 500);
+	}).mouseup(function() {
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	});
+	panviewportdown.mousedown(function() {
+		if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
+		intervalDelayStartId = setTimeout(function(){
+			intervalId = setInterval(function(){
+				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
+			}, 100);
+		}, 500);
+	}).mouseup(function() {
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	});
+	panviewportleft.mousedown(function() {
+		if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
+		intervalDelayStartId = setTimeout(function(){
+			intervalId = setInterval(function(){
+				if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
+			}, 100);
+		}, 500);
+	}).mouseup(function() {
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	});
+	panviewportright.mousedown(function() {
+		if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+		intervalDelayStartId = setTimeout(function(){
+			intervalId = setInterval(function(){
+				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+			}, 100);
+		}, 500);
+	}).mouseup(function() {
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	}).mouseout(function() { // Cleanup in case user moves mouse OFF the button before they let go of the mouse
+		clearInterval(intervalId);
+		clearTimeout(intervalDelayStartId);
+	});
+	
+	// Center viewport on tractor's current location (find tractor)
+	panviewportcenter.on('click', function() {
+	  if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
+		game.viewport.x = 0;
+      } else if (game.viewport.target.x < game.viewport.width / 2) {
+        game.viewport.x = 0;
+      } else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
+        game.viewport.x = game.width - game.viewport.width;
+      } else {
+        game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
+      }
+	  if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
+		return game.viewport.y = 0;
+      } else if (game.viewport.target.y < game.viewport.height / 2) {
+        return game.viewport.y = 0;
+      } else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
+        return game.viewport.y = game.height - game.viewport.height;
+      } else {
+        return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
+      }
+	});
+	
+	
+	
+	// Hide viewport pan options that are not needed to see the full width and height of this game.
+	setTimeout(function(){
+		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
+		{
+			panmenu.hide();
+		}
+		else
+		{
+			panmenu.show();
+			panmenu.css('display', 'block');
+			
+			if (game.width <= game.viewport.width)
+			{
+				panviewportright.hide();
+				panviewportleft.hide();
+			}
+			else
+			{
+				panviewportright.show();
+				panviewportleft.show();
+			}
+			if (game.height <= game.viewport.height)
+			{
+				panviewportup.hide();
+				panviewportdown.hide();
+			}
+			else
+			{
+				panviewportup.show();
+				panviewportdown.show();
+			}
+		}
+	}, 2000);
+	//================================
+	//}, 2000);
+	
+	
+	
 	
     run.on('click', function() {
       console.log('before step');
