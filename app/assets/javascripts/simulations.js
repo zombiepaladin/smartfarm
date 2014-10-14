@@ -1,3 +1,5 @@
+var panViewportToFollowTractor = true;
+
 var clampAngle, steerAngle, wrapAngle;
 
 //gets the angle between -2pi and +2pi
@@ -569,6 +571,11 @@ jQuery(function() {
         me.preventDefault();
         return false;
       });
+	  $('#farm-display').on('mouseout', function(me) { // prevent errors
+        inputUp(me.pageX, me.pageY);
+        me.preventDefault();
+        return false;
+      });
       inputDown = function(x, y) {
         var offset;
         if (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting') {
@@ -635,7 +642,69 @@ jQuery(function() {
         return renderGame();
       });
       game.ctx.front.drawImage(game.buffers.terrain, 0, 0);
-      return $('#farm #farm-display').append(game.buffers.front);
+      
+	  
+	  
+	  
+	  
+		//============== PAN VIEWPORT CONTROLS (begin) ==============
+		// Show/Hide pan menu on page
+		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
+		{
+			panmenu.hide();
+		}
+		else
+		{
+			panmenu.show();
+			panmenu.css('display', 'block');
+			
+			if (game.width <= game.viewport.width)
+			{
+				panviewportright.hide();
+				panviewportleft.hide();
+			}
+			else
+			{
+				panviewportright.show();
+				panviewportleft.show();
+			}
+			if (game.height <= game.viewport.height)
+			{
+				panviewportup.hide();
+				panviewportdown.hide();
+			}
+			else
+			{
+				panviewportup.show();
+				panviewportdown.show();
+			}
+		}
+		
+		// Arrow key controls
+		$(document).keydown(function(e) { // '#farm-display canvas'
+			var code = e.keyCode;
+			//console.log(code);
+			switch(code) {
+			case 37:
+				e.preventDefault();
+				panViewportMovement("left"); break;
+			case 38:
+				e.preventDefault();
+				panViewportMovement("up"); break;
+			case 39:
+				e.preventDefault();
+				panViewportMovement("right"); break;
+			case 40:
+				e.preventDefault();
+				panViewportMovement("down"); break;
+			default:
+				break;
+			}
+		});
+		//============== PAN VIEWPORT CONTROLS (end) ==============
+	  
+	  
+		return $('#farm #farm-display').append(game.buffers.front);
     };
     updateGame = function() {
       var distance, dx, dy, speed, x, y;
@@ -740,28 +809,10 @@ jQuery(function() {
             game.combine.y += speed * Math.sin(game.combine.angle);
           }
       }
-	  if (game.path.length <= 0) {
-		// do not auto-move the viewport when the tractor is not moving
-	  } else if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
-		game.viewport.x = 0;
-      } else if (game.viewport.target.x < game.viewport.width / 2) {
-        game.viewport.x = 0;
-      } else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
-        game.viewport.x = game.width - game.viewport.width;
-      } else {
-        game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
-      }
-	  if (game.path.length <= 0) {
-		// do not auto-move the viewport when the tractor is not moving
-	  } else if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
-		return game.viewport.y = 0;
-      } else if (game.viewport.target.y < game.viewport.height / 2) {
-        return game.viewport.y = 0;
-      } else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
-        return game.viewport.y = game.height - game.viewport.height;
-      } else {
-        return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
-      }
+	  if (panViewportToFollowTractor && game.path.length > 0) // do not auto-move the viewport to follow the tractor if the tractor is not moving
+	  {
+		centerViewportOnTractor();
+	  }
     };
     renderGame = function() {
       var granularity, i, pattern, x, y, _i, _j, _k, _ref, _ref1, _ref2;
@@ -1003,7 +1054,8 @@ jQuery(function() {
 			});
 			updateGame();
 		}
-		return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		if (game && game.ctx && game.ctx.back) // !!!
+			return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
     };
 	
 	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation itself.
@@ -1013,9 +1065,7 @@ jQuery(function() {
 	
 	
 	
-	//window.onload = function(){
-	//================================
-	// PAN VIEWPORT:
+	//=============== PAN VIEWPORT FUNCTIONS (begin) =================
 	var panmenu = $('#simulation-pan-arrow-menu');
 	var panviewportup = $('#simulation-pan-up');
 	var panviewportdown = $('#simulation-pan-down');
@@ -1024,83 +1074,45 @@ jQuery(function() {
 	var panviewportcenter = $('#simulation-pan-center');
 	var movementIncrement = 10;
 	
+	
+	// Stop viewport from auto-following tractor for a bit
+	var pausePanTrackingTimer;
+	function pausePanTracking()
+	{
+		if (!simulation.paused)
+		{
+			// Stop viewport from auto-following tractor for a bit
+			panViewportToFollowTractor = false;
+			clearInterval(pausePanTrackingTimer);
+			pausePanTrackingTimer = setTimeout(function(){
+				panViewportToFollowTractor = true;
+			}, 6000);
+		}
+	}
+	
+	// Stop viewport from auto-following tractor for a bit if user is clicking something on the page (drawing a path, panning the viewport, etc)
+	$("#farm-display").on('mousedown', function() {
+		if (!simulation.paused) panViewportToFollowTractor = false;
+	}).on('mouseup', function() {
+		pausePanTracking();
+	}).on('mouseout', function() {
+		pausePanTracking();
+	});
+	
 	/*
-	panviewportup.on('click', function() {
-		if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
-	});
-	panviewportdown.on('click', function() {
-		if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
-	});
-	panviewportleft.on('click', function() {
-		if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
-	});
-	panviewportright.on('click', function() {
-		if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+	var pausePanTrackerMouseIsDown = false;
+	$(document).on('mousedown', function() {
+		pausePanTrackerMouseIsDown = true;
+		pausePanTracking();
+	}).on('mousemove', function() {
+		if (pausePanTrackerMouseIsDown) pausePanTracking();
+	}).on('mouseup', function() {
+		pausePanTrackerMouseIsDown = false;
 	});
 	*/
 	
-	// Will continually pan viewport while arrow button is held down
-	var intervalId;
-	var intervalDelayStartId; // delay before starting loop so users can "tap" the movement arrows and move the viewport only one increment
-	panviewportup.mousedown(function() {
-		if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
-		intervalDelayStartId = setTimeout(function(){
-			intervalId = setInterval(function(){
-				if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
-			}, 100);
-		}, 500);
-	}).mouseup(function() {
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	});
-	panviewportdown.mousedown(function() {
-		if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
-		intervalDelayStartId = setTimeout(function(){
-			intervalId = setInterval(function(){
-				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
-			}, 100);
-		}, 500);
-	}).mouseup(function() {
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	});
-	panviewportleft.mousedown(function() {
-		if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
-		intervalDelayStartId = setTimeout(function(){
-			intervalId = setInterval(function(){
-				if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
-			}, 100);
-		}, 500);
-	}).mouseup(function() {
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	});
-	panviewportright.mousedown(function() {
-		if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
-		intervalDelayStartId = setTimeout(function(){
-			intervalId = setInterval(function(){
-				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
-			}, 100);
-		}, 500);
-	}).mouseup(function() {
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	}).mouseout(function() { // Cleanup in case user moves mouse OFF the button before they let go of the mouse
-		clearInterval(intervalId);
-		clearTimeout(intervalDelayStartId);
-	});
-	
-	// Center viewport on tractor's current location (find tractor)
-	panviewportcenter.on('click', function() {
+	// Center viewport pan on tractor
+	function centerViewportOnTractor() {
 	  if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
 		game.viewport.x = 0;
       } else if (game.viewport.target.x < game.viewport.width / 2) {
@@ -1119,45 +1131,83 @@ jQuery(function() {
       } else {
         return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
       }
+	}
+	
+	// Pan viewport in a direction.
+	function panViewportMovement(pandirection)
+	{
+		pausePanTracking();
+	
+		switch (pandirection) {
+			case "up":
+				if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
+				break;
+			case "down":
+				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
+				break;
+			case "left":
+				if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
+				break;
+			case "right":
+				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+				break;
+			default:
+				centerViewportOnTractor();
+				break;
+		}
+	}
+	
+	// Register a button to pan the viewport while clicked
+	var intervalId; // Will continually pan viewport while arrow button is held down
+	var intervalDelayStartId; // delay before starting loop so users can "tap" the movement arrows and move the viewport only one increment
+	// Takes a button element and one of these strings as arguments: "up", "down", "left", "right"
+	function addPanViewportControl(pancontrolbutton, pandirection)
+	{
+		pancontrolbutton.mousedown(function() {
+			panViewportMovement(pandirection);
+			intervalDelayStartId = setTimeout(function(){
+				intervalId = setInterval(function(){
+					panViewportMovement(pandirection);
+				}, 100);
+			}, 500);
+		}).mouseup(function() {
+			clearInterval(intervalId);
+			clearTimeout(intervalDelayStartId);
+		}).mouseout(function() {  // Cleanup in case user moves mouse OFF the button before they let go of the mouse
+			clearInterval(intervalId);
+			clearTimeout(intervalDelayStartId);
+		});
+	}
+	
+	// Register controls to pan the viewport
+	addPanViewportControl(panviewportup, "up");
+	addPanViewportControl(panviewportdown, "down");
+	addPanViewportControl(panviewportleft, "left");
+	addPanViewportControl(panviewportright, "right");
+	addPanViewportControl(panviewportcenter, "center");
+	
+	
+	
+	/*
+	// Stop viewport auto-follow for a bit if user is doing something in the viewport
+	$('#farm-display').mousedown(function() {
+		panViewportToFollowTractor = false;
+		clearInterval(pausePanTrackingTimer);
+	}).mouseup(function() {
+		clearInterval(pausePanTrackingTimer);
+		pausePanTrackingTimer = setTimeout(function(){
+			panViewportToFollowTractor = true;
+			//alert("true");
+		}, 6000);
+	}).mouseout(function() { // Cleanup in case user moves mouse OFF the page before they let go of the mouse
+		clearInterval(pausePanTrackingTimer);
+		pausePanTrackingTimer = setTimeout(function(){
+			panViewportToFollowTractor = true;
+			alert("true");
+		}, 6000);
 	});
-	
-	
-	
-	// Hide viewport pan options that are not needed to see the full width and height of this game.
-	setTimeout(function(){
-		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
-		{
-			panmenu.hide();
-		}
-		else
-		{
-			panmenu.show();
-			panmenu.css('display', 'block');
-			
-			if (game.width <= game.viewport.width)
-			{
-				panviewportright.hide();
-				panviewportleft.hide();
-			}
-			else
-			{
-				panviewportright.show();
-				panviewportleft.show();
-			}
-			if (game.height <= game.viewport.height)
-			{
-				panviewportup.hide();
-				panviewportdown.hide();
-			}
-			else
-			{
-				panviewportup.show();
-				panviewportdown.show();
-			}
-		}
-	}, 2000);
-	//================================
-	//}, 2000);
+	*/
+	//=============== PAN VIEWPORT FUNCTIONS (end) =================
 	
 	
 	
