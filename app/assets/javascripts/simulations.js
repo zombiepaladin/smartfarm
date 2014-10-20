@@ -1,4 +1,6 @@
+// Global variables/settings
 var panViewportToFollowTractor = true;
+var canvasDimensions = [800, 600];
 
 var clampAngle, steerAngle, wrapAngle;
 
@@ -501,7 +503,8 @@ if ($('#simulation-controls').length > 0) {
       game.width = simulation.size.width * simulation.size.granularity;
       game.height = simulation.size.height * simulation.size.granularity;
       game.buffers = {
-        front: $("<canvas width=800 height=600>")[0],
+        front: $("<canvas width=" + canvasDimensions[0] + " height=" + canvasDimensions[1] + ">")[0],
+		//front: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
         back: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
         terrain: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
         vegitation: $("<canvas width=" + game.width + " height=" + game.height + ">")[0]
@@ -519,8 +522,8 @@ if ($('#simulation-controls').length > 0) {
       game.viewport = {
         x: 0,
         y: 0,
-        width: 800,
-        height: 600,
+        width: canvasDimensions[0],
+        height: canvasDimensions[1],
         radius: 500,
         target: game.hq
       };
@@ -667,6 +670,8 @@ if ($('#simulation-controls').length > 0) {
 		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
 		{
 			panmenu.hide();
+			$('#simulation-expand-viewport-button').hide();
+			$('#simulation-shrink-viewport-button').hide();
 		}
 		else
 		{
@@ -1178,18 +1183,24 @@ if ($('#simulation-controls').length > 0) {
 	{
 		pausePanTracking();
 	
+		//console.log("x: " + game.viewport.x + " y: " + game.viewport.y);
+	
 		switch (pandirection) {
 			case "up":
 				if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
+				else game.viewport.y = 0;
 				break;
 			case "down":
 				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
+				else game.viewport.y = game.height - game.viewport.height;
 				break;
 			case "left":
 				if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
+				else game.viewport.x = 0;
 				break;
 			case "right":
 				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
+				else game.viewport.x = game.width - game.viewport.width;
 				break;
 			default:
 				centerViewportOnTractor();
@@ -1250,6 +1261,25 @@ if ($('#simulation-controls').length > 0) {
 //============================ PAN VIEWPORT FUNCTIONS (end) =====================================
 	
 	
+	//=============== EXPAND VIEWPORT (begin) =================
+	$('#simulation-expand-viewport-button').on('click', function(event) {
+		panmenu.hide();
+		$('#simulation-expand-viewport-button').hide();
+		$('#simulation-shrink-viewport-button').show();
+		game.viewport.x = 0;
+		game.viewport.y = 0;
+		game.buffers.front.width = game.width;
+		game.buffers.front.height = game.height;
+	});
+	
+	$('#simulation-shrink-viewport-button').on('click', function(event) {
+		panmenu.show();
+		$('#simulation-expand-viewport-button').show();
+		$('#simulation-shrink-viewport-button').hide();
+		game.buffers.front.width = canvasDimensions[0];
+		game.buffers.front.height = canvasDimensions[1];
+	});
+	//=============== EXPAND VIEWPORT (end) =================
 	
 	
     run.on('click', function() {
