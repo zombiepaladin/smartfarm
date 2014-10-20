@@ -1158,7 +1158,7 @@ if ($('#simulation-controls').length > 0) {
 	
 	// Center viewport pan on tractor
 	function centerViewportOnTractor() {
-	  if (game.width <= game.viewport.width) { // Do not pan if simulation size is smaller than the canvas screen size.
+	  if (game.width <= game.viewport.width) { // || game.width <= game.buffers.front.width // Do not pan if simulation size is smaller than the canvas screen size.
 		game.viewport.x = 0;
       } else if (game.viewport.target.x < game.viewport.width / 2) {
         game.viewport.x = 0;
@@ -1268,6 +1268,8 @@ if ($('#simulation-controls').length > 0) {
 		$('#simulation-shrink-viewport-button').show();
 		game.viewport.x = 0;
 		game.viewport.y = 0;
+		game.viewport.width = game.width;
+		game.viewport.height = game.height;
 		game.buffers.front.width = game.width;
 		game.buffers.front.height = game.height;
 	});
@@ -1276,8 +1278,10 @@ if ($('#simulation-controls').length > 0) {
 		panmenu.show();
 		$('#simulation-expand-viewport-button').show();
 		$('#simulation-shrink-viewport-button').hide();
-		game.buffers.front.width = canvasDimensions[0];
-		game.buffers.front.height = canvasDimensions[1];
+		game.viewport.width = canvasDimensions[0];
+		game.viewport.height = canvasDimensions[1];
+		game.buffers.front.width = game.viewport.width;
+		game.buffers.front.height = game.viewport.height;
 	});
 	//=============== EXPAND VIEWPORT (end) =================
 	

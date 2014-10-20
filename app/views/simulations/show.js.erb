@@ -335,15 +335,15 @@ function updateWeather() {
 // Update the soil
 //-----------------------------------------------------
 function updateSoil() {
-	for(x = 0; x < simulation.width; x++) {
-		for(y = 0; y < simulation.height; y++) {
-			index = x + simulation.width * y;
-			<%= @simulation.soil.code.html_safe %>
-		}
-	}
-	<% for property in Soil::PROPERTIES %>
-		postMessage({type: 'soil_data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
-	<% end %>
+  for(x = 0; x < simulation.width; x++) {
+    for(y = 0; y < simulation.height; y++) {
+      index = x + simulation.width * y;
+      <%= @simulation.soil.code.html_safe %>
+    }
+  }
+<% for property in Soil::PROPERTIES %>
+  postMessage({type: 'soil_data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
+<% end %>
 }
 
 // Update the crops
