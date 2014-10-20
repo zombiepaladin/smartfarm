@@ -302,58 +302,57 @@ if ($('#simulation-controls').length > 0) {
       });
     };
 
-	//puts the month abbreviation in the #calendar-month div
-	updateTime = function(time) {
-		var simtime;
-		simtime = new Date(time);
-		switch (simtime.getMonth()) {
-			case 1:
-				$('#calendar-month').html('Jan');
-				break;
-			case 2:
-				$('#calendar-month').html('Feb');
-				break;
-			case 3:
-				$('#calendar-month').html('Mar');
-				break;
-			case 4:
-				$('#calendar-month').html('Apr');
-				break;
-			case 5:
-				$('#calendar-month').html('May');
-				break;
-			case 6:
-				$('#calendar-month').html('Jun');
-				break;
-			case 7:
-				$('#calendar-month').html('Jul');
-				break;
-			case 8:
-				$('#calendar-month').html('Aug');
-				break;
-			case 9:
-				$('#calendar-month').html('Sep');
-				break;
-			case 10:
-				$('#calendar-month').html('Oct');
-				break;
-			case 11:
-				$('#calendar-month').html('Nov');
-				break;
-			case 12:
-				$('#calendar-month').html('Dec');
-				break;
-		}
+    //puts the month abbreviation in the #calendar-month div
+    updateTime = function(time) {
+      var simtime;
+      simtime = new Date(time);
+      switch (simtime.getMonth()) {
+        case 1:
+          $('#calendar-month').html('Jan');
+          break;
+        case 2:
+          $('#calendar-month').html('Feb');
+          break;
+        case 3:
+          $('#calendar-month').html('Mar');
+          break;
+        case 4:
+          $('#calendar-month').html('Apr');
+          break;
+        case 5:
+          $('#calendar-month').html('May');
+          break;
+        case 6:
+          $('#calendar-month').html('Jun');
+          break;
+        case 7:
+          $('#calendar-month').html('Jul');
+          break;
+        case 8:
+          $('#calendar-month').html('Aug');
+          break;
+        case 9:
+          $('#calendar-month').html('Sep');
+          break;
+        case 10:
+          $('#calendar-month').html('Oct');
+          break;
+        case 11:
+          $('#calendar-month').html('Nov');
+          break;
+        case 12:
+          $('#calendar-month').html('Dec');
+      }
 
-		//update the calendar to show the numberic date and the simulation clock to show the time
-		$('#calendar-day').html(simtime.getDate());
-		return $('#simulation-clock').html(simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2));
-	};
+      //update the calendar to show the numberic date and the simulation clock to show the time
+      $('#calendar-day').html(simtime.getDate());
+      return $('#simulation-clock').html(simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2));
+    };
 
-	//set the weather within the simulation object
-	updateWeather = function(weather) {
-		return simulation.weather = weather;
-	};
+    //set the weather within the simulation object
+    updateWeather = function(weather) {
+      return simulation.weather = weather;
+    };
 
 	//colors the soil with the RGB values from the layerColors dictionary
 	updateSoilDataLayer = function(name, data) {
