@@ -1,7 +1,6 @@
 // Global variables/settings
 var panViewportToFollowTractor = true;
 var canvasDimensions = [800, 600];
-
 var clampAngle, steerAngle, wrapAngle;
 
 //gets the angle between -2pi and +2pi
@@ -37,85 +36,85 @@ steerAngle = function(desired, current, speed) {
 };
 
 jQuery(function() {
-  var game, growCrop, initializeCropDataLayers, initializeDataLayers, initializeGame, layerColors, pause, renderGame, restart, run, saveButton, simulation, step, updateCropDataLayer, updateGame, updateSize, updateSoilDataLayer, updateTime, updateWeather;
+	var game, growCrop, initializeCropDataLayers, initializeDataLayers, initializeGame, layerColors, pause, renderGame, restart, run, saveButton, simulation, step, updateCropDataLayer, updateGame, updateSize, updateSoilDataLayer, updateTime, updateWeather;
   
-  //if we have necessary items (farm, weather, soil) to perform simulation
-  if ($('#simulation-form').size() > 0) {
-    
-    //add a farm to #selected-farms
-    $(".farm [data-id='" + ($('#simulation_farm_id').data('id')) + "']").detach().appendTo('#selected-farms');
-    
-    //add a weather pattern to #selected-weather
-    $(".weather [data-id='" + ($('#simulation_weather_id').data('id')) + "']").appendTo('#selected-weather');
-	
-    //adds and removes farms between #selected-farm
-    //and #unselected-farms on click
-    $('.farm a').on('click', function(event) {
-      if ($(this).parent().hasClass('thumbnail'))
-      {
-        var selected;
-        event.preventDefault();
-        $('#selected-farm').children().detach().appendTo("#unselected-farms");
-        selected = $(this).parent().detach().appendTo('#selected-farm');
-        $('#simulation_farm_id').val(selected.data('id'));
-      }
-      return false;
-    });
+	//if we have necessary items (farm, weather, soil) to perform simulation
+	if ($('#simulation-form').size() > 0) {
 
-    //adds and removes weather patterns between #selected-weather
-    //and #unselected-weather on click
-    $('.weather a').on('click', function(event) {
-      if ($(this).parent().hasClass('thumbnail'))
-      {
-        var selected;
-        event.preventDefault();
-        $('#selected-weather').children().detach().appendTo("#unselected-weater"); //weather? typo?
-        selected = $(this).parent().detach().appendTo('#selected-weather');
-        $('#simulation_weather_id').val(selected.data('id'));
-      }
-      return false;
-    });
+		//add a farm to #selected-farms
+		$(".farm [data-id='" + ($('#simulation_farm_id').data('id')) + "']").detach().appendTo('#selected-farms');
 
-    //adds and removes soil models between #selected-soil
-    //and #unselected-soils on click
-    $('.soil a').on('click', function(event) {
-      if ($(this).parent().hasClass('thumbnail'))
-      {
-        var selected;
-        event.preventDefault();
-        $('#selected-soil').children().detach().appendTo("#unselected-soils");
-        selected = $(this).parent().detach().appendTo('#selected-soil');
-        $('#simulation_soil_id').val(selected.data('id'));
-      }
-      return false;
-    });
+		//add a weather pattern to #selected-weather
+		$(".weather [data-id='" + ($('#simulation_weather_id').data('id')) + "']").appendTo('#selected-weather');
 
-    //these buttons will remove/delete the farm, weather pattern, or soil model
-    $('.farm .btn').remove();
-    $('.weather .btn').remove();
-    $('.soil .btn').remove();
+		//adds and removes farms between #selected-farm
+		//and #unselected-farms on click
+		$('.farm a').on('click', function(event) {
+			if ($(this).parent().hasClass('thumbnail'))
+			{
+				var selected;
+				event.preventDefault();
+				$('#selected-farm').children().detach().appendTo("#unselected-farms");
+				selected = $(this).parent().detach().appendTo('#selected-farm');
+				$('#simulation_farm_id').val(selected.data('id'));
+			}
+			return false;
+		});
 
-    //saves the selected weather pattern and farm into the simulation object
-    //do we need the soil models?
-    saveButton = $('button#save');
-    saveButton.on('click', function(event) {
-      var simulation;
-      simulation = {};
-      simulation.farm = {
-        id: $('#simulation_farm_id').val()
-      };
-      simulation.weather = {
-        id: $('#simulation_weather_id').val()
-      };
-      simulation.soil = {
-        id: $('#simulation_soil_id').val()
-      };
+		//adds and removes weather patterns between #selected-weather
+		//and #unselected-weather on click
+		$('.weather a').on('click', function(event) {
+			if ($(this).parent().hasClass('thumbnail'))
+			{
+				var selected;
+				event.preventDefault();
+				$('#selected-weather').children().detach().appendTo("#unselected-weater"); //weather? typo?
+				selected = $(this).parent().detach().appendTo('#selected-weather');
+				$('#simulation_weather_id').val(selected.data('id'));
+			}
+			return false;
+		});
 
-      //set the simulation_state to have the simulation farm and weather
-      $('#simulation_state').val(JSON.stringify(simulation));
-      return console.log(simulation);
-    });
-  }
+		//adds and removes soil models between #selected-soil
+		//and #unselected-soils on click
+		$('.soil a').on('click', function(event) {
+			if ($(this).parent().hasClass('thumbnail'))
+			{
+				var selected;
+				event.preventDefault();
+				$('#selected-soil').children().detach().appendTo("#unselected-soils");
+				selected = $(this).parent().detach().appendTo('#selected-soil');
+				$('#simulation_soil_id').val(selected.data('id'));
+			}
+			return false;
+		});
+
+		//these buttons will remove/delete the farm, weather pattern, or soil model
+		$('.farm .btn').remove();
+		$('.weather .btn').remove();
+		$('.soil .btn').remove();
+
+		//saves the selected weather pattern and farm into the simulation object
+		//do we need the soil models?
+		saveButton = $('button#save');
+		saveButton.on('click', function(event) {
+			var simulation;
+			simulation = {};
+			simulation.farm = {
+				id: $('#simulation_farm_id').val()
+			};
+			simulation.weather = {
+				id: $('#simulation_weather_id').val()
+			};
+			simulation.soil = {
+				id: $('#simulation_soil_id').val()
+			};
+
+			//set the simulation_state to have the simulation farm and weather
+			$('#simulation_state').val(JSON.stringify(simulation));
+			return console.log(simulation);
+		});
+	}
 
 //this if statement goes to the end of the script
 //simulation-controls is the calendar, clock, run, pause, reset buttons
@@ -226,83 +225,82 @@ if ($('#simulation-controls').length > 0) {
 	updateSize = function(size) {
 		simulation.size = size;
 		initializeGame(size);
-		return initializeDataLayers(size);
+		initializeDataLayers(size);
 	};
 
-    //initializes the data within the soil and crop objects
-    initializeDataLayers = function(size) {
-      var attributes, cropDataLayers, ctx, fields, soilDataLayers, soilLayerCheckboxes;
-      soilDataLayers = $('#soil-data-layers');
-      fields = $("<canvas id='fields' class='layer' width=" + (size.width * 50) + " height=" + (size.height * 50) + ">");
+	//initializes the data within the soil and crop objects
+	initializeDataLayers = function(size) {
+		var attributes, cropDataLayers, ctx, fields, soilDataLayers, soilLayerCheckboxes;
+		soilDataLayers = $('#soil-data-layers');
+		fields = $("<canvas id='fields' class='layer' width=" + (size.width * 50) + " height=" + (size.height * 50) + ">");
 
-      //ctx contains the properties and methods to draw on the canvas
-      ctx = fields[0].getContext('2d');
-      console.log(simulation.size);
+		//ctx contains the properties and methods to draw on the canvas
+		ctx = fields[0].getContext('2d');
+		console.log(simulation.size);
 
-      //draws the path on each field
-      simulation.size.fields.forEach(function(field) {
-        ctx.beginPath();
-        field.bounds.forEach(function(corner) {
-          return ctx.lineTo(corner.x * 50, corner.y * 50);
-        });
-        ctx.closePath();
-        return ctx.stroke();
-      });
-      //add the fields to the soilDataLayers
-      soilDataLayers.append(fields);
-      soilLayerCheckboxes = $('#soil-data-layer-checkboxes');
-      attributes = ["snow_cover", "water_content", "wilting_point", "percolation_travel_time", "porosity", "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen", "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus", "flat_residue_carbon", "humus_carbon"];
+		//draws the path on each field
+		simulation.size.fields.forEach(function(field) {
+			ctx.beginPath();
+			field.bounds.forEach(function(corner) {
+				return ctx.lineTo(corner.x * 50, corner.y * 50);
+			});
+			ctx.closePath();
+			return ctx.stroke();
+		});
+		//add the fields to the soilDataLayers
+		soilDataLayers.append(fields);
+		soilLayerCheckboxes = $('#soil-data-layer-checkboxes');
+		attributes = ["snow_cover", "water_content", "wilting_point", "percolation_travel_time", "porosity", "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen", "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus", "flat_residue_carbon", "humus_carbon"];
 
-      //add each of the weather attributes as a checkbox within the Legend
-      attributes.forEach(function(name) {
-        var layer;
-        layer = $("<canvas id='" + name + "' class='layer' width=" + size.width + " height=" + size.height + " style='display: none;'></canvas>");
-        simulation.soilLayerContexts[name] = layer[0].getContext('2d');
-        soilDataLayers.prepend(layer);
-        return soilLayerCheckboxes.append("<div class='checkbox'><label for='cb_" + name + "'><input name='" + name + "' id='cb_" + name + "' type='checkbox'>" + (name.replace('_', ' ').replace('_', ' ')) + "</label></div>");
-      });
+		//add each of the weather attributes as a checkbox within the Legend
+		attributes.forEach(function(name) {
+			var layer;
+			layer = $("<canvas id='" + name + "' class='layer' width=" + size.width + " height=" + size.height + " style='display: none;'></canvas>");
+			simulation.soilLayerContexts[name] = layer[0].getContext('2d');
+			soilDataLayers.prepend(layer);
+			return soilLayerCheckboxes.append("<div class='checkbox'><label for='cb_" + name + "'><input name='" + name + "' id='cb_" + name + "' type='checkbox'>" + (name.replace('_', ' ').replace('_', ' ')) + "</label></div>");
+		});
 
-      //toggles the checkbox options
-      $('#soil-data-layer-checkboxes input').on('change', function(event) {
-        return $('#' + $(this).attr('name')).toggle();
-      });
+		//toggles the checkbox options
+		$('#soil-data-layer-checkboxes input').on('change', function(event) {
+			return $('#' + $(this).attr('name')).toggle();
+		});
 
+		cropDataLayers = $('#crop-data-layers');
+		fields = $("<canvas id='fields' class='layer' width=" + (size.width * 50) + " height=" + (size.height * 50) + ">");
+		ctx = fields[0].getContext('2d');
 
-      cropDataLayers = $('#crop-data-layers');
-      fields = $("<canvas id='fields' class='layer' width=" + (size.width * 50) + " height=" + (size.height * 50) + ">");
-      ctx = fields[0].getContext('2d');
+		//draw on the cropDataLayers
+		simulation.size.fields.forEach(function(field) {
+			ctx.beginPath();
+			field.bounds.forEach(function(corner) {
+				return ctx.lineTo(corner.x * 50, corner.y * 50);
+			});
+			ctx.closePath();
+			return ctx.stroke();
+		});
+		return cropDataLayers.append(fields);
+	};
 
-      //draw on the cropDataLayers
-      simulation.size.fields.forEach(function(field) {
-        ctx.beginPath();
-        field.bounds.forEach(function(corner) {
-          return ctx.lineTo(corner.x * 50, corner.y * 50);
-        });
-        ctx.closePath();
-        return ctx.stroke();
-      });
-      return cropDataLayers.append(fields);
-    };
-
-    //initialize the crop layers in the simulation object
-    initializeCropDataLayers = function(id, name) {
-      var attributes, cropDataLayers, cropLayerCheckboxes;
-      simulation.cropLayerContexts[id] = {};
-      cropDataLayers = $('#crop-data-layers');
-      cropLayerCheckboxes = $('#crop-data-layer-checkboxes');
-      cropLayerCheckboxes.append("<h5>" + name + "</h5>");
-      attributes = ["root_biomass", "stem_biomass", "leaf_biomass", "storage_organ_biomass", "reproductive_organ_biomass", "standing_residue_biomass"];
-      attributes.forEach(function(name) {
-        var layer;
-        layer = $("<canvas id='" + id + "_" + name + "' class='layer' width=" + simulation.size.width + " height=" + simulation.size.height + " style='display: none;'></canvas>");
-        simulation.cropLayerContexts[id][name] = layer[0].getContext('2d');
-        cropDataLayers.prepend(layer);
-        return cropLayerCheckboxes.append("<div class='checkbox'><label for='cb_" + id + "_" + name + "'><input name='" + id + "_" + name + "' id='cb_" + id + "_" + name + "' type='checkbox'>" + (name.replace('_', ' ').replace('_', ' ')) + "</label></div>");
-      });
-      return $('#crop-data-layer-checkboxes input').on('change', function(event) {
-        return $('#' + $(this).attr('name')).toggle();
-      });
-    };
+	//initialize the crop layers in the simulation object
+	initializeCropDataLayers = function(id, name) {
+		var attributes, cropDataLayers, cropLayerCheckboxes;
+		simulation.cropLayerContexts[id] = {};
+		cropDataLayers = $('#crop-data-layers');
+		cropLayerCheckboxes = $('#crop-data-layer-checkboxes');
+		cropLayerCheckboxes.append("<h5>" + name + "</h5>");
+		attributes = ["root_biomass", "stem_biomass", "leaf_biomass", "storage_organ_biomass", "reproductive_organ_biomass", "standing_residue_biomass"];
+		attributes.forEach(function(name) {
+			var layer;
+			layer = $("<canvas id='" + id + "_" + name + "' class='layer' width=" + simulation.size.width + " height=" + simulation.size.height + " style='display: none;'></canvas>");
+			simulation.cropLayerContexts[id][name] = layer[0].getContext('2d');
+			cropDataLayers.prepend(layer);
+			return cropLayerCheckboxes.append("<div class='checkbox'><label for='cb_" + id + "_" + name + "'><input name='" + id + "_" + name + "' id='cb_" + id + "_" + name + "' type='checkbox'>" + (name.replace('_', ' ').replace('_', ' ')) + "</label></div>");
+		});
+		return $('#crop-data-layer-checkboxes input').on('change', function(event) {
+			return $('#' + $(this).attr('name')).toggle();
+		});
+	};
 
 	//puts the month abbreviation in the #calendar-month div
 	updateTime = function(time) {
@@ -345,9 +343,12 @@ if ($('#simulation-controls').length > 0) {
 			case 12:
 				$('#calendar-month').html('Dec');
 				break;
+			default:
+				$('#calendar-month').html('Jan');
+				break;
 		}
 
-		//update the calendar to show the numberic date and the simulation clock to show the time
+		//update the calendar to show the numeric date and the simulation clock to show the time
 		$('#calendar-day').html(simtime.getDate());
 		return $('#simulation-clock').html(simtime.getHours() + ':' + ('0' + simtime.getMinutes()).slice(-2));
 	};
@@ -359,7 +360,7 @@ if ($('#simulation-controls').length > 0) {
 
 	//colors the soil with the RGB values from the layerColors dictionary
 	updateSoilDataLayer = function(name, data) {
-		var brush, brushData, offset, x, y, _i, _ref, _results;
+		var brush, brushData, offset, x, y;
 		if (name === 'snow_cover') {
 			game.weather.snow_cover.data = data;
 		}
@@ -368,50 +369,38 @@ if ($('#simulation-controls').length > 0) {
 		brushData[0] = layerColors[name][0];
 		brushData[1] = layerColors[name][1];
 		brushData[2] = layerColors[name][2];
-		_results = [];
-		for (y = _i = 0, _ref = simulation.size.height; _i < _ref; y = _i += 1) {
+		for (y = 0; y < simulation.size.height; y++)
+		{
 			offset = y * simulation.size.width;
-			_results.push((function() {
-				var _j, _ref1, _results1;
-				_results1 = [];
-				for (x = _j = 0, _ref1 = simulation.size.width; _j < _ref1; x = _j += 1) {
-					brushData[3] = data[x + offset];
-					_results1.push(simulation.soilLayerContexts[name].putImageData(brush, x, y));
-				}
-				return _results1;
-			})());
+			for (x = 0; x < simulation.size.width; x++)
+			{
+				brushData[3] = data[x + offset];
+				simulation.soilLayerContexts[name].putImageData(brush, x, y);
+			}
 		}
-		return _results;
 	};
 
 	//colors the crops with the RGB from the layerColors dictionary
 	updateCropDataLayer = function(id, name, data) {
-		var brush, brushData, offset, x, y, _i, _ref, _results;
+		var brush, brushData, offset, x, y;
 		brush = simulation.cropLayerContexts[id][name].createImageData(1, 1);
 		brushData = brush.data;
 		brushData[0] = layerColors[name][0];
 		brushData[1] = layerColors[name][1];
 		brushData[2] = layerColors[name][2];
-		_results = [];
-		for (y = _i = 0, _ref = simulation.size.height; _i < _ref; y = _i += 1) {
+		for (y = 0; y < simulation.size.height; y++)
+		{
 			offset = y * simulation.size.width;
-			_results.push((function() {
-				var _j, _ref1, _results1;
-				_results1 = [];
-				for (x = _j = 0, _ref1 = simulation.size.width; _j < _ref1; x = _j += 1) {
-					brushData[3] = data[x + offset];
-					simulation.cropLayerContexts[id][name].putImageData(brush, x, y);
-					if (data[x + offset] > 0) {
-						_results1.push(growCrop(x, y, name, data[x + offset]));
-					}
-					else {
-						_results1.push(void 0);
-					}
+			for (x = 0; x < simulation.size.width; x++)
+			{
+				brushData[3] = data[x + offset];
+				simulation.cropLayerContexts[id][name].putImageData(brush, x, y);
+				if (data[x + offset] > 0)
+				{
+					growCrop(x, y, name, data[x + offset]);
 				}
-				return _results1;
-			})());
+			}
 		}
-		return _results;
 	};
 
 	//the object to hold our combine (tiller)
@@ -422,8 +411,6 @@ if ($('#simulation-controls').length > 0) {
 		active: false,
 		image: new Image()
 	};
-	//the image for our combine
-	game.combine.image.src = "/images/combine.png";
 
 	//the object to hold our tractor
 	game.tractor = {
@@ -455,6 +442,7 @@ if ($('#simulation-controls').length > 0) {
 	};
 
 	//the image for our farm
+	game.combine.image.src = "/images/combine.png";
 	game.tractor.image.src = "/images/tractor.png";
 	game.plow.image.src = "/images/plow.png";
 	game.plow.stamp.src = "/images/plow_trail.png";
@@ -497,174 +485,196 @@ if ($('#simulation-controls').length > 0) {
 	game.crop.image[5] = new Image();
 	game.crop.image[5].src = "/images/crop_5.png";
 
-
-    initializeGame = function() {
-      var inputDown, inputMove, inputUp, touchEvents, touchHandler;
-      game.width = simulation.size.width * simulation.size.granularity;
-      game.height = simulation.size.height * simulation.size.granularity;
-      game.buffers = {
-        front: $("<canvas width=" + canvasDimensions[0] + " height=" + canvasDimensions[1] + ">")[0],
-		//front: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
-        back: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
-        terrain: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
-        vegitation: $("<canvas width=" + game.width + " height=" + game.height + ">")[0]
-      };
-      game.ctx = {
-        front: game.buffers.front.getContext('2d'),
-        back: game.buffers.back.getContext('2d'),
-        terrain: game.buffers.terrain.getContext('2d'),
-        vegitation: game.buffers.vegitation.getContext('2d')
-      };
-      game.hq = {
-        x: simulation.size.location.x * simulation.size.granularity,
-        y: simulation.size.location.y * simulation.size.granularity
-      };
-      game.viewport = {
-        x: 0,
-        y: 0,
-        width: canvasDimensions[0],
-        height: canvasDimensions[1],
-        radius: 500,
-        target: game.hq
-      };
-      game.combine.x = game.hq.x;
-      game.combine.y = game.hq.y;
-      game.tractor.x = game.hq.x;
-      game.tractor.y = game.hq.y;
-      game.plow.x = game.hq.x;
-      game.plow.y = game.hq.y;
-      game.drill.x = game.hq.x;
-      game.drill.y = game.hq.y;
-      game.ctx.terrain.fillStyle = 'tan';
-      game.ctx.terrain.fillRect(0, 0, game.width, game.height);
-      game.ctx.terrain.strokeStyle = 'yellow';
-      game.ctx.terrain.lineWidth = 5;
-      simulation.size.fields.forEach(function(field) {
-        game.ctx.terrain.beginPath();
-        field.bounds.forEach(function(corner) {
-          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-        });
-        game.ctx.terrain.closePath();
-        return game.ctx.terrain.stroke();
-      });
-      game.path = [];
-      game.tracking = false;
-      touchEvents = {};
-      touchEvents.touchMapper = {
-        "touchstart": "mousedown",
-        "touchmove": "mousemove",
-        "touchend": "mouseup"
-      };
-      touchHandler = function(event) {
-        var mappedEvent, simulatedEvent, touchPoint;
-        if (event.touches.length > 1) {
-          return;
-        }
-        touchPoint = event.changedTouches[0];
-        mappedEvent = touchMapper[event.type];
-        if (mappedEvent === null) {
-          return;
-        }
-        alert("HERE");
-        simulatedEvent = document.createEvent("MouseEvent");
-        simulatedEvent.initMouseEvent(mappedEvent, true, true, window, 1, touchPoint.screenX, touchPoint.screenY, touchPoint.clientX, touchPoint.clientY, false, false, false, false, 0, null);
-        touchPoint.target.dispatchEvent(simulatedEvent);
-        return event.preventDefault();
-      };
-      $('#farm-display')[0].ontouchstart = touchHandler;
-      $('#farm-display')[0].ontouchmove = Blockly.TouchEvents.touchHandler;
-      $('#farm-display')[0].ontouchend = Blockly.TouchEvents.touchHandler;
-      $('#farm-display').on('mousedown', function(me) {
-        inputDown(me.pageX, me.pageY);
-        me.preventDefault;
-        return false;
-      });
-      $('#farm-display').on('mousemove', function(me) {
-        inputMove(me.pageX, me.pageY);
-        me.preventDefault();
-        return false;
-      });
-      $('#farm-display').on('mouseup', function(me) {
-        inputUp(me.pageX, me.pageY);
-        me.preventDefault();
-        return false;
-      });
-	  $('#farm-display').on('mouseout', function(me) { // prevent errors
-        inputUp(me.pageX, me.pageY);
-        me.preventDefault();
-        return false;
-      });
-      inputDown = function(x, y) {
-        var offset;
-        if (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting') {
-          offset = $('#farm-display').offset();
-          //game.path = []; // erases old path when you start a new one.
-		  
-			var myX = x - offset.left + game.viewport.x;
-			var myY = y - offset.top + game.viewport.y;
-			if (myX <= game.width && myY <= game.height) {
-			  game.path.push({
-				x: myX,
-				y: myY
-			  });
-
+	//1px = 1meter
+	//vegetation is misspelled
+	initializeGame = function() {
+		var inputDown, inputMove, inputUp, touchEvents, touchHandler;
+		game.width = simulation.size.width * simulation.size.granularity;
+		game.height = simulation.size.height * simulation.size.granularity;
+		game.buffers = {
+			front: $("<canvas width=" + canvasDimensions[0] + " height=" + canvasDimensions[1] + ">")[0],
+			//front: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
+			back: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
+			terrain: $("<canvas width=" + game.width + " height=" + game.height + ">")[0],
+			vegitation: $("<canvas width=" + game.width + " height=" + game.height + ">")[0]
+		};
+		game.ctx = {
+			front: game.buffers.front.getContext('2d'),
+			back: game.buffers.back.getContext('2d'),
+			terrain: game.buffers.terrain.getContext('2d'),
+			vegitation: game.buffers.vegitation.getContext('2d')
+		};
+		game.hq = {
+			x: simulation.size.location.x * simulation.size.granularity,
+			y: simulation.size.location.y * simulation.size.granularity
+		};
+		game.viewport = {
+			x: 0,
+			y: 0,
+			width: canvasDimensions[0],
+			height: canvasDimensions[1],
+			radius: 500,
+			target: game.hq
+		};
+		game.combine.x = game.hq.x;
+		game.combine.y = game.hq.y;
+		game.tractor.x = game.hq.x;
+		game.tractor.y = game.hq.y;
+		game.plow.x = game.hq.x;
+		game.plow.y = game.hq.y;
+		game.drill.x = game.hq.x;
+		game.drill.y = game.hq.y;
+		//set the looks for the terrain
+		game.ctx.terrain.fillStyle = 'tan';
+		game.ctx.terrain.fillRect(0, 0, game.width, game.height);
+		game.ctx.terrain.strokeStyle = 'yellow';
+		game.ctx.terrain.lineWidth = 5;
+		
+		simulation.size.fields.forEach(function(field) {
+			game.ctx.terrain.beginPath();
+			field.bounds.forEach(function(corner) {
+				return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
+			});
+			game.ctx.terrain.closePath();
+			return game.ctx.terrain.stroke();
+		});
+		game.path = [];
+		game.tracking = false;
+	  
+		//translate touch events to mouse events
+		touchEvents = {};
+		touchEvents.touchMapper = {
+			"touchstart": "mousedown",
+			"touchmove": "mousemove",
+			"touchend": "mouseup"
+		};
+		touchHandler = function(event) {
+			var mappedEvent, simulatedEvent, touchPoint;
+			//return on multi-touch
+			if (event.touches.length > 1) {
+				return;
 			}
-          return game.tracking = true;
-        }
-      };
-      inputMove = function(x, y) {
-        var offset;
-        if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
-          offset = $('#farm-display').offset();
-			
-			var myX = x - offset.left + game.viewport.x;
-			var myY = y - offset.top + game.viewport.y;
+			touchPoint = event.changedTouches[0];
+			mappedEvent = touchMapper[event.type];
+			//if the touch event is something we haven't translated to a mouse event, ignore it
+			if (mappedEvent === null) {
+				return;
+			}
+			alert("HERE"); //testing successful touch translation
+			simulatedEvent = document.createEvent("MouseEvent");
+			simulatedEvent.initMouseEvent(mappedEvent, true, true, window, 1, touchPoint.screenX, touchPoint.screenY, touchPoint.clientX, touchPoint.clientY, false, false, false, false, 0, null);
+			touchPoint.target.dispatchEvent(simulatedEvent);
+			return event.preventDefault();
+		};
+		$('#farm-display')[0].ontouchstart = touchHandler;
+		$('#farm-display')[0].ontouchmove = Blockly.TouchEvents.touchHandler;
+		$('#farm-display')[0].ontouchend = Blockly.TouchEvents.touchHandler;
+	  
+		//allow the user to draw with the mouse is held down
+		$('#farm-display').on('mousedown', function(me) {
+			inputDown(me.pageX, me.pageY);
+			me.preventDefault;
+			return false;
+		});
 
-			if (myX <= game.width && myY <= game.height) {
+		//allow the user to move while drawing
+		$('#farm-display').on('mousemove', function(me) {
+			inputMove(me.pageX, me.pageY);
+			me.preventDefault();
+			return false;
+		});
+
+		//stop the user from drawing while the mouse is up
+		$('#farm-display').on('mouseup', function(me) {
+			inputUp(me.pageX, me.pageY);
+			me.preventDefault();
+			return false;
+		});
+
+		//occurs when leaving the outer perimeter of the element and
+		//occurs when leaving the inner perimeter of the element into a child element
+		$('#farm-display').on('mouseout', function(me) { // prevent errors
+			inputUp(me.pageX, me.pageY);
+			me.preventDefault();
+			return false;
+		});
+	  
+		//occurs when leaving the outer perimeter of the element only
+		$('#farm-display').on('mouseleave', function(me) {
+			if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
 				game.path.push({
-					x: myX,
-					y: myY
+				x: me.pageX - offset.left + game.viewport.x,
+				y: me.pageY - offset.top + game.viewport.y
 				});
+				game.tracking = false;
 			}
-        }
-      };
-      inputUp = function(x, y) {
-        var offset;
-        if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
-          offset = $('#farm-display').offset();
-         
-			var myX = x - offset.left + game.viewport.x;
-			var myY = y - offset.top + game.viewport.y;
+			me.preventDefault();
+			return false;
+		});
+	  
+		//if the user is tilling, planting, or harvesting
+		//add the mouse's initial x and y coordinates into the game.path array
+		//set game.tracking to true (user has begun drawing)
+		inputDown = function(x, y) {
+		var offset, myX, myY;
+			if (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting') {
+				offset = $('#farm-display').offset();
+				//game.path = []; // erases old path when you start a new one.
+				myX = x - offset.left + game.viewport.x;
+				myY = y - offset.top + game.viewport.y;
+				if (myX <= game.width && myY <= game.height) {
+					game.path.push({
+						x: myX,
+						y: myY
+					});
+				}
+				return game.tracking = true;
+			}
+		};
 
-			if (myX <= game.width && myY <= game.height) {
-				game.path.push({
-					x: myX,
-					y: myY
-				});
+		//push the mouse's coordinates into the game.path array
+		//while the mouse is held down and dragged (user is drawing)
+		inputMove = function(x, y) {
+			var offset, myX, myY;
+			if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
+				offset = $('#farm-display').offset();
+				myX = x - offset.left + game.viewport.x;
+				myY = y - offset.top + game.viewport.y;
+
+				if (myX <= game.width && myY <= game.height) {
+					game.path.push({
+						x: myX,
+						y: myY
+					});
+				}
 			}
-          return game.tracking = false;
-        }
-      };
-      $('#farm-display').on('mouseleave', function(me) {
-        if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
-          game.path.push({
-            x: me.pageX - offset.left + game.viewport.x,
-            y: me.pageY - offset.top + game.viewport.y
-          });
-          game.tracking = false;
-        }
-        me.preventDefault();
-        return false;
-      });
-      game.animation_frame = window.requestAnimationFrame(function() {
-        return renderGame();
-      });
-      game.ctx.front.drawImage(game.buffers.terrain, 0, 0);
-      
-	  
-	  
-	  
-	  
+		};
+
+		//add the ending mouse coordinates to the game.path array
+		//set game.tracking to false (user is no longer drawing)
+		inputUp = function(x, y) {
+			var offset, myX, myY;
+			if (game.tracking && (game.state === 'tilling' || game.state === 'planting' || game.state === 'harvesting')) {
+				offset = $('#farm-display').offset();
+				myX = x - offset.left + game.viewport.x;
+				myY = y - offset.top + game.viewport.y;
+
+				if (myX <= game.width && myY <= game.height) {
+					game.path.push({
+						x: myX,
+						y: myY
+					});
+				}
+				return game.tracking = false;
+			}
+		};
+
+		game.animation_frame = window.requestAnimationFrame(function() {
+			return renderGame();
+		});
+
+		game.ctx.front.drawImage(game.buffers.terrain, 0, 0);
+		
 //=============================== PAN VIEWPORT CONTROLS (begin) ==============
 		// Show/Hide pan menu on page
 		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
@@ -722,260 +732,279 @@ if ($('#simulation-controls').length > 0) {
 			}
 		});
 //================================== PAN VIEWPORT CONTROLS (end) ==============
-	  
-	  
+
 		return $('#farm #farm-display').append(game.buffers.front);
     };
 
-    updateGame = function() {
-      var distance, dx, dy, speed, x, y;
-      console.log(game.state);
-      switch (game.state) {
-        case 'tilling':
-          dy = 0;
-          dx = 0;
-          while (game.path.length > 0) {
-            dy = game.path[0].y - game.tractor.y;
-            dx = game.path[0].x - game.tractor.x;
-            distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 12) {
-              game.plow.active = true;
-              game.path.shift();
-            } else {
-              break;
-            }
-          }
-          if (game.path.length === 0) {
-            game.plow.active = false;
-          }
-          else {
-            speed = 5;
-            game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
-            game.tractor.x += speed * Math.cos(game.tractor.angle);
-            game.tractor.y += speed * Math.sin(game.tractor.angle);
-            game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
-            game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
-            game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16);
-            if (game.plow.active) {
-              game.ctx.terrain.save();
-              game.ctx.terrain.fillStyle = '#3d1f00';
-              x = game.plow.x;
-              y = game.plow.y;
-              game.ctx.terrain.translate(x, y);
-              game.ctx.terrain.rotate(game.plow.angle);
-              game.ctx.terrain.drawImage(game.plow.stamp, -22, -9);
-              game.ctx.terrain.restore();
-            }
-          }
-          break;
-        case 'planting':
-          dy = 0;
-          dx = 0;
-          while (game.path.length > 0) {
-            dy = game.path[0].y - game.tractor.y;
-            dx = game.path[0].x - game.tractor.x;
-            distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 12) {
-              game.drill.active = true;
-              game.path.shift();
-            } else {
-              break;
-            }
-          }
-          if (game.path.length === 0) {
-            game.drill.active = false;
-          } else {
-            speed = 5;
-            game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
-            game.tractor.x += speed * Math.cos(game.tractor.angle);
-            game.tractor.y += speed * Math.sin(game.tractor.angle);
-            game.drill.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
-            game.drill.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
-            game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16);
-            if (game.drill.active) {
-              game.ctx.terrain.save();
-              x = game.drill.x;
-              y = game.drill.y;
-              game.ctx.terrain.translate(x, y);
-              game.ctx.terrain.rotate(game.drill.angle);
-              game.ctx.terrain.drawImage(game.drill.stamp, -16, -9);
-              game.ctx.terrain.restore();
-              game.ctx.vegitation.save();
-              game.ctx.vegitation.translate(x, y);
-              game.ctx.vegitation.rotate(game.drill.angle);
-              game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
-              game.ctx.vegitation.restore();
-            }
-          }
-          break;
-        case 'harvesting':
-          dy = 0;
-          dx = 0;
-          while (game.path.length > 0) {
-            dy = game.path[0].y - game.combine.y;
-            dx = game.path[0].x - game.combine.x;
-            distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 12) {
-              game.combine.active = true;
-              game.path.shift();
-            } else {
-              break;
-            }
-          }
-          if (game.path.length === 0) {
-            game.combine.active = false;
-          } else {
-            speed = 5;
-            game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
-            game.combine.x += speed * Math.cos(game.combine.angle);
-            game.combine.y += speed * Math.sin(game.combine.angle);
-          }
-      }
-	  if (panViewportToFollowTractor && game.path.length > 0) // do not auto-move the viewport to follow the tractor if the tractor is not moving
-	  {
-		centerViewportOnTractor();
-	  }
+	updateGame = function() {
+		var distance, dx, dy, speed, x, y;
+		console.log(game.state);
+		switch (game.state) {
+			case 'tilling':
+				dy = 0;
+				dx = 0;
+				while (game.path.length > 0) {
+					dy = game.path[0].y - game.tractor.y;
+					dx = game.path[0].x - game.tractor.x;
+					distance = Math.sqrt(dx * dx + dy * dy);
+					if (distance < 12) {
+						game.plow.active = true;
+						game.path.shift();
+					}
+					else {
+						break; //break while loop;
+					}
+				}
+				if (game.path.length === 0) {
+					game.plow.active = false;
+				}
+				else {
+					speed = 5;
+					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
+					game.tractor.x += speed * Math.cos(game.tractor.angle);
+					game.tractor.y += speed * Math.sin(game.tractor.angle);
+					game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
+					game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
+					game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16);
+					if (game.plow.active) {
+						game.ctx.terrain.save();
+						game.ctx.terrain.fillStyle = '#3d1f00';
+						x = game.plow.x;
+						y = game.plow.y;
+						game.ctx.terrain.translate(x, y);
+						game.ctx.terrain.rotate(game.plow.angle);
+						game.ctx.terrain.drawImage(game.plow.stamp, -22, -9);
+						game.ctx.terrain.restore();
+					}
+				}
+				break;
+				
+			case 'planting':
+				dy = 0;
+				dx = 0;
+				while (game.path.length > 0) {
+					dy = game.path[0].y - game.tractor.y;
+					dx = game.path[0].x - game.tractor.x;
+					distance = Math.sqrt(dx * dx + dy * dy);
+					if (distance < 12) {
+						  game.drill.active = true;
+						  game.path.shift();
+					}
+					else {
+						break;
+					}
+				}
+				if (game.path.length === 0) {
+					game.drill.active = false;
+				}
+				else {
+					speed = 5;
+					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
+					game.tractor.x += speed * Math.cos(game.tractor.angle);
+					game.tractor.y += speed * Math.sin(game.tractor.angle);
+					game.drill.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
+					game.drill.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
+					game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16);
+					if (game.drill.active) {
+						game.ctx.terrain.save();
+						x = game.drill.x;
+						y = game.drill.y;
+						game.ctx.terrain.translate(x, y);
+						game.ctx.terrain.rotate(game.drill.angle);
+						game.ctx.terrain.drawImage(game.drill.stamp, -16, -9);
+						game.ctx.terrain.restore();
+						game.ctx.vegitation.save();
+						game.ctx.vegitation.translate(x, y);
+						game.ctx.vegitation.rotate(game.drill.angle);
+						game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
+						game.ctx.vegitation.restore();
+					}
+				}
+				break;
+				
+			case 'harvesting':
+				dy = 0;
+				dx = 0;
+				while (game.path.length > 0) {
+					dy = game.path[0].y - game.combine.y;
+					dx = game.path[0].x - game.combine.x;
+					distance = Math.sqrt(dx * dx + dy * dy);
+					if (distance < 12) {
+						game.combine.active = true;
+						game.path.shift();
+					}
+					else {
+						break;
+					}
+				}
+				if (game.path.length === 0) {
+					game.combine.active = false;
+				}
+				else {
+					speed = 5;
+					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
+					game.combine.x += speed * Math.cos(game.combine.angle);
+					game.combine.y += speed * Math.sin(game.combine.angle);
+				}
+			} //end switch
+			
+			//do not move the viewport to follow the tractor if the tractor is not moving
+			if (panViewportToFollowTractor && game.path.length > 0)
+			{
+				centerViewportOnTractor();
+			}
     };
 
 	//renders the changes to the terrain
 	renderGame = function() {
-	var granularity, i, pattern, x, y, _i, _j, _k, _ref, _ref1, _ref2;
+		var granularity, i, pattern, x, y, _i, _j, _k, _ref, _ref1, _ref2;
 
-	//copy terrain to back buffer (effectively clearing back buffer)
-	game.ctx.back.drawImage(game.buffers.terrain, 0, 0);
+		//copy terrain to back buffer (effectively clearing back buffer)
+		game.ctx.back.drawImage(game.buffers.terrain, 0, 0);
 
-	//render combine
-	game.ctx.back.save();      
-	game.ctx.back.translate(game.combine.x, game.combine.y);
-	game.ctx.back.rotate(game.combine.angle);
-	game.ctx.back.drawImage(game.combine.image, -6, -9);
-	game.ctx.back.restore();
-
-	//render plow
-	game.ctx.back.save();
-	game.ctx.back.translate(game.plow.x, game.plow.y);
-	game.ctx.back.rotate(game.plow.angle);
-	game.ctx.back.drawImage(game.plow.image, -17, -9);
-	game.ctx.back.restore();
-
-	//render drill
-	game.ctx.back.save();
-	game.ctx.back.translate(game.drill.x, game.drill.y);
-	game.ctx.back.rotate(game.drill.angle);
-	game.ctx.back.drawImage(game.drill.image, -13, -9);
-	game.ctx.back.restore();
-
-	//render tractor
-	game.ctx.back.save();
-	game.ctx.back.translate(game.tractor.x, game.tractor.y);
-	game.ctx.back.rotate(game.tractor.angle);
-	game.ctx.back.drawImage(game.tractor.image, -5, -5);
-	game.ctx.back.restore();
-
-	//render precipitation
-	if (simulation.weather.rainfall > 0) {
-		game.ctx.back.save();
-		pattern = game.ctx.back.createPattern(game.weather.rain.image, 'repeat');
-		game.ctx.back.fillStyle = pattern;
-		game.ctx.back.translate(game.viewport.x + game.viewport.width / 2, game.viewport.y + game.viewport.height / 2);
-		game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925);
-		game.ctx.back.translate(0, Date.now() % 30);
-		game.ctx.back.fillRect(-game.viewport.radius - 30, -game.viewport.radius - 30, 2 * game.viewport.radius + 30, 2 * game.viewport.radius + 30);
+		//render combine
+		game.ctx.back.save();      
+		game.ctx.back.translate(game.combine.x, game.combine.y);
+		game.ctx.back.rotate(game.combine.angle);
+		game.ctx.back.drawImage(game.combine.image, -6, -9);
 		game.ctx.back.restore();
-	}
 
-	//render snow cover
-	if (simulation.weather.snowfall > 0) {
+		//render plow
 		game.ctx.back.save();
-		pattern = game.ctx.back.createPattern(game.weather.snow.image, 'repeat');
-		game.ctx.back.fillStyle = pattern;
-		game.ctx.back.translate(game.viewport.x + game.viewport.width / 2, game.viewport.y + game.viewport.height / 2);
-		game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925);
-		game.ctx.back.translate(0, Date.now() % 30);
-		game.ctx.back.fillRect(-game.viewport.radius - 30, -game.viewport.radius - 30, 2 * game.viewport.radius + 30, 2 * game.viewport.radius + 30);
+		game.ctx.back.translate(game.plow.x, game.plow.y);
+		game.ctx.back.rotate(game.plow.angle);
+		game.ctx.back.drawImage(game.plow.image, -17, -9);
 		game.ctx.back.restore();
-	}
 
-	//render snow cover
-	if (game.weather.snow_cover.data) {
+		//render drill
 		game.ctx.back.save();
-		pattern = game.ctx.back.createPattern(game.weather.snow_cover.image, 'repeat');
-		game.ctx.back.fillStyle = pattern;
-		granularity = simulation.size.granularity;
-		for (x = _i = 0, _ref = simulation.size.width; _i < _ref; x = _i += 1) {
-			for (y = _j = 0, _ref1 = simulation.size.height; _j < _ref1; y = _j += 1) {
-				for (i = _k = 0, _ref2 = Math.min(5, Math.ceil(game.weather.snow_cover.data[x + y * simulation.size.width] / 5)); _k < _ref2; i = _k += 1) {
-					game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
+		game.ctx.back.translate(game.drill.x, game.drill.y);
+		game.ctx.back.rotate(game.drill.angle);
+		game.ctx.back.drawImage(game.drill.image, -13, -9);
+		game.ctx.back.restore();
+
+		//render tractor
+		game.ctx.back.save();
+		game.ctx.back.translate(game.tractor.x, game.tractor.y);
+		game.ctx.back.rotate(game.tractor.angle);
+		game.ctx.back.drawImage(game.tractor.image, -5, -5);
+		game.ctx.back.restore();
+
+		//render precipitation
+		if (simulation.weather.rainfall > 0) {
+			game.ctx.back.save();
+			pattern = game.ctx.back.createPattern(game.weather.rain.image, 'repeat');
+			game.ctx.back.fillStyle = pattern;
+			game.ctx.back.translate(game.viewport.x + game.viewport.width / 2, game.viewport.y + game.viewport.height / 2);
+			game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925);
+			game.ctx.back.translate(0, Date.now() % 30);
+			game.ctx.back.fillRect(-game.viewport.radius - 30, -game.viewport.radius - 30, 2 * game.viewport.radius + 30, 2 * game.viewport.radius + 30);
+			game.ctx.back.restore();
+		}
+
+		//render snow cover
+		if (simulation.weather.snowfall > 0) {
+			game.ctx.back.save();
+			pattern = game.ctx.back.createPattern(game.weather.snow.image, 'repeat');
+			game.ctx.back.fillStyle = pattern;
+			game.ctx.back.translate(game.viewport.x + game.viewport.width / 2, game.viewport.y + game.viewport.height / 2);
+			game.ctx.back.rotate(simulation.weather.wind_direction * 0.0174543925);
+			game.ctx.back.translate(0, Date.now() % 30);
+			game.ctx.back.fillRect(-game.viewport.radius - 30, -game.viewport.radius - 30, 2 * game.viewport.radius + 30, 2 * game.viewport.radius + 30);
+			game.ctx.back.restore();
+		}
+
+		//render snow cover
+		if (game.weather.snow_cover.data) {
+			game.ctx.back.save();
+			pattern = game.ctx.back.createPattern(game.weather.snow_cover.image, 'repeat');
+			game.ctx.back.fillStyle = pattern;
+			granularity = simulation.size.granularity;
+			for (x=0; x <simulation.size.width; x++)
+			{
+				for (y = 0; y < simulation.size.height; y++)
+				{
+					for (i = 0; i < Math.min(5, Math.ceil(game.weather.snow_cover.data[x + y * simulation.size.width] / 5)); i++)
+					{
+						game.ctx.back.fillRect(x * granularity, y * granularity, granularity, granularity);
+					}
 				}
 			}
+			game.ctx.back.restore();
 		}
+
+		//render crops
+		game.ctx.back.drawImage(game.buffers.vegitation, 0, 0);
+
+		//render equipment path
+		game.ctx.back.save();
+		game.ctx.back.strokeStyle = 'red';
+		game.ctx.back.beginPath();
+
+		if (game.path.length > 0) {
+			game.ctx.back.moveTo(game.path[0].x, game.path[0].y);
+		}
+		//draws the line from point to point
+		game.path.forEach(function(point) {
+			return game.ctx.back.lineTo(point.x, point.y);
+		});
+		game.ctx.back.stroke();
 		game.ctx.back.restore();
-	}
+		return game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y);
+	};
 
-	//render crops
-	game.ctx.back.drawImage(game.buffers.vegitation, 0, 0);
-
-	//render equipment path
-	game.ctx.back.save();
-	game.ctx.back.strokeStyle = 'red';
-	game.ctx.back.beginPath();
-
-	if (game.path.length > 0) {
-		game.ctx.back.moveTo(game.path[0].x, game.path[0].y);
-	}
-	game.path.forEach(function(point) {
-		return game.ctx.back.lineTo(point.x, point.y);
-	});
-	game.ctx.back.stroke();
-	game.ctx.back.restore();
-	return game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y);
-};
-    growCrop = function(patchX, patchY, category, amount) {
-      var granularity, offsetX, offsetY, pattern;
-      granularity = simulation.size.granularity;
-      offsetX = patchX * granularity;
-      offsetY = patchY * granularity;
-      if (category === 'leaf_biomass' || category === 'stem_biomass') {
-        if (amount > 800) {
-          pattern = game.ctx.vegitation.createPattern(game.crop.image[5], 'repeat');
-          game.ctx.vegitation.save();
-          game.ctx.vegitation.fillStyle = pattern;
-          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
-          game.ctx.vegitation.restore();
-        } else if (amount > 400) {
-          pattern = game.ctx.vegitation.createPattern(game.crop.image[4], 'repeat');
-          game.ctx.vegitation.save();
-          game.ctx.vegitation.fillStyle = pattern;
-          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
-          game.ctx.vegitation.restore();
-        } else if (amount > 200) {
-          pattern = game.ctx.vegitation.createPattern(game.crop.image[3], 'repeat');
-          game.ctx.vegitation.save();
-          game.ctx.vegitation.fillStyle = pattern;
-          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
-          game.ctx.vegitation.restore();
-        } else if (amount > 100) {
-          pattern = game.ctx.vegitation.createPattern(game.crop.image[2], 'repeat');
-          game.ctx.vegitation.save();
-          game.ctx.vegitation.fillStyle = pattern;
-          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
-          game.ctx.vegitation.restore();
-        } else if (amount > 50) {
-          pattern = game.ctx.vegitation.createPattern(game.crop.image[1], 'repeat');
-          game.ctx.vegitation.save();
-          game.ctx.vegitation.fillStyle = pattern;
-          game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
-          game.ctx.vegitation.restore();
-          console.log("using pattern 1");
-        }
-      }
-      return console.log("Grow", patchX, patchY, category, amount);
-    };
+	growCrop = function(patchX, patchY, category, amount) {
+		var granularity, offsetX, offsetY, pattern;
+		granularity = simulation.size.granularity;
+		offsetX = patchX * granularity;
+		offsetY = patchY * granularity;
+		if (category === 'leaf_biomass' || category === 'stem_biomass') {
+			if (amount > 800) {
+				pattern = game.ctx.vegitation.createPattern(game.crop.image[5], 'repeat');
+				game.ctx.vegitation.save();
+				game.ctx.vegitation.fillStyle = pattern;
+				game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
+				game.ctx.vegitation.restore();
+			}
+			else if (amount > 400) {
+				pattern = game.ctx.vegitation.createPattern(game.crop.image[4], 'repeat');
+				game.ctx.vegitation.save();
+				game.ctx.vegitation.fillStyle = pattern;
+				game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
+				game.ctx.vegitation.restore();
+			}
+			else if (amount > 200) {
+				pattern = game.ctx.vegitation.createPattern(game.crop.image[3], 'repeat');
+				game.ctx.vegitation.save();
+				game.ctx.vegitation.fillStyle = pattern;
+				game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
+				game.ctx.vegitation.restore();
+			}
+			else if (amount > 100) {
+				pattern = game.ctx.vegitation.createPattern(game.crop.image[2], 'repeat');
+				game.ctx.vegitation.save();
+				game.ctx.vegitation.fillStyle = pattern;
+				game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
+				game.ctx.vegitation.restore();
+			}
+			else if (amount > 50) {
+				pattern = game.ctx.vegitation.createPattern(game.crop.image[1], 'repeat');
+				game.ctx.vegitation.save();
+				game.ctx.vegitation.fillStyle = pattern;
+				game.ctx.vegitation.fillRect(offsetX, offsetY, granularity, granularity);
+				game.ctx.vegitation.restore();
+				console.log("using pattern 1");
+			}
+		}
+		return console.log("Grow", patchX, patchY, category, amount);
+	};
 	
+	//remove x and y coordinates from game.path
 	$('#clear-game-path').on('click', function() {
-      return game.path = [];
-    });
+		game.path = [];
+	});
 	
+	//add a class to a button
 	function displayCurrentButtonSelected() {
 		$('#manual-till').removeClass('simulation-button-selected');
 		$('#manual-plant').removeClass('simulation-button-selected');
@@ -989,97 +1018,110 @@ if ($('#simulation-controls').length > 0) {
 			$('#manual-harvest').addClass('simulation-button-selected');
 	}
 	
-    $('#manual-till').on('click', function() {
-      game.state = 'tilling';
-	  displayCurrentButtonSelected();
-      game.viewport.target = game.tractor;
-      return game.path = [];
-    });
-    $('#auto-till').on('click', function() {
-      return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
-        var field_id, pattern;
-        field_id = $('input[name="field_id"]:checked').val();
-        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
-        game.ctx.terrain.save();
-        game.ctx.terrain.fillStyle = pattern;
-        game.ctx.terrain.beginPath();
-        simulation.size.fields[field_id].bounds.forEach(function(corner) {
-          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-        });
-        game.ctx.terrain.closePath();
-        game.ctx.terrain.fill();
-        game.ctx.terrain.restore();
-        return simulation.postMessage({
-          type: 'till',
-          field: field_id
-        });
-      });
-    });
-    $('#manual-plant').on('click', function() {
-      return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
-        var crop_id;
-        crop_id = $('input[name="crop_id"]').val();
-        if (crop_id !== -1) {
-          game.state = 'planting';
-		  displayCurrentButtonSelected();
-          game.viewport.target = game.tractor;
-          return game.path = [];
-        }
-      });
-    });
-    $('#auto-plant').on('click', function() {
-      return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
-        var crop_id;
-        crop_id = $('input[name="crop_id"]').val();
-        if (crop_id !== -1) {
-          return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
-            var field_id, pattern;
-            field_id = $('input[name="field_id"]:checked').val();
-            if (field_id !== -1) {
-              pattern = game.ctx.terrain.createPattern(game.drill.stamp, 'repeat');
-              game.ctx.terrain.save();
-              game.ctx.terrain.fillStyle = pattern;
-              game.ctx.terrain.beginPath();
-              simulation.size.fields[field_id].bounds.forEach(function(corner) {
-                return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-              });
-              game.ctx.terrain.closePath();
-              game.ctx.terrain.fill();
-              game.ctx.terrain.restore();
-              return simulation.worker.postMessage({
-                type: 'plant',
-                crop: crop_id,
-                field: field_id
-              });
-            }
-          });
-        }
-      });
-    });
-    $('#crop-select-modal-cancel').on('click', function() {
-      return $('input[name="crop_id"]').val(-1);
-    });
-    $('#crops a').on('click', function(event) {
-      var crop_id;
-      event.preventDefault();
-      crop_id = $(this).parent().data('id');
-      $('input[name="crop_id"]').val(crop_id);
-      $('#crop-select-modal').modal('hide');
-      return false;
-    });
-    $('#manual-harvest').on('click', function() {
-      game.state = 'harvesting';
-	  displayCurrentButtonSelected();
-      return game.viewport.target = game.combine;
-    });
-    $('#field-select-map polygon').on('click', function() {
-      var boxes, index;
-      index = $(this).data('field-index');
-      boxes = $("input[name=field_id]");
-      boxes.prop('checked', false).parent().removeClass("active");
-      console.log(index);
-      return boxes.filter("[value=" + index + "]").prop('checked', true).parent().addClass("active");
-    });
+	//allows a user to manually till a field
+	$('#manual-till').on('click', function() {
+		game.state = 'tilling';
+		displayCurrentButtonSelected();
+		game.viewport.target = game.tractor;
+		return game.path = [];
+	});
+	
+	//allows a field to be automatically tilled
+	$('#auto-till').on('click', function() {
+		return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var field_id, pattern;
+			field_id = $('input[name="field_id"]:checked').val();
+			pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
+			game.ctx.terrain.save();
+			game.ctx.terrain.fillStyle = pattern;
+			game.ctx.terrain.beginPath();
+			simulation.size.fields[field_id].bounds.forEach(function(corner) {
+				return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
+			});
+			game.ctx.terrain.closePath();
+			game.ctx.terrain.fill();
+			game.ctx.terrain.restore();
+			return simulation.postMessage({
+				type: 'till',
+				field: field_id
+			});
+		});
+	});
+	
+	//allows a user to begin manually planting a field
+	$('#manual-plant').on('click', function() {
+		return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
+			var crop_id;
+			crop_id = $('input[name="crop_id"]').val();
+			if (crop_id !== -1) {
+				game.state = 'planting';
+				displayCurrentButtonSelected();
+				game.viewport.target = game.tractor;
+				return game.path = [];
+			}
+		});
+	});
+	
+	//allows a user to automatically plant a crop in a field
+	$('#auto-plant').on('click', function() {
+		return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
+			var crop_id;
+			crop_id = $('input[name="crop_id"]').val();
+			if (crop_id !== -1) {
+			return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
+				var field_id, pattern;
+				field_id = $('input[name="field_id"]:checked').val();
+				if (field_id !== -1) {
+					pattern = game.ctx.terrain.createPattern(game.drill.stamp, 'repeat');
+					game.ctx.terrain.save();
+					game.ctx.terrain.fillStyle = pattern;
+					game.ctx.terrain.beginPath();
+					simulation.size.fields[field_id].bounds.forEach(function(corner) {
+						return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
+					});
+					game.ctx.terrain.closePath();
+					game.ctx.terrain.fill();
+					game.ctx.terrain.restore();
+					return simulation.worker.postMessage({
+					type: 'plant',
+					crop: crop_id,
+					field: field_id
+					});
+				}
+			});
+			}
+		});
+	});
+	
+	//return -1 if the user does not select a field
+	$('#crop-select-modal-cancel').on('click', function() {
+		return $('input[name="crop_id"]').val(-1);
+	});
+
+	$('#crops a').on('click', function(event) {
+		var crop_id;
+		event.preventDefault();
+		crop_id = $(this).parent().data('id');
+		$('input[name="crop_id"]').val(crop_id);
+		$('#crop-select-modal').modal('hide');
+		return false;
+	});
+
+	$('#manual-harvest').on('click', function() {
+		game.state = 'harvesting';
+		displayCurrentButtonSelected();
+		return game.viewport.target = game.combine;
+	});
+
+	$('#field-select-map polygon').on('click', function() {
+		var boxes, index;
+		index = $(this).data('field-index');
+		boxes = $("input[name=field_id]");
+		boxes.prop('checked', false).parent().removeClass("active");
+		console.log(index);
+		return boxes.filter("[value=" + index + "]").prop('checked', true).parent().addClass("active");
+	});
+	
     run = $('#simulation-run');
     pause = $('#simulation-pause');
     restart = $('#simulation-restart');
@@ -1089,7 +1131,7 @@ if ($('#simulation-controls').length > 0) {
 	restart.hide();
 	
 	// Add an option to skip ahead a month?
-	
+
     step = function() {
 		if (simulation.paused != true) // !!! if paused, do not update game data.
 		{
@@ -1107,9 +1149,6 @@ if ($('#simulation-controls').length > 0) {
 	simulation.paused = true;
 	simulation.interval = setInterval(step, 100);
 	
-	
-	
-	
 //============================== PAN VIEWPORT FUNCTIONS (begin) ==================================
 	var panmenu = $('#simulation-pan-arrow-menu');
 	var panviewportup = $('#simulation-pan-up');
@@ -1118,7 +1157,6 @@ if ($('#simulation-controls').length > 0) {
 	var panviewportright = $('#simulation-pan-right');
 	var panviewportcenter = $('#simulation-pan-center');
 	var movementIncrement = 10;
-	
 	
 	// Stop viewport from auto-following tractor for a bit
 	var pausePanTrackingTimer;
@@ -1160,20 +1198,26 @@ if ($('#simulation-controls').length > 0) {
 	function centerViewportOnTractor() {
 	  if (game.width <= game.viewport.width) { // || game.width <= game.buffers.front.width // Do not pan if simulation size is smaller than the canvas screen size.
 		game.viewport.x = 0;
-      } else if (game.viewport.target.x < game.viewport.width / 2) {
+      }
+	  else if (game.viewport.target.x < game.viewport.width / 2) {
         game.viewport.x = 0;
-      } else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
+      }
+	  else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
         game.viewport.x = game.width - game.viewport.width;
-      } else {
+      }
+	  else {
         game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
       }
 	  if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
 		return game.viewport.y = 0;
-      } else if (game.viewport.target.y < game.viewport.height / 2) {
+      }
+	  else if (game.viewport.target.y < game.viewport.height / 2) {
         return game.viewport.y = 0;
-      } else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
+      }
+	  else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
         return game.viewport.y = game.height - game.viewport.height;
-      } else {
+      }
+	  else {
         return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
       }
 	}
@@ -1182,25 +1226,32 @@ if ($('#simulation-controls').length > 0) {
 	function panViewportMovement(pandirection)
 	{
 		pausePanTracking();
-	
 		//console.log("x: " + game.viewport.x + " y: " + game.viewport.y);
 	
 		switch (pandirection) {
 			case "up":
-				if (game.viewport.y - movementIncrement >= 0) game.viewport.y = game.viewport.y - movementIncrement;
-				else game.viewport.y = 0;
+				if (game.viewport.y - movementIncrement >= 0)
+					game.viewport.y = game.viewport.y - movementIncrement;
+				else
+					game.viewport.y = 0;
 				break;
 			case "down":
-				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height) game.viewport.y = game.viewport.y + movementIncrement;
-				else game.viewport.y = game.height - game.viewport.height;
+				if (game.viewport.y + movementIncrement + game.viewport.height <= game.height)
+					game.viewport.y = game.viewport.y + movementIncrement;
+				else
+					game.viewport.y = game.height - game.viewport.height;
 				break;
 			case "left":
-				if (game.viewport.x - movementIncrement >= 0) game.viewport.x = game.viewport.x - movementIncrement;
-				else game.viewport.x = 0;
+				if (game.viewport.x - movementIncrement >= 0)
+					game.viewport.x = game.viewport.x - movementIncrement;
+				else
+					game.viewport.x = 0;
 				break;
 			case "right":
-				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width) game.viewport.x = game.viewport.x + movementIncrement;
-				else game.viewport.x = game.width - game.viewport.width;
+				if (game.viewport.x + movementIncrement + game.viewport.width <= game.width)
+					game.viewport.x = game.viewport.x + movementIncrement;
+				else
+					game.viewport.x = game.width - game.viewport.width;
 				break;
 			default:
 				centerViewportOnTractor();
@@ -1236,9 +1287,7 @@ if ($('#simulation-controls').length > 0) {
 	addPanViewportControl(panviewportleft, "left");
 	addPanViewportControl(panviewportright, "right");
 	addPanViewportControl(panviewportcenter, "center");
-	
-	
-	
+
 	/*
 	// Stop viewport auto-follow for a bit if user is doing something in the viewport
 	$('#farm-display').mousedown(function() {
@@ -1260,8 +1309,7 @@ if ($('#simulation-controls').length > 0) {
 	*/
 //============================ PAN VIEWPORT FUNCTIONS (end) =====================================
 	
-	
-	//=============== EXPAND VIEWPORT (begin) =================
+//=========================== EXPAND VIEWPORT (begin) =============================
 	$('#simulation-expand-viewport-button').on('click', function(event) {
 		panmenu.hide();
 		$('#simulation-expand-viewport-button').hide();
@@ -1283,43 +1331,37 @@ if ($('#simulation-controls').length > 0) {
 		game.buffers.front.width = game.viewport.width;
 		game.buffers.front.height = game.viewport.height;
 	});
-	//=============== EXPAND VIEWPORT (end) =================
+//========================== EXPAND VIEWPORT (end) ================================
 	
-	
+	//run the simulation
     run.on('click', function() {
       console.log('before step');
 		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
 		{
 			simulation.interval = setInterval(step, 100);
 		}
-	  
-		// Hide the run button
 		run.hide();
-		// Show these buttons when run is clicked
 		pause.show();
 		restart.show();
-	  
-      return simulation.paused = false;
+		return simulation.paused = false;
     });
+	
+	//pause the simulation
     pause.on('click', function() {
 		//clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
-		
-		run.show(); // Show the run button
-		pause.hide(); // Hide the pause button
-		
-      return simulation.paused = true;
+		run.show();
+		pause.hide();
+		return simulation.paused = true;
     });
-    return restart.on('click', function() {
+	
+	//restart the simulation
+    restart.on('click', function() {
       //clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
 		simulation.paused = true;
-	  
 		$('#farm-display').html(''); // Remove the old canvas element before adding the new one.
-		run.show(); // Show the run button
-		pause.hide(); // Hide the pause button
-	  
-      return simulation.worker.postMessage({
-        type: 'init'
-      });
+		run.show();
+		pause.hide();
+		return simulation.worker.postMessage({ type: 'init'});
     });
-  }
-});
+  } //end if
+}); //end jQuery
