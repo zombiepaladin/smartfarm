@@ -748,7 +748,8 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.tractor.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						game.plow.active = true;
+						if (game.path[0].noaction) game.plow.active = false; // so we can travel without tilling
+						else game.plow.active = true;
 						game.path.shift();
 					}
 					else {
@@ -1026,27 +1027,197 @@ if ($('#simulation-controls').length > 0) {
 		return game.path = [];
 	});
 	
-	//allows a field to be automatically tilled
-	$('#auto-till').on('click', function() {
-		return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
-			var field_id, pattern;
-			field_id = $('input[name="field_id"]:checked').val();
-			pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
-			game.ctx.terrain.save();
-			game.ctx.terrain.fillStyle = pattern;
-			game.ctx.terrain.beginPath();
-			simulation.size.fields[field_id].bounds.forEach(function(corner) {
-				return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-			});
-			game.ctx.terrain.closePath();
-			game.ctx.terrain.fill();
-			game.ctx.terrain.restore();
-			return simulation.postMessage({
-				type: 'till',
-				field: field_id
+	
+	
+	//============== LINE-INTERSECT (begin) ================
+	// SOURCE:  http://stackoverflow.com/questions/13937782/calculating-the-point-of-intersection-of-two-lines
+	function getIntersection(x11, y11, x12, y12, x21, y21, x22, y22) 
+	{
+		var slope1, slope2, yint1, yint2, intx, inty;
+		if (x11 == x21 && y11 == y21) return [x11, y11];
+		if (x12 == x22 && y12 == y22) return [x12, y22];
+
+		slope1 = this.slope(x11, y11, x12, y12);
+		slope2 = this.slope(x21, y21, x22, y22);
+		if (slope1 === slope2) return false;
+
+		yint1 = this.yInt(x11, y11, x12, y12);
+		yint2 = this.yInt(x21, y21, x22, y22);
+		if (yint1 === yint2) return yint1 === false ? false : [0, yint1];
+
+		if (slope1 === false) return [y21, slope2 * y21 + yint2];
+		if (slope2 === false) return [y11, slope1 * y11 + yint1];
+		intx = (slope1 * x11 + yint1 - yint2)/ slope2;
+		return [intx, slope1 * intx + yint1];
+	}
+	
+	// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
+	/*
+	Copyright (c) 1970-2003, Wm. Randolph Franklin
+	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers.
+	Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution.
+	The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	*/
+	/*
+	nvert - Number of vertices in the polygon. Whether to repeat the first vertex at the end is discussed below.
+	vertx, verty - Arrays containing the x- and y-coordinates of the polygon's vertices.
+	testx, testy - X- and y-coordinate of the test point.
+	*/
+	function pnpoly( nvert, vertx, verty, testx, testy ) {
+    var i, j, c = false;
+    for( i = 0, j = nvert-1; i < nvert; j = i++ ) {
+        if( ( ( verty[i] > testy ) != ( verty[j] > testy ) ) &&
+            ( testx < ( vertx[j] - vertx[i] ) * ( testy - verty[i] ) / ( verty[j] - verty[i] ) + vertx[i] ) ) {
+                c = !c;
+			}
+		}
+		return c;
+	}
+	//============== LINE-INTERSECT (begin) ================
+	
+	
+    $('#auto-till').on('click', function() {
+      //return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
+        game.state = 'tilling';
+		var field_id, pattern;
+		//field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
+        field_id = 0; // !!! temp, delete later!
+		
+        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
+        game.ctx.terrain.save();
+        game.ctx.terrain.fillStyle = pattern;
+        game.ctx.terrain.beginPath();
+		//console.log("DANE:");
+		//console.log(simulation.size.fields[field_id].bounds); // !!! THIS IS IT !!!
+//        simulation.size.fields[field_id].bounds.forEach(function(corner) {
+//          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
+//        });
+        game.ctx.terrain.closePath();
+        game.ctx.terrain.fill();
+        game.ctx.terrain.restore();
+		
+		
+		console.log("DANE:");
+		console.log(simulation.size.height * simulation.size.granularity);
+		console.log(simulation.size.height);
+		console.log(simulation.size.width);
+		console.log(simulation.size.granularity);
+		
+		var nvert = 0;
+		var vertx = [];
+		var verty = [];
+		simulation.size.fields[field_id].bounds.forEach(function(corner) {
+			vertx[nvert] = corner.x * simulation.size.granularity;
+			verty[nvert] = corner.y * simulation.size.granularity;
+			nvert++;
+		});
+		
+		var stepSizeY = game.height / simulation.size.granularity;
+		var stepSizeX = game.width / simulation.size.granularity;
+		
+		var lastStepWasOutside = true;
+		var lastX, lastY;
+		
+		game.ctx.terrain.save();
+        game.ctx.terrain.fillStyle = pattern;
+        game.ctx.terrain.beginPath();
+		for (var i = 1; i < simulation.size.granularity; i++)
+		{
+			testy = i*stepSizeY;
+			for (var j = 1; j < simulation.size.granularity; j++)
+			{
+				testx = j*stepSizeX;
+			
+				//var x11, y11, x12, y12, x21, y21, x22, y22;
+				//getIntersection(x11, y11, x12, y12, x21, y21, x22, y22);
+				
+				//console.log(testx + ", " + testy);
+				
+				// If these coordinates fall within the polygon, till this point
+				if (pnpoly( nvert, vertx, verty, testx, testy ))
+				{
+					//console.log(" INSIDE: " + testx + ", " + testy);
+					
+					//game.ctx.terrain.fillRect(testx,testy,stepSizeX,stepSizeY);
+					
+					// Travel to, but do NOT have tiller down until we get there
+					if (lastStepWasOutside)
+					{
+						lastStepWasOutside = false;
+						game.path.push({
+							x: testx,
+							y: testy,
+							noaction: true
+						});
+					}
+					
+					game.path.push({
+						x: testx,
+						y: testy
+					});
+					
+					lastX = testx;
+					lastY = testy;
+				}
+				else
+				{
+					/*
+					// I do not know why this did not work
+					if (game.path[0] && game.path[0].noaction) game.path.shift();
+					game.path.push({
+						x: testx,
+						y: testy,
+						noaction: true
+					});
+					*/
+					if (!lastStepWasOutside)
+					{
+						lastStepWasOutside = true;
+						game.path.push({
+							x: lastX,
+							y: lastY,
+							noaction: true
+						});
+					}
+				}
+			}
+		}
+		game.ctx.terrain.closePath();
+        game.ctx.terrain.fill();
+        game.ctx.terrain.restore();
+		
+		console.log("DONE");
+		
+		
+		/*
+		simulation.size.fields[field_id].bounds.forEach(function(corner) {
+			var tempX = corner.x * simulation.size.granularity;
+			var tempY = corner.y * simulation.size.granularity;
+			
+			console.log(tempX + ", " + tempY);
+			game.ctx.terrain.font="15px Georgia";
+			game.ctx.terrain.fillStyle = "black";
+			game.ctx.terrain.fillText(tempX + ", " + tempY, tempX, tempY);
+			
+			game.path.push({
+				x: tempX,
+				y: tempY
 			});
 		});
-	});
+		*/
+		
+		
+		/*
+		// ??? !!! Why does this give an error?
+        return simulation.postMessage({
+          type: 'till',
+          field: field_id
+        });
+		*/
+      //});
+    });
 	
 	//allows a user to begin manually planting a field
 	$('#manual-plant').on('click', function() {
