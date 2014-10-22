@@ -1029,28 +1029,7 @@ if ($('#simulation-controls').length > 0) {
 	
 	
 	
-	//============== LINE-INTERSECT (begin) ================
-	// SOURCE:  http://stackoverflow.com/questions/13937782/calculating-the-point-of-intersection-of-two-lines
-	function getIntersection(x11, y11, x12, y12, x21, y21, x22, y22) 
-	{
-		var slope1, slope2, yint1, yint2, intx, inty;
-		if (x11 == x21 && y11 == y21) return [x11, y11];
-		if (x12 == x22 && y12 == y22) return [x12, y22];
-
-		slope1 = this.slope(x11, y11, x12, y12);
-		slope2 = this.slope(x21, y21, x22, y22);
-		if (slope1 === slope2) return false;
-
-		yint1 = this.yInt(x11, y11, x12, y12);
-		yint2 = this.yInt(x21, y21, x22, y22);
-		if (yint1 === yint2) return yint1 === false ? false : [0, yint1];
-
-		if (slope1 === false) return [y21, slope2 * y21 + yint2];
-		if (slope2 === false) return [y11, slope1 * y11 + yint1];
-		intx = (slope1 * x11 + yint1 - yint2)/ slope2;
-		return [intx, slope1 * intx + yint1];
-	}
-	
+	//============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
 	// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
 	/*
 	Copyright (c) 1970-2003, Wm. Randolph Franklin
@@ -1075,36 +1054,59 @@ if ($('#simulation-controls').length > 0) {
 		}
 		return c;
 	}
-	//============== LINE-INTERSECT (begin) ================
+	//============== CHECK IF POINT FALLS WITHIN POLYGON (end) ================
+
+	function writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside)
+	{
+		// If these coordinates fall within the polygon, till this point
+		if (pnpoly( nvert, vertx, verty, testx, testy ))
+		{
+			// Travel to start of next sweep, but do NOT have tiller down until we get there
+			if (lastStepWasOutside)
+			{
+				lastStepWasOutside = false;
+				game.path.push({
+					x: testx,
+					y: testy,
+					noaction: true
+				});
+			}
+			
+			game.path.push({
+				x: testx,
+				y: testy
+			});
+			
+			lastX = testx;
+			lastY = testy;
+		}
+		else
+		{
+			// Travel to start of next sweep, but do NOT have tiller down until we get there
+			/*
+			// I do not know why this did not work
+			if (game.path[0] && game.path[0].noaction) game.path.shift();
+			game.path.push({
+				x: testx,
+				y: testy,
+				noaction: true
+			});
+			*/
+			if (!lastStepWasOutside)
+			{
+				lastStepWasOutside = true;
+				game.path.push({
+					x: lastX,
+					y: lastY,
+					noaction: true
+				});
+			}
+		}
+		return lastStepWasOutside;
+	}
 	
-	
-    $('#auto-till').on('click', function() {
-      //return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
-        game.state = 'tilling';
-		var field_id, pattern;
-		//field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
-        field_id = 0; // !!! temp, delete later!
-		
-        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
-        game.ctx.terrain.save();
-        game.ctx.terrain.fillStyle = pattern;
-        game.ctx.terrain.beginPath();
-		//console.log("DANE:");
-		//console.log(simulation.size.fields[field_id].bounds); // !!! THIS IS IT !!!
-//        simulation.size.fields[field_id].bounds.forEach(function(corner) {
-//          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-//        });
-        game.ctx.terrain.closePath();
-        game.ctx.terrain.fill();
-        game.ctx.terrain.restore();
-		
-		
-		console.log("DANE:");
-		console.log(simulation.size.height * simulation.size.granularity);
-		console.log(simulation.size.height);
-		console.log(simulation.size.width);
-		console.log(simulation.size.granularity);
-		
+	function autoDrawPath(field_id)
+	{
 		var nvert = 0;
 		var vertx = [];
 		var verty = [];
@@ -1120,73 +1122,56 @@ if ($('#simulation-controls').length > 0) {
 		var lastStepWasOutside = true;
 		var lastX, lastY;
 		
-		game.ctx.terrain.save();
-        game.ctx.terrain.fillStyle = pattern;
-        game.ctx.terrain.beginPath();
+		var sweepLeftToRight = true; // To be more efficient, sweep one way, then the other way
 		for (var i = 1; i < simulation.size.granularity; i++)
 		{
 			testy = i*stepSizeY;
-			for (var j = 1; j < simulation.size.granularity; j++)
-			{
-				testx = j*stepSizeX;
 			
-				//var x11, y11, x12, y12, x21, y21, x22, y22;
-				//getIntersection(x11, y11, x12, y12, x21, y21, x22, y22);
-				
-				//console.log(testx + ", " + testy);
-				
-				// If these coordinates fall within the polygon, till this point
-				if (pnpoly( nvert, vertx, verty, testx, testy ))
+			if (sweepLeftToRight)
+			{
+				for (var j = 1; j < simulation.size.granularity; j++)
 				{
-					//console.log(" INSIDE: " + testx + ", " + testy);
+					testx = j*stepSizeX;
 					
-					//game.ctx.terrain.fillRect(testx,testy,stepSizeX,stepSizeY);
-					
-					// Travel to, but do NOT have tiller down until we get there
-					if (lastStepWasOutside)
-					{
-						lastStepWasOutside = false;
-						game.path.push({
-							x: testx,
-							y: testy,
-							noaction: true
-						});
-					}
-					
-					game.path.push({
-						x: testx,
-						y: testy
-					});
-					
-					lastX = testx;
-					lastY = testy;
+					lastStepWasOutside = writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside);
 				}
-				else
+				sweepLeftToRight = false;
+			}
+			else
+			{
+				for (var j = simulation.size.granularity; j > 1; j--)
 				{
-					/*
-					// I do not know why this did not work
-					if (game.path[0] && game.path[0].noaction) game.path.shift();
-					game.path.push({
-						x: testx,
-						y: testy,
-						noaction: true
-					});
-					*/
-					if (!lastStepWasOutside)
-					{
-						lastStepWasOutside = true;
-						game.path.push({
-							x: lastX,
-							y: lastY,
-							noaction: true
-						});
-					}
+					testx = j*stepSizeX;
+					
+					lastStepWasOutside = writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside);
 				}
+				sweepLeftToRight = true;
 			}
 		}
-		game.ctx.terrain.closePath();
+	}
+	
+	
+    $('#auto-till').on('click', function() {
+      //return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
+        game.state = 'tilling';
+		var field_id, pattern;
+		//field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
+        field_id = 0; // !!! temp, delete later!
+		
+		/*
+        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
+        game.ctx.terrain.save();
+        game.ctx.terrain.fillStyle = pattern;
+        game.ctx.terrain.beginPath();
+        simulation.size.fields[field_id].bounds.forEach(function(corner) {
+          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
+        });
+        game.ctx.terrain.closePath();
         game.ctx.terrain.fill();
         game.ctx.terrain.restore();
+		*/
+		
+		autoDrawPath(field_id);
 		
 		console.log("DONE");
 		
@@ -1218,6 +1203,8 @@ if ($('#simulation-controls').length > 0) {
 		*/
       //});
     });
+	
+	
 	
 	//allows a user to begin manually planting a field
 	$('#manual-plant').on('click', function() {
