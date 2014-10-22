@@ -788,8 +788,9 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.tractor.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						  game.drill.active = true;
-						  game.path.shift();
+						if (game.path[0].noaction) game.drill.active = false; // so we can travel without tilling
+						else game.drill.active = true;
+						game.path.shift();
 					}
 					else {
 						break;
@@ -831,7 +832,8 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.combine.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						game.combine.active = true;
+						if (game.path[0].noaction) game.combine.active = false; // so we can travel without tilling
+						else game.combine.active = true;
 						game.path.shift();
 					}
 					else {
@@ -1107,6 +1109,8 @@ if ($('#simulation-controls').length > 0) {
 	
 	function autoDrawPath(field_id)
 	{
+		game.path = []; // Empty current path before drawing a new one.
+	
 		var nvert = 0;
 		var vertx = [];
 		var verty = [];
@@ -1152,11 +1156,11 @@ if ($('#simulation-controls').length > 0) {
 	
 	
     $('#auto-till').on('click', function() {
-      //return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
+      return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
         game.state = 'tilling';
 		var field_id, pattern;
-		//field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
-        field_id = 0; // !!! temp, delete later!
+		field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
+        //field_id = 0; // !!! temp, delete later!
 		
 		/*
         pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
@@ -1172,8 +1176,6 @@ if ($('#simulation-controls').length > 0) {
 		*/
 		
 		autoDrawPath(field_id);
-		
-		console.log("DONE");
 		
 		
 		/*
@@ -1193,15 +1195,7 @@ if ($('#simulation-controls').length > 0) {
 		});
 		*/
 		
-		
-		/*
-		// ??? !!! Why does this give an error?
-        return simulation.postMessage({
-          type: 'till',
-          field: field_id
-        });
-		*/
-      //});
+      });
     });
 	
 	
@@ -1230,6 +1224,7 @@ if ($('#simulation-controls').length > 0) {
 				var field_id, pattern;
 				field_id = $('input[name="field_id"]:checked').val();
 				if (field_id !== -1) {
+					/*
 					pattern = game.ctx.terrain.createPattern(game.drill.stamp, 'repeat');
 					game.ctx.terrain.save();
 					game.ctx.terrain.fillStyle = pattern;
@@ -1245,6 +1240,10 @@ if ($('#simulation-controls').length > 0) {
 					crop: crop_id,
 					field: field_id
 					});
+					*/
+					
+					game.state = 'planting';
+					autoDrawPath(field_id);
 				}
 			});
 			}
@@ -1270,6 +1269,17 @@ if ($('#simulation-controls').length > 0) {
 		displayCurrentButtonSelected();
 		return game.viewport.target = game.combine;
 	});
+	
+	$('#auto-harvest').on('click', function() {
+      return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
+		var field_id, pattern;
+		field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
+
+		game.state = 'harvesting';
+		autoDrawPath(field_id);
+      });
+    });
+	
 
 	$('#field-select-map polygon').on('click', function() {
 		var boxes, index;
