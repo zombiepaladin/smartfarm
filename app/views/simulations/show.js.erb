@@ -1,19 +1,19 @@
 <% data = JSON.parse @simulation.state %>
 
 var simulation = {
-  rate: 0,                      // in ms
-  clock: {
-    time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
-    elapsed_time: 0,           // in minutes
-  },
-  weather: {},
-  soil: {},
-  crops: [],
-  patches: [],
-  granularity: 100, 		// 100x100 meters
-  width: 0,
-  height: 0,
-  water: undefined
+	rate: 0,                      // in ms
+	clock: {
+		time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
+		elapsed_time: 0,           // in minutes
+	},
+	weather: {},
+	soil: {},
+	crops: [],
+	patches: [],
+	granularity: 100, 		// 100x100 meters
+	width: 0,
+	height: 0,
+	water: undefined
 };
 
 postMessage({start_time: '<%= @simulation.start_on.to_s %>'});
@@ -26,76 +26,69 @@ postMessage({start_time: '<%= @simulation.start_on.to_s %>'});
 //  (2) tick messages, advancing the simulation, and
 //  (3) various agricultural operations carried out by the user, 
 //      such as planting
-//
+
+//When we receive a message from the main thread
 onmessage = function(msg) {
-
-  switch(msg.data.type) {
-    
-    case 'init':
-      initialize(simulation);
-      break;
-
-    case 'tick': 
-      simulation.clock.elapsed_time += 1; // Add one minute to elapsed time
-      simulation.clock.time += 60000; // Add one minute to time
-      update(simulation);
-      postMessage({type: 'time_update', time: simulation.clock.time});
-      break;
-
-    case 'till': 
-      tillField(msg.data.field);
-	  break;
-	  
-    case 'plant':
-      plantFieldWithCrop(msg.data.field, msg.data.crop)
-	  break;
-	  
-    case 'spray':
-	  // do stuff
-	  break;
-  }
-
-
+	switch(msg.data.type) {
+		case 'init':
+			initialize(simulation);
+			break;
+		case 'tick': 
+			simulation.clock.elapsed_time += 1; // Add one minute to elapsed time
+			simulation.clock.time += 60000; // Add one minute to time
+			update(simulation);
+			postMessage({type: 'time_update', time: simulation.clock.time});
+			break;
+		case 'till': 
+			tillField(msg.data.field);
+			break;
+		case 'plant':
+			plantFieldWithCrop(msg.data.field, msg.data.crop)
+			break;
+		case 'spray':
+			// do stuff
+			break;
+	}
 }
 
 //=====================================================
 // Simulation API
 
 window = {
-  alert: function(msg) { postMessage({type: 'alert', value: msg}) }
+	alert: function(msg) { postMessage({type: 'alert', value: msg}) }
 }
 
 function get_elapsed_time() {
-  return simulation.clock.elapsed_time;
+	return simulation.clock.elapsed_time;
 }
 
 function get_simulation_year() {
-  return new Date(simulation.clock.time).getFullYear();
+	return new Date(simulation.clock.time).getFullYear();
 }
 
 function get_simulation_month() {
-  // month is 0-indexed in JavaScript
-  return (new Date(simulation.clock.time).getMonth()) + 1;
+	// month is 0-indexed in JavaScript
+	return (new Date(simulation.clock.time).getMonth()) + 1;
 }
 
 function get_simulation_day_of_month() {
-  return new Date(simulation.clock.time).getDate();
+	return new Date(simulation.clock.time).getDate();
 }
 
 function get_simulation_day_of_year() {
-  var startOfYear = new Date(new Date(simulation.clock.time).fullYear(), 0, 0)
-  // 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,500,000 ms/day
-  return Math.floor((simulation.clock.time - startOfyear)/86400000)
+	var startOfYear = new Date(new Date(simulation.clock.time).fullYear(), 0, 0);
+	// 1000 ms/s * 60 s/min * 60 min/hr * 24 hr/day = 86,400,000 ms/day
+	return Math.floor((simulation.clock.time - startOfyear)/86400000);
 }
 
 // Weather API
 <% for property in Weather::PROPERTIES %>
 function get_<%= property %>() {
-  return simulation.weather.<%= property %>;
+	return simulation.weather.<%= property %>;
 }
 
 function set_<%= property %>(value) {
-  simulation.weather.<%= property %> = value;
+	simulation.weather.<%= property %> = value;
 }
 <% end %> 
 
@@ -103,11 +96,11 @@ function set_<%= property %>(value) {
 var index = 0
 <% for property in Soil::PROPERTIES %>
 function get_<%= property %>() {
-  return simulation.soil.<%= property %>[index];
+	return simulation.soil.<%= property %>[index];
 }
 
 function set_<%= property %>(value) {
-  simulation.soil.<%= property %>[index] = value;
+	simulation.soil.<%= property %>[index] = value;
 }
 <% end %>
 
@@ -116,11 +109,11 @@ var patch_index = 0
 var crop_index = 0
 <% for property in Crop::PROPERTIES %>
 function get_<%= property %>() {
-  return simulation.crops[crop_index].<%= property %>[patch_index];
+	return simulation.crops[crop_index].<%= property %>[patch_index];
 }
 
 function set_<%= property %>(value) {
-  simulation.crops[crop_index].<%=property %>[patch_index] = value;
+	simulation.crops[crop_index].<%=property %>[patch_index] = value;
 }
 <% end %>
 
@@ -128,185 +121,190 @@ function set_<%= property %>(value) {
 // Simulation initialization methods
 
 function initialize(simulation) {
-  initClock(simulation);
-  initWeather(simulation);
-  initPatches(simulation);
+	initClock(simulation);
+	initWeather(simulation);
+	initPatches(simulation);
 }
 
 // Initialize the simulation clock
 function initClock(simulation) {
-  simulation.clock = {
-    start: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
-    end: new Date(<%= @simulation.end_on.strftime("%Y, %-m, %-d")%>).getTime(),
-    time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
-    elapsed_time: 0,           // in minutes
-  }
-  postMessage({type: 'time_update', time: simulation.clock.time});
+	simulation.clock = {
+		start: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
+		end: new Date(<%= @simulation.end_on.strftime("%Y, %-m, %-d")%>).getTime(),
+		time: new Date(<%= @simulation.start_on.strftime("%Y, %-m, %-d")%>).getTime(),
+		elapsed_time: 0,           // in minutes
+	}
+	postMessage({type: 'time_update', time: simulation.clock.time});
 }
 
 // Initialize the weather data buffer
 function initWeather(simulation) {
-  simulation.weather = {
-    rainfall: 0,
-    snowfall: 0,
-    solar_radiation: 0,
-    day_length: 0,
-    average_temperature: 14,
-    low_temperature: 14,
-    high_temperature: 14,
-    wind_speed: 0,
-    wind_direction: 0,
-    dew_point: 0,
-    relative_humidity: 0.5,
-  }
+	simulation.weather = {
+		rainfall: 0,
+		snowfall: 0,
+		solar_radiation: 0,
+		day_length: 0,
+		average_temperature: 14,
+		low_temperature: 14,
+		high_temperature: 14,
+		wind_speed: 0,
+		wind_direction: 0,
+		dew_point: 0,
+		relative_humidity: 0.5,
+	}
 }
 
 // Initialize the patch grid (grid cells are at simulation granularity in size)
 function initPatches(simulation) {
-  var farm = <%= @simulation.farm.data.html_safe %>,
-      north = farm.location.latitude, 
-      south = farm.location.latitude, 
-      east = farm.location.longitude, 
-      west = farm.location.longitude,
-      widthInPatches,
-      heightInPatches,
-      degreesPerMeterLat,
-      degreesPerMeterLng,
-      halfWidth,
-      halfHeight;
+	var farm = <%= @simulation.farm.data.html_safe %>,
+	north = farm.location.latitude, 
+	south = farm.location.latitude, 
+	east = farm.location.longitude, 
+	west = farm.location.longitude,
+	widthInPatches,
+	heightInPatches,
+	degreesPerMeterLat,
+	degreesPerMeterLng,
+	halfWidth,
+	halfHeight;
 
-  // Find the outer boundaries of the simulations
-  farm.field_bounds.forEach( function(bounds) {
-    bounds.forEach( function(corner) {
-      north = corner.latitude > north ? corner.latitude : north;
-      south = corner.latitude < south ? corner.latitude : south;
-      west = corner.longitude > west ? corner.longitude : west;
-      east = corner.longitude < east ? corner.longitude : east;
-    });
-  });
-  
-  // 111,111 meters = 1 degree latitude
-  heightInPatches = Math.ceil(111111 * (north - south) / simulation.granularity);
-  degreesPerHundredMeterLat = 100/111111;
-  halfHeight = degreesPerHundredMeterLat / 2;
+	// Find the outer boundaries of the simulations
+	farm.field_bounds.forEach( function(bounds) {
+		bounds.forEach( function(corner) {
+			north = corner.latitude > north ? corner.latitude : north;
+			south = corner.latitude < south ? corner.latitude : south;
+			west = corner.longitude > west ? corner.longitude : west;
+			east = corner.longitude < east ? corner.longitude : east;
+		});
+	});
 
-  // 111,111 * cos(latitude) = 1 degree longitude
-  widthInPatches = Math.ceil(111111 * Math.cos(farm.location.latitude * (Math.PI/180)) * (west - east) / simulation.granularity);
-  degreesPerHundredMeterLng = 100/(111111 * Math.cos(farm.location.latitude * (Math.PI/180)));
-  halfWidth = degreesPerHundredMeterLng / 2;
+	// 111,111 meters = 1 degree latitude
+	heightInPatches = Math.ceil(111111 * (north - south) / simulation.granularity);
+	degreesPerHundredMeterLat = 100/111111;
+	halfHeight = degreesPerHundredMeterLat / 2;
 
-  simulation.width = widthInPatches;
-  simulation.height = heightInPatches;
+	// 111,111 * cos(latitude) = 1 degree longitude
+	widthInPatches = Math.ceil(111111 * Math.cos(farm.location.latitude * (Math.PI/180)) * (west - east) / simulation.granularity);
+	degreesPerHundredMeterLng = 100/(111111 * Math.cos(farm.location.latitude * (Math.PI/180)));
+	halfWidth = degreesPerHundredMeterLng / 2;
 
-  // Convert farm location into pixel coordinates
-  simulation.location = {
-    x: (farm.location.longitude - east) * (simulation.width / (west - east)),
-    y: simulation.height - (farm.location.latitude - south) * (simulation.height / (north - south))
-  }
+	simulation.width = widthInPatches;
+	simulation.height = heightInPatches;
 
-  // Convert field bounds into pixel coordinates
-  simulation.fields = farm.field_bounds.map( function(boundary) {
-    return {
-      patches: [],
-      bounds: boundary.map( function(corner) {
-        return {
-          x: (corner.longitude - east) * (simulation.width / (west - east)),
-          y: simulation.height - (corner.latitude - south) * (simulation.height / (north - south))
-        };
-      })
-    };
-  });
+	// Convert farm location into pixel coordinates
+	simulation.location = {
+		x: (farm.location.longitude - east) * (simulation.width / (west - east)),
+		y: simulation.height - (farm.location.latitude - south) * (simulation.height / (north - south))
+	}
 
-  // Calculate the %area of each patch covered by each field
-  for(x = 0; x < simulation.width; x++) {
-    for(y = 0; y < simulation.height; y++) {
-      simulation.fields.forEach( function(field, i) {
-        var clipped = clipPolygon(field.bounds, {left: x, right: x+1, top: y, bottom: y+1});
-        var area = 0;
-        var j = clipped.length - 1;
-        for(i = 0; i < clipped.length; i++) {
-          area += (clipped[j].x + clipped[i].x) * (clipped[j].y-clipped[i].y);
-          j = i;
-        }
-        area = Math.abs(area * 0.5);
-        if(area > 0) field.patches.push({index: x+y*simulation.width, x:x, y:y, ratio:area});
-      });
-    }
-  }
+	// Convert field bounds into pixel coordinates
+	simulation.fields = farm.field_bounds.map( function(boundary) {
+		return {
+			patches: [],
+			bounds: boundary.map( function(corner) {
+				return {
+					x: (corner.longitude - east) * (simulation.width / (west - east)),
+					y: simulation.height - (corner.latitude - south) * (simulation.height / (north - south))
+				};
+			})
+		};
+	});
 
-  // Send calculated size to UI
-  postMessage({type: 'size_update', size: {
-    granularity: simulation.granularity, 
-    width: simulation.width, 
-    height: simulation.height, 
-    location: simulation.location,
-    fields: simulation.fields
-  }});
+	// Calculate the %area of each patch covered by each field
+	for(x = 0; x < simulation.width; x++) {
+		for(y = 0; y < simulation.height; y++) {
+			simulation.fields.forEach( function(field, i) {
+				var clipped = clipPolygon(field.bounds, {left: x, right: x+1, top: y, bottom: y+1});
+				var area = 0;
+				var j = clipped.length - 1;
+				for(i = 0; i < clipped.length; i++) {
+					area += (clipped[j].x + clipped[i].x) * (clipped[j].y-clipped[i].y);
+					j = i;
+				}
+				area = Math.abs(area * 0.5);
+				if(area > 0) {
+					field.patches.push({index: x+y*simulation.width, x:x, y:y, ratio:area});
+				}
+			});
+		}
+	}
 
-  // Create soil data buffers  
-<% for property in Soil::PROPERTIES %>
-  simulation.soil.<%= property %> = new Uint8Array(widthInPatches * heightInPatches );
-<% end %>
+	// Send calculated size to UI
+	postMessage({
+		type: 'size_update',
+		size: {
+			granularity: simulation.granularity, 
+			width: simulation.width, 
+			height: simulation.height, 
+			location: simulation.location,
+			fields: simulation.fields
+		}
+	});
 
-  // Save soil point values to data buffers
-  if(farm.soil_samples) {
-    farm.soil_samples.forEach( function (soil_sample) {
-      soil_sample.x = Math.floor((soil_sample.longitude - east) * (simulation.width / (west - east)));
-      soil_sample.y = simulation.height - Math.floor((soil_sample.latitude - south) * (simulation.height / (north - south)));
-    <% for property in Soil::PROPERTIES %>
-      simulation.soil.<%= property %>[soil_sample.x + soil_sample.y * simulation.width] = soil_sample.<%= property %>;
-    <% end %>
-    });
-  
+	// Create soil data buffers  
+	<% for property in Soil::PROPERTIES %>
+		simulation.soil.<%= property %> = new Uint8Array(widthInPatches * heightInPatches );
+	<% end %>
 
-    // Interpolate soil point values across data buffers
-    // TODO: Replace this simple interpolation with better interpolation methods
-    for(i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
-      for(j = -i; j <= i; j++) {
-      
-        for(k = 0; k < farm.soil_samples.length; k++) {
-          var doneFlag = true,
-              dx = farm.soil_samples[k].x - i;
-              dy = farm.soil_samples[k].y + j;
-          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          <% for property in Soil::PROPERTIES %>
-            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-          <% end %>
-            doneFlag = false;
-          }
-          dx = farm.soil_samples[k].x + i;      
-          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          <% for property in Soil::PROPERTIES %>
-            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-          <% end %>
-            doneFlag = false;
-          }
-          dy = farm.soil_samples[k].y - i;
-          dx = farm.soil_samples[k].x + j;
-          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          <% for property in Soil::PROPERTIES %>
-            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-          <% end %>
-            doneFlag = false;
-          }
-          dy = farm.soil_samples[k].y + i;
-          if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
-          <% for property in Soil::PROPERTIES %>
-            simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
-          <% end %>
-            doneFlag = false;
-          }
-          if(doneFlag) continue;
-        }
-      }
-    }
-  }
+	// Save soil point values to data buffers
+	if (farm.soil_samples) {
+		farm.soil_samples.forEach( function (soil_sample) {
+			soil_sample.x = Math.floor((soil_sample.longitude - east) * (simulation.width / (west - east)));
+			soil_sample.y = simulation.height - Math.floor((soil_sample.latitude - south) * (simulation.height / (north - south)));
+			<% for property in Soil::PROPERTIES %>
+				simulation.soil.<%= property %>[soil_sample.x + soil_sample.y * simulation.width] = soil_sample.<%= property %>;
+			<% end %>
+		});
 
-  // Send new layer data to UI
-<% for property in Soil::PROPERTIES %>
-  postMessage({type: 'soil_data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
-<% end %>
-}
+		// Interpolate soil point values across data buffers
+		// TODO: Replace this simple interpolation with better interpolation methods
+		for (i = 0; i < (simulation.width > simulation.height ? simulation.width: simulation.height); i++) {
+			for (j = -i; j <= i; j++) {
+				for (k = 0; k < farm.soil_samples.length; k++) {
+					var doneFlag = true,
+					dx = farm.soil_samples[k].x - i;
+					dy = farm.soil_samples[k].y + j;
+					if (dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+						<% for property in Soil::PROPERTIES %>
+							simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+						<% end %>
+						doneFlag = false;
+					}
+					dx = farm.soil_samples[k].x + i;      
+					if (dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+						<% for property in Soil::PROPERTIES %>
+							simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+						<% end %>
+						doneFlag = false;
+					}
+					dy = farm.soil_samples[k].y - i;
+					dx = farm.soil_samples[k].x + j;
+					if (dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+						<% for property in Soil::PROPERTIES %>
+							simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+						<% end %>
+						doneFlag = false;
+					}
+					dy = farm.soil_samples[k].y + i;
+					if(dx >= 0 && dy >= 0 && dx < simulation.width && dy < simulation.height && simulation.soil.water_content[dx + dy * simulation.width] == 0) {
+						<% for property in Soil::PROPERTIES %>
+							simulation.soil.<%= property %>[dx + dy * simulation.width] = farm.soil_samples[k].<%= property %>;
+						<% end %>
+						doneFlag = false;
+					}
+					if(doneFlag) {
+						continue;
+					}
+				}
+			}
+		}
+	}
+
+	// Send new layer data to UI
+	<% for property in Soil::PROPERTIES %>
+		postMessage({type: 'soil_data_layer_update', layer_name: '<%= property %>', layer_data: simulation.soil.<%= property %>});
+	<% end %>
+} //end initPatches
 
 //=====================================================
 // Simulation update methods
@@ -315,99 +313,92 @@ function initPatches(simulation) {
 // Update the simulation
 //-----------------------------------------------------
 function update(simulation) {
-  updateWeather();
-  updateSoil();
-  updateCrops();
+	updateWeather();
+	updateSoil();
+	updateCrops();
 }
 
 // Update the weather
 //-----------------------------------------------------
 function updateWeather() {
-
-  <%= @simulation.weather.code.html_safe %>
-
-  postMessage({
-    type: 'weather_update',
-    weather: simulation.weather
-  });
+	<%= @simulation.weather.code.html_safe %>
+	postMessage({
+		type: 'weather_update',
+		weather: simulation.weather
+	});
 }
 
 // Update the soil
 //-----------------------------------------------------
 function updateSoil() {
-  for(x = 0; x < simulation.width; x++) {
-    for(y = 0; y < simulation.height; y++) {
-      index = x + simulation.width * y;
-      <%= @simulation.soil.code.html_safe %>
-    }
-  }
-<% for property in Soil::PROPERTIES %>
-  postMessage({type: 'soil_data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
-<% end %>
+	for(x = 0; x < simulation.width; x++) {
+		for(y = 0; y < simulation.height; y++) {
+			index = x + simulation.width * y;
+			<%= @simulation.soil.code.html_safe %>
+		}
+	}
+	<% for property in Soil::PROPERTIES %>
+		postMessage({type: 'soil_data_layer_update', layer_name:'<%= property %>', layer_data: simulation.soil.<%= property %>});
+	<% end %>
 }
 
 // Update the crops
 //------------------------------------------------------
 function updateCrops() {
-  simulation.crops.forEach( function(crop) {
-    for(x = 0; x < simulation.width; x++) {
-      for(y = 0; y < simulation.height; y++) {
-        crop_index = crop.id;
-        patch_index = x + simulation.width * y;
-        eval(crop.code);
-      }
-    }
-  <% for property in Crop::PROPERTIES %>
-    postMessage({type: 'crop_data_layer_update', crop_id: crop.id, layer_name: '<%= property %>', layer_data: simulation.crops[crop.id].<%= property %>});
-  <% end %>
-  });
+	simulation.crops.forEach( function(crop) {
+		for(x = 0; x < simulation.width; x++) {
+			for(y = 0; y < simulation.height; y++) {
+				crop_index = crop.id;
+				patch_index = x + simulation.width * y;
+				eval(crop.code);
+			}
+		}
+		<% for property in Crop::PROPERTIES %>
+			postMessage({type: 'crop_data_layer_update', crop_id: crop.id, layer_name: '<%= property %>', layer_data: simulation.crops[crop.id].<%= property %>});
+		<% end %>
+	});
 }
 
 //=====================================================
 // Simulation interaction methods
 
 function tillField(fieldIndex) {
-  fields[fieldIndex]
-
+	fields[fieldIndex]
 }
 
 function plantFieldWithCrop(fieldIndex, cropID) {
-  if(simulation.crops[cropID] == undefined) { // crop not already in use
+	if (simulation.crops[cropID] == undefined) { // crop not already in use
 
-    // Load the crop data
-    load('/crops/' + cropID + '.json', function(xhr) {
+		// Load the crop data
+		load('/crops/' + cropID + '.json', function(xhr) {
 
-      // create the crop
-      simulation.crops[cropID] = JSON.parse(xhr.responseText);
-    <% for property in Crop::PROPERTIES %>
-      simulation.crops[cropID].<%= property %> = new Uint8Array(simulation.width * simulation.height);
-    <% end %>
-      postMessage({type: 'crop_initialize', crop_id: cropID, crop_name: simulation.crops[cropID].name});
+			// create the crop
+			simulation.crops[cropID] = JSON.parse(xhr.responseText);
+			<% for property in Crop::PROPERTIES %>
+				simulation.crops[cropID].<%= property %> = new Uint8Array(simulation.width * simulation.height);
+			<% end %>
+			postMessage({type: 'crop_initialize', crop_id: cropID, crop_name: simulation.crops[cropID].name});
 
-      // plant the crop
-      simulation.fields[fieldIndex].patches.forEach( function(patch) {
-        simulation.crops[cropID].root_biomass[patch.index] = 25 * patch.ratio
-        simulation.crops[cropID].leaf_biomass[patch.index] = 25 * patch.ratio
-      });
-    <% for property in Crop::PROPERTIES %>
-      postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
-    <% end %>
-
-    });
- 
-
-  } else {
-
-      // plant the crop
-      simulation.fields[fieldIndex].patches.forEach( function(patch) {
-        simulation.crops[cropID].root_biomass[patch.index] = 25 * patch.ratio
-        simulation.crops[cropID].leaf_biomass[patch.index] = 25 * patch.ratio
-      });
-    <% for property in Crop::PROPERTIES %>
-      postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
-    <% end %>
-
-  }
+			// plant the crop
+			simulation.fields[fieldIndex].patches.forEach( function(patch) {
+				simulation.crops[cropID].root_biomass[patch.index] = 25 * patch.ratio
+				simulation.crops[cropID].leaf_biomass[patch.index] = 25 * patch.ratio
+			});
+			<% for property in Crop::PROPERTIES %>
+				postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
+			<% end %>
+		});
+	}
+	else {
+		// plant the crop
+		simulation.fields[fieldIndex].patches.forEach( function(patch) {
+			simulation.crops[cropID].root_biomass[patch.index] = 25 * patch.ratio
+			simulation.crops[cropID].leaf_biomass[patch.index] = 25 * patch.ratio
+		});
+		<% for property in Crop::PROPERTIES %>
+			postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
+		<% end %>
+	}
 }
 
 <%= render "load_via_xhr" %>
