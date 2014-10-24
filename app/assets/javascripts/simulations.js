@@ -2,6 +2,12 @@
 var panViewportToFollowTractor = true;
 var canvasDimensions = [800, 600];
 var clampAngle, steerAngle, wrapAngle;
+var globalDrawGranularityGuidelines = false;
+
+//var globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
+
+
+
 
 //gets the angle between -2pi and +2pi
 wrapAngle = function(angle) {
@@ -163,7 +169,7 @@ if ($('#simulation-controls').length > 0) {
 	//when a message returns from the worker thread,
 	//perform an action based on the 'msg.data.type'
 	simulation.worker.onmessage = function(msg) {
-		console.log(msg.data);
+		//console.log(msg.data);
 		switch (msg.data.type) {
 			case 'size_update':
 				updateSize(msg.data.size);
@@ -236,7 +242,6 @@ if ($('#simulation-controls').length > 0) {
 
 		//ctx contains the properties and methods to draw on the canvas
 		ctx = fields[0].getContext('2d');
-		console.log(simulation.size);
 
 		//draws the path on each field
 		simulation.size.fields.forEach(function(field) {
@@ -530,14 +535,31 @@ if ($('#simulation-controls').length > 0) {
 		game.ctx.terrain.strokeStyle = 'yellow';
 		game.ctx.terrain.lineWidth = 5;
 		
+		var field_id = 0;
 		simulation.size.fields.forEach(function(field) {
+			
+			field.poly = new PolygonGrid(field_id); //(game, simulation);
+			field_id++;
+			
+			// Provides data on whether a set of coordinates are inside or outside the field boundaries
+			// var stepSizeY = game.height / simulation.size.granularity;
+			// var stepSizeX = game.width / simulation.size.granularity;
+			// var polyGrid = getPolyGrid(field_id);
+			// field.poly = {
+				// grid: polyGrid,
+				// stepX: stepSizeX,
+				// stepY: stepSizeY,
+				
+			// };
+		
 			game.ctx.terrain.beginPath();
 			field.bounds.forEach(function(corner) {
 				return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
 			});
 			game.ctx.terrain.closePath();
-			return game.ctx.terrain.stroke();
+			game.ctx.terrain.stroke();
 		});
+		
 		game.path = [];
 		game.tracking = false;
 	  
@@ -848,6 +870,53 @@ if ($('#simulation-controls').length > 0) {
 					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
 					game.combine.x += speed * Math.cos(game.combine.angle);
 					game.combine.y += speed * Math.sin(game.combine.angle);
+					if (game.combine.active) {
+						game.ctx.terrain.save();
+						x = game.combine.x;
+						y = game.combine.y;
+						game.ctx.terrain.translate(x, y);
+						game.ctx.terrain.rotate(game.combine.angle);
+						//game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
+						
+						// ??? Placeholder, no stamp for the combine yet
+						//game.ctx.terrain.fillStyle = '#3d1f00';
+						//game.ctx.terrain.fillRect(-16, -9, 20, 20)
+						
+						game.ctx.vegitation.save();
+						game.ctx.vegitation.translate(x, y);
+						game.ctx.vegitation.rotate(game.drill.angle);
+						//game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
+						//game.ctx.vegitation.fillStyle = '#3d1f00';
+						//game.ctx.vegitation.fillRect(-16, -9, 20, 20);
+						
+						/*
+						// Eraser
+						var globalComposite = game.ctx.vegitation.globalCompositeOperation;
+						
+						// SOURCE:  http://jsfiddle.net/ArtBIT/WUXDb/1/
+						game.ctx.vegitation.globalCompositeOperation = 'destination-out';
+						
+						//game.ctx.vegitation.fillCircle(-10, -10, 20, '#ff0000');
+						
+						//game.ctx.vegitation.fillStyle = '#ff0000';
+						//game.ctx.vegitation.fillRect(-10, -10, 20, 20);
+						
+						//game.ctx.arc(-10, -10, 20, 0, 2 * Math.PI, false);
+						//game.ctx.fill();
+						
+						//game.ctx.vegitation.globalCompositeOperation = "copy";
+						//game.ctx.vegitation.globalCompositeOperation = "destination-out";
+						//game.ctx.vegitation.strokeStyle = "rgba(0,0,0,1)";
+						//game.ctx.vegitation.stroke(); 
+						//game.ctx.vegitation.fillRect(-16, -9, 20, 20);
+						game.ctx.vegitation.globalCompositeOperation = globalComposite;
+						*/
+						
+						game.ctx.vegitation.restore();
+						
+						
+						game.ctx.terrain.restore();
+					}
 				}
 			} //end switch
 			
@@ -948,12 +1017,38 @@ if ($('#simulation-controls').length > 0) {
 			game.ctx.back.moveTo(game.path[0].x, game.path[0].y);
 		}
 		//draws the line from point to point
+		var isOnNoAction = false;
 		game.path.forEach(function(point) {
-			return game.ctx.back.lineTo(point.x, point.y);
+		
+			if (isOnNoAction != point.noaction)
+			{
+				isOnNoAction = point.noaction;
+				game.ctx.back.stroke();
+				game.ctx.back.closePath();
+				game.ctx.back.moveTo(point.x, point.y);
+				game.ctx.back.beginPath();
+				if (point.noaction) 	game.ctx.back.strokeStyle = '#7A7A52';
+				else 				game.ctx.back.strokeStyle = 'red';
+			}
+			
+			game.ctx.back.lineTo(point.x, point.y);
 		});
 		game.ctx.back.stroke();
 		game.ctx.back.restore();
-		return game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y);
+		
+		game.ctx.front.drawImage(game.buffers.back, -game.viewport.x, -game.viewport.y);
+		
+		
+		// render granularity guidelines
+		if (globalDrawGranularityGuidelines) 
+		{
+			//drawGranularity(0); // Using first field // ??? WILL THIS EVER BE MORE THAN 0 ???
+			
+			simulation.size.fields.forEach(function(field) {
+				//console.log(field);
+				field.poly.drawGrid();
+			});
+		}
 	};
 
 	growCrop = function(patchX, patchY, category, amount) {
@@ -1030,171 +1125,22 @@ if ($('#simulation-controls').length > 0) {
 	});
 	
 	
-	
-	//============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
-	// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
-	/*
-	Copyright (c) 1970-2003, Wm. Randolph Franklin
-	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers.
-	Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution.
-	The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission.
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	*/
-	/*
-	nvert - Number of vertices in the polygon. Whether to repeat the first vertex at the end is discussed below.
-	vertx, verty - Arrays containing the x- and y-coordinates of the polygon's vertices.
-	testx, testy - X- and y-coordinate of the test point.
-	*/
-	function pnpoly( nvert, vertx, verty, testx, testy ) {
-    var i, j, c = false;
-    for( i = 0, j = nvert-1; i < nvert; j = i++ ) {
-        if( ( ( verty[i] > testy ) != ( verty[j] > testy ) ) &&
-            ( testx < ( vertx[j] - vertx[i] ) * ( testy - verty[i] ) / ( verty[j] - verty[i] ) + vertx[i] ) ) {
-                c = !c;
-			}
-		}
-		return c;
-	}
-	//============== CHECK IF POINT FALLS WITHIN POLYGON (end) ================
-
-	function writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside)
-	{
-		// If these coordinates fall within the polygon, till this point
-		if (pnpoly( nvert, vertx, verty, testx, testy ))
-		{
-			// Travel to start of next sweep, but do NOT have tiller down until we get there
-			if (lastStepWasOutside)
-			{
-				lastStepWasOutside = false;
-				game.path.push({
-					x: testx,
-					y: testy,
-					noaction: true
-				});
-			}
-			
-			game.path.push({
-				x: testx,
-				y: testy
-			});
-			
-			lastX = testx;
-			lastY = testy;
-		}
-		else
-		{
-			// Travel to start of next sweep, but do NOT have tiller down until we get there
-			/*
-			// I do not know why this did not work
-			if (game.path[0] && game.path[0].noaction) game.path.shift();
-			game.path.push({
-				x: testx,
-				y: testy,
-				noaction: true
-			});
-			*/
-			if (!lastStepWasOutside)
-			{
-				lastStepWasOutside = true;
-				game.path.push({
-					x: lastX,
-					y: lastY,
-					noaction: true
-				});
-			}
-		}
-		return lastStepWasOutside;
-	}
-	
-	function autoDrawPath(field_id)
-	{
-		game.path = []; // Empty current path before drawing a new one.
-	
-		var nvert = 0;
-		var vertx = [];
-		var verty = [];
-		simulation.size.fields[field_id].bounds.forEach(function(corner) {
-			vertx[nvert] = corner.x * simulation.size.granularity;
-			verty[nvert] = corner.y * simulation.size.granularity;
-			nvert++;
-		});
-		
-		var stepSizeY = game.height / simulation.size.granularity;
-		var stepSizeX = game.width / simulation.size.granularity;
-		
-		var lastStepWasOutside = true;
-		var lastX, lastY;
-		
-		var sweepLeftToRight = true; // To be more efficient, sweep one way, then the other way
-		for (var i = 1; i < simulation.size.granularity; i++)
-		{
-			testy = i*stepSizeY;
-			
-			if (sweepLeftToRight)
-			{
-				for (var j = 1; j < simulation.size.granularity; j++)
-				{
-					testx = j*stepSizeX;
-					
-					lastStepWasOutside = writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside);
-				}
-				sweepLeftToRight = false;
-			}
-			else
-			{
-				for (var j = simulation.size.granularity; j > 1; j--)
-				{
-					testx = j*stepSizeX;
-					
-					lastStepWasOutside = writePathInPoly(nvert, vertx, verty, testx, testy, lastStepWasOutside);
-				}
-				sweepLeftToRight = true;
-			}
-		}
-	}
+	// This is mostly a helper for use during development
+	// This draws a grid to show the "patches" created by the "granularity" of the simulation
+	$('#draw-granularity').on('click', function() {
+		globalDrawGranularityGuidelines = this.checked; // !globalDrawGranularityGuidelines; // Toggle guidelines
+		//globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
+	});
 	
 	
     $('#auto-till').on('click', function() {
       return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
-        game.state = 'tilling';
 		var field_id, pattern;
 		field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
-        //field_id = 0; // !!! temp, delete later!
-		
-		/*
-        pattern = game.ctx.terrain.createPattern(game.plow.stamp, 'repeat');
-        game.ctx.terrain.save();
-        game.ctx.terrain.fillStyle = pattern;
-        game.ctx.terrain.beginPath();
-        simulation.size.fields[field_id].bounds.forEach(function(corner) {
-          return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-        });
-        game.ctx.terrain.closePath();
-        game.ctx.terrain.fill();
-        game.ctx.terrain.restore();
-		*/
-		
-		autoDrawPath(field_id);
-		
-		
-		/*
-		simulation.size.fields[field_id].bounds.forEach(function(corner) {
-			var tempX = corner.x * simulation.size.granularity;
-			var tempY = corner.y * simulation.size.granularity;
-			
-			console.log(tempX + ", " + tempY);
-			game.ctx.terrain.font="15px Georgia";
-			game.ctx.terrain.fillStyle = "black";
-			game.ctx.terrain.fillText(tempX + ", " + tempY, tempX, tempY);
-			
-			game.path.push({
-				x: tempX,
-				y: tempY
-			});
-		});
-		*/
-		
+        if (field_id !== -1) {
+			game.state = 'tilling';
+			simulation.size.fields[field_id].poly.drawPath();
+		}
       });
     });
 	
@@ -1224,26 +1170,8 @@ if ($('#simulation-controls').length > 0) {
 				var field_id, pattern;
 				field_id = $('input[name="field_id"]:checked').val();
 				if (field_id !== -1) {
-					/*
-					pattern = game.ctx.terrain.createPattern(game.drill.stamp, 'repeat');
-					game.ctx.terrain.save();
-					game.ctx.terrain.fillStyle = pattern;
-					game.ctx.terrain.beginPath();
-					simulation.size.fields[field_id].bounds.forEach(function(corner) {
-						return game.ctx.terrain.lineTo(corner.x * simulation.size.granularity, corner.y * simulation.size.granularity);
-					});
-					game.ctx.terrain.closePath();
-					game.ctx.terrain.fill();
-					game.ctx.terrain.restore();
-					return simulation.worker.postMessage({
-					type: 'plant',
-					crop: crop_id,
-					field: field_id
-					});
-					*/
-					
 					game.state = 'planting';
-					autoDrawPath(field_id);
+					simulation.size.fields[field_id].poly.drawPath();
 				}
 			});
 			}
@@ -1273,10 +1201,11 @@ if ($('#simulation-controls').length > 0) {
 	$('#auto-harvest').on('click', function() {
       return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
 		var field_id, pattern;
-		field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
-
-		game.state = 'harvesting';
-		autoDrawPath(field_id);
+		field_id = $('input[name="field_id"]:checked').val();
+		if (field_id !== -1) {
+			game.state = 'harvesting';
+			simulation.size.fields[field_id].poly.drawPath();
+		}
       });
     });
 	
@@ -1309,8 +1238,12 @@ if ($('#simulation-controls').length > 0) {
 			});
 			updateGame();
 		}
-		if (game && game.ctx && game.ctx.back) // !!!
-			return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		//if (game && game.path && game.path.length != globalLastPathLinkChecked) {
+			//console.log("rendering...");
+			//globalLastPathLinkChecked = game.path.length;
+			if (game && game.ctx && game.ctx.back) // !!!
+				return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		//}
     };
 	
 	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation.
@@ -1531,5 +1464,204 @@ if ($('#simulation-controls').length > 0) {
 		pause.hide();
 		return simulation.worker.postMessage({ type: 'init'});
     });
-  } //end if
+  //} //end if
+
+
+
+
+
+
+
+
+
+	//============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
+		// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
+		/*
+		Copyright (c) 1970-2003, Wm. Randolph Franklin
+		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+		Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers.
+		Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution.
+		The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission.
+		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+		*/
+		/*
+		nvert - Number of vertices in the polygon. Whether to repeat the first vertex at the end is discussed below.
+		vertx, verty - Arrays containing the x- and y-coordinates of the polygon's vertices.
+		testx, testy - X- and y-coordinate of the test point.
+		*/
+		function pnpoly( nvert, vertx, verty, testx, testy ) {
+		var i, j, c = false;
+		for( i = 0, j = nvert-1; i < nvert; j = i++ ) {
+			if( ( ( verty[i] > testy ) != ( verty[j] > testy ) ) &&
+				( testx < ( vertx[j] - vertx[i] ) * ( testy - verty[i] ) / ( verty[j] - verty[i] ) + vertx[i] ) ) {
+					c = !c;
+				}
+			}
+			return c;
+		}
+	//============== CHECK IF POINT FALLS WITHIN POLYGON (end) ================
+
+	function PolygonGrid(field_id)	//(field, simulation)
+	{
+		// Gather polygon data from this field for "pnpoly" checks (below)
+		var nvert = 0;
+		var vertx = [];
+		var verty = [];
+		simulation.size.fields[field_id].bounds.forEach(function(corner) {
+		//field.bounds.forEach(function(corner) {
+			vertx[nvert] = corner.x * simulation.size.granularity;
+			verty[nvert] = corner.y * simulation.size.granularity;
+			nvert++;
+		});
+
+		var stepSizeY = game.height / simulation.size.granularity;
+		var stepSizeX = game.width / simulation.size.granularity;
+		var testx, testy;
+		
+		var outputGrid = [];
+		
+		for (var i = 0; i < simulation.size.granularity; i++)
+		{
+			testx = i*stepSizeX;
+			
+			outputGrid[i] = [];
+			
+			for (var j = 0; j < simulation.size.granularity; j++)
+			{
+				testy = j*stepSizeY;
+				
+				// Check if these coordinates fall inside the polygon's boundaries
+				outputGrid[i][j] = pnpoly( nvert, vertx, verty, testx, testy );
+			}
+		}
+		
+		
+		// ====== Object Data ======
+		this.stepx = stepSizeX;
+		this.stepy = stepSizeY;
+		this.grid = outputGrid;
+	}
+
+	PolygonGrid.prototype.drawGrid = function() {
+		var testx, testy;
+		
+		game.ctx.terrain.lineWidth = 0.3;
+		game.ctx.front.strokeStyle = '#0000ff';
+		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
+			
+		game.ctx.front.save();
+		game.ctx.front.beginPath();
+		for (var j = 0; j < simulation.size.granularity-1; j++)
+		{
+			testy = j*this.stepy - game.viewport.y;
+		
+			for (var i = 0; i < simulation.size.granularity-1; i++)
+			{
+				testx = i*this.stepx - game.viewport.x;
+				
+				// Check if this grid square fits inside the field boundaries
+				if (this.grid[i][j] && this.grid[i+1][j+1])
+				{
+					// Draw four lines to create a square grid box
+				
+					// left
+					game.ctx.front.moveTo(testx, testy);
+					game.ctx.front.lineTo(testx, testy+this.stepy);
+					
+					// top
+					game.ctx.front.moveTo(testx, testy);
+					game.ctx.front.lineTo(testx+this.stepx, testy);
+					
+					// bottom
+					game.ctx.front.moveTo(testx, testy+this.stepy);
+					game.ctx.front.lineTo(testx+this.stepx, testy+this.stepy);
+					
+					// right
+					game.ctx.front.moveTo(testx+this.stepx, testy);
+					game.ctx.front.lineTo(testx+this.stepx, testy+this.stepy);
+				}
+			}
+		}
+		game.ctx.front.stroke();
+		game.ctx.front.closePath();
+		game.ctx.front.restore();
+	};
+	
+	PolygonGrid.prototype.drawPath = function() {
+		game.path = [];
+		
+		var testx, testy;
+		
+		game.ctx.terrain.lineWidth = 0.3;
+		game.ctx.front.strokeStyle = '#0000ff';
+		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
+			
+		var lastStepWasOutside = true;
+		var goLeftToRight = true;
+		for (var y = 1; y < simulation.size.granularity; y++)
+		{
+			if (goLeftToRight)
+			{
+				for (var x = 1; x < simulation.size.granularity-1; x++)
+				{
+					lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
+					lastX = x*this.stepx;
+					lastY = y*this.stepy;
+				}
+			}
+			else
+			{
+				for (var x = simulation.size.granularity-1; x > 1; x--)
+				{
+					lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
+					lastX = x*this.stepx;
+					lastY = y*this.stepy;
+				}
+			}
+			goLeftToRight = !goLeftToRight;
+		}
+	};
+	
+	PolygonGrid.prototype.drawStep = function(x, y, lastStepWasOutside)
+	{
+		testy = y*this.stepy;
+		testx = x*this.stepx;
+	
+		// Check if this grid square fits inside the field boundaries
+		if (this.grid[x][y])
+		{
+			// Travel to start of next sweep, but do NOT have tiller down until we get there
+			if (lastStepWasOutside)
+			{
+				lastStepWasOutside = false;
+				game.path.push({
+					x: testx,
+					y: testy,
+					noaction: true
+				});
+			}
+			
+			game.path.push({
+				x: testx,
+				y: testy
+			});
+		}
+		else
+		{
+			// Travel to start of next sweep, but do NOT have tiller down until we get there
+			if (!lastStepWasOutside)
+			{
+				lastStepWasOutside = true;
+				game.path.push({
+					x: lastX,
+					y: lastY,
+					noaction: true
+				});
+			}
+		}
+		return lastStepWasOutside;
+	};
+	
+
+  } // end if
 }); //end jQuery
