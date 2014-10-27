@@ -368,9 +368,27 @@ function updateCrops() {
 
 //when the field has been auto tilled, what do we do?
 function tillField(fieldIndex, x, y) {
-	//var field = simulation.fields[fieldIndex];
 	console.log("tilling field " + fieldIndex + " at x: " + x + " y: " + y);
 
+	/*
+	// ??? v
+	//console.log(simulation.fields[0].patches);
+	var field = simulation.fields[fieldIndex];
+	for (var i in field.patches)
+	{
+		if (field.patches[i].x <= x && field.patches[i].x + 100 > x)
+		{
+			if (field.patches[i].y <= y && field.patches[i].y + 100 > y)
+			{
+				// We are within this patch
+				console.log("tilling patch with index of " + field.patches[i].index
+				//simulation.granularity
+			}
+		}
+	}
+	// ??? ^
+	*/
+	
 	//see plantFieldWithCrop
 	
 	/*

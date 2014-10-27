@@ -439,7 +439,8 @@ if ($('#simulation-controls').length > 0) {
 		y: 0,
 		angle: 0,
 		active: false,
-		image: new Image()
+		image: new Image(),
+		width: 18.288 // 60ft
 	};
 
 	//the object to hold our tractor
@@ -447,7 +448,8 @@ if ($('#simulation-controls').length > 0) {
 		x: 0,
 		y: 0,
 		angle: 0,
-		image: new Image()
+		image: new Image(),
+		//width: 18.288 // 60ft
 	};
 
 	//the object to hold our plow
@@ -457,7 +459,8 @@ if ($('#simulation-controls').length > 0) {
 		angle: 0,
 		active: false,
 		image: new Image(),
-		stamp: new Image()
+		stamp: new Image(),
+		width: 18.288 // 60ft
 	};
 	
 	//the object for our drill
@@ -468,7 +471,8 @@ if ($('#simulation-controls').length > 0) {
 		active: false,
 		image: new Image(),
 		stamp: new Image(),
-		seed: new Image()
+		seed: new Image(),
+		width: 18.288 // 60ft
 	};
 
 	//the image for our farm
@@ -1678,6 +1682,18 @@ if ($('#simulation-controls').length > 0) {
 	PolygonGrid.prototype.drawPath = function() {
 		game.path = [];
 		
+		// !!! Use width of implement to determine spacing between rows (instead of just using granularity)!
+		// ??? Also need to make both the visually tilling/etc and the FUNCTIONAL tilling/etc be accurate to scale?
+		
+		var widthOfTool = 18.288; // 60 meters
+		if (game.state == 'tilling') {
+			widthOfTool = game.plow.width;
+		} else if (game.state == 'planting') {
+			widthOfTool = game.combine.width;
+		} else if (game.state == 'harvesting') {
+			widthOfTool = game.drill.width;
+		}
+		
 		var testx, testy;
 		
 		game.ctx.terrain.lineWidth = 0.3;
@@ -1688,25 +1704,37 @@ if ($('#simulation-controls').length > 0) {
 		var goLeftToRight = true;
 		for (var y = 1; y < simulation.size.granularity; y++)
 		{
-			if (goLeftToRight)
+			console.log("offsetcalc y: " + (y % (widthOfTool/this.stepy)));
+			if (y % (widthOfTool/this.stepy) <= 1) // Width of implement
 			{
-				for (var x = 1; x < simulation.size.granularity-1; x++)
+				if (goLeftToRight)
 				{
-					lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
-					lastX = x*this.stepx;
-					lastY = y*this.stepy;
+					for (var x = 1; x < simulation.size.granularity-1; x++)
+					{
+						console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
+						if (x % (widthOfTool/this.stepx) <= 1) // Width of implement
+						{
+							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
+							lastX = x*this.stepx;
+							lastY = y*this.stepy;
+						}
+					}
 				}
-			}
-			else
-			{
-				for (var x = simulation.size.granularity-1; x > 1; x--)
+				else
 				{
-					lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
-					lastX = x*this.stepx;
-					lastY = y*this.stepy;
+					for (var x = simulation.size.granularity-1; x > 1; x--)
+					{
+						console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
+						if (x % (widthOfTool/this.stepx) <= 1) // Width of implement
+						{
+							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
+							lastX = x*this.stepx;
+							lastY = y*this.stepy;
+						}
+					}
 				}
+				goLeftToRight = !goLeftToRight;
 			}
-			goLeftToRight = !goLeftToRight;
 		}
 	};
 	
