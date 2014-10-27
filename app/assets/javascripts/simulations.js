@@ -130,6 +130,7 @@ if ($('#simulation-controls').length > 0) {
 	//mouse is an object with attributes 'x' and 'y'
 	game = {
 		state: 'observer',
+		currentfield: 0,
 		mouse: {
 			x: 0,
 			y: 0
@@ -179,12 +180,12 @@ if ($('#simulation-controls').length > 0) {
 				break;
 			case 'weather_update':
 				updateWeather(msg.data.weather);
-				break;
-			case 'field_tilled':
-				alert("Message received from worker");
-				setTimeout(function() {}, 10000);
-				tillField(msg.data.field_index); //, msg.data.field_name); //write this function
-				break;
+				break
+
+
+
+
+
 			case 'soil_data_layer_update':
 				updateSoilDataLayer(msg.data.layer_name, msg.data.layer_data);
 				break;
@@ -386,6 +387,7 @@ if ($('#simulation-controls').length > 0) {
 		alert("Fields reset?");
 	};
 
+	
 	//colors the soil with the RGB values from the layerColors dictionary
 	updateSoilDataLayer = function(name, data) {
 		var brush, brushData, offset, x, y;
@@ -783,7 +785,7 @@ if ($('#simulation-controls').length > 0) {
 
 	updateGame = function() {
 		var distance, dx, dy, speed, x, y;
-		console.log(game.state);
+		//console.log(game.state);
 		switch (game.state) {
 			case 'tilling':
 				dy = 0;
@@ -821,6 +823,16 @@ if ($('#simulation-controls').length > 0) {
 						game.ctx.terrain.rotate(game.plow.angle);
 						game.ctx.terrain.drawImage(game.plow.stamp, -22, -9);
 						game.ctx.terrain.restore();
+						
+						// ???
+						simulation.worker.postMessage({
+							type: 'till',
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
+
+					
 					}
 				}
 				break;
@@ -865,6 +877,16 @@ if ($('#simulation-controls').length > 0) {
 						game.ctx.vegitation.rotate(game.drill.angle);
 						game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
 						game.ctx.vegitation.restore();
+
+						
+						// ???
+						simulation.worker.postMessage({
+							type: 'plant',
+							crop: crop_id,
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
 					}
 				}
 				break;
@@ -893,53 +915,65 @@ if ($('#simulation-controls').length > 0) {
 					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
 					game.combine.x += speed * Math.cos(game.combine.angle);
 					game.combine.y += speed * Math.sin(game.combine.angle);
+
+					
 					if (game.combine.active) {
-						game.ctx.terrain.save();
-						x = game.combine.x;
-						y = game.combine.y;
-						game.ctx.terrain.translate(x, y);
-						game.ctx.terrain.rotate(game.combine.angle);
-						//game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
-						
-						// ??? Placeholder, no stamp for the combine yet
-						//game.ctx.terrain.fillStyle = '#3d1f00';
-						//game.ctx.terrain.fillRect(-16, -9, 20, 20)
-						
-						game.ctx.vegitation.save();
-						game.ctx.vegitation.translate(x, y);
-						game.ctx.vegitation.rotate(game.drill.angle);
-						//game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
-						//game.ctx.vegitation.fillStyle = '#3d1f00';
-						//game.ctx.vegitation.fillRect(-16, -9, 20, 20);
-						
-						/*
-						// Eraser
-						var globalComposite = game.ctx.vegitation.globalCompositeOperation;
-						
-						// SOURCE:  http://jsfiddle.net/ArtBIT/WUXDb/1/
-						game.ctx.vegitation.globalCompositeOperation = 'destination-out';
-						
-						//game.ctx.vegitation.fillCircle(-10, -10, 20, '#ff0000');
-						
-						//game.ctx.vegitation.fillStyle = '#ff0000';
-						//game.ctx.vegitation.fillRect(-10, -10, 20, 20);
-						
-						//game.ctx.arc(-10, -10, 20, 0, 2 * Math.PI, false);
-						//game.ctx.fill();
-						
-						//game.ctx.vegitation.globalCompositeOperation = "copy";
-						//game.ctx.vegitation.globalCompositeOperation = "destination-out";
-						//game.ctx.vegitation.strokeStyle = "rgba(0,0,0,1)";
-						//game.ctx.vegitation.stroke(); 
-						//game.ctx.vegitation.fillRect(-16, -9, 20, 20);
-						game.ctx.vegitation.globalCompositeOperation = globalComposite;
-						*/
-						
-						game.ctx.vegitation.restore();
-						
-						
-						game.ctx.terrain.restore();
+						// ???
+						simulation.worker.postMessage({
+							type: 'harvest',
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
 					}
+					
+					// if (game.combine.active) {
+						// game.ctx.terrain.save();
+						// x = game.combine.x;
+						// y = game.combine.y;
+						// game.ctx.terrain.translate(x, y);
+						// game.ctx.terrain.rotate(game.combine.angle);
+						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
+						
+						// // ??? Placeholder, no stamp for the combine yet
+						// //game.ctx.terrain.fillStyle = '#3d1f00';
+						// //game.ctx.terrain.fillRect(-16, -9, 20, 20)
+						
+						// game.ctx.vegitation.save();
+						// game.ctx.vegitation.translate(x, y);
+						// game.ctx.vegitation.rotate(game.drill.angle);
+						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
+						// //game.ctx.vegitation.fillStyle = '#3d1f00';
+						// //game.ctx.vegitation.fillRect(-16, -9, 20, 20);
+						
+						// /*
+						// // Eraser
+						// var globalComposite = game.ctx.vegitation.globalCompositeOperation;
+						
+						// // SOURCE:  http://jsfiddle.net/ArtBIT/WUXDb/1/
+						// game.ctx.vegitation.globalCompositeOperation = 'destination-out';
+						
+						// //game.ctx.vegitation.fillCircle(-10, -10, 20, '#ff0000');
+						
+						// //game.ctx.vegitation.fillStyle = '#ff0000';
+						// //game.ctx.vegitation.fillRect(-10, -10, 20, 20);
+						
+						// //game.ctx.arc(-10, -10, 20, 0, 2 * Math.PI, false);
+						// //game.ctx.fill();
+						
+						// //game.ctx.vegitation.globalCompositeOperation = "copy";
+						// //game.ctx.vegitation.globalCompositeOperation = "destination-out";
+						// //game.ctx.vegitation.strokeStyle = "rgba(0,0,0,1)";
+						// //game.ctx.vegitation.stroke(); 
+						// //game.ctx.vegitation.fillRect(-16, -9, 20, 20);
+						// game.ctx.vegitation.globalCompositeOperation = globalComposite;
+						// */
+						
+						// game.ctx.vegitation.restore();
+						
+						
+						// game.ctx.terrain.restore();
+					// }
 				}
 			} //end switch
 			
@@ -1141,10 +1175,18 @@ if ($('#simulation-controls').length > 0) {
 	
 	//allows a user to manually till a field
 	$('#manual-till').on('click', function() {
-		game.state = 'tilling';
-		displayCurrentButtonSelected();
-		game.viewport.target = game.tractor;
-		return game.path = [];
+		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var field_id = $('input[name="field_id"]').val();
+			if (field_id !== -1) {
+				game.state = 'tilling';
+
+
+				game.currentfield = field_id; // !!! ???
+				displayCurrentButtonSelected();
+				game.viewport.target = game.tractor;
+				game.path = []; // clear existing path
+			}
+		});
 	});
 	
 	
@@ -1159,9 +1201,11 @@ if ($('#simulation-controls').length > 0) {
     $('#auto-till').on('click', function() {
       return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
 		var field_id, pattern;
-		field_id = $('input[name="field_id"]:checked').val(); // !!! temp, re-enable later!
+		field_id = $('input[name="field_id"]:checked').val();
         if (field_id !== -1) {
+			game.path = [];
 			game.state = 'tilling';
+			game.currentfield = field_id; // !!! ???
 			simulation.size.fields[field_id].poly.drawPath();
 		}
       });
@@ -1175,28 +1219,40 @@ if ($('#simulation-controls').length > 0) {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-				game.state = 'planting';
-				displayCurrentButtonSelected();
-				game.viewport.target = game.tractor;
-				return game.path = [];
+				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+					var field_id = $('input[name="field_id"]').val();
+					if (field_id !== -1) {
+						game.path = []; // clear existing path
+						game.state = 'planting';
+
+
+
+						game.currentfield = field_id; // !!! ???
+						displayCurrentButtonSelected();
+						game.viewport.target = game.tractor;
+					}
+				});
 			}
 		});
 	});
 	
 	//allows a user to automatically plant a crop in a field
 	$('#auto-plant').on('click', function() {
-		return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
+		$('#crop-select-modal').modal().one('hidden.bs.modal', function() {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-			return $('#field-select-modal').modal().one('hidden.bs.modal', function() {
-				var field_id, pattern;
-				field_id = $('input[name="field_id"]:checked').val();
-				if (field_id !== -1) {
-					game.state = 'planting';
-					simulation.size.fields[field_id].poly.drawPath();
-				}
-			});
+				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+					var field_id, pattern;
+					field_id = $('input[name="field_id"]:checked').val();
+					if (field_id !== -1) {
+						game.path = []; // clear existing path
+						game.state = 'planting';
+						game.currentfield = field_id; // !!! ???
+						simulation.size.fields[field_id].poly.drawPath();
+
+					}
+				});
 			}
 		});
 	});
@@ -1216,17 +1272,26 @@ if ($('#simulation-controls').length > 0) {
 	});
 
 	$('#manual-harvest').on('click', function() {
-		game.state = 'harvesting';
-		displayCurrentButtonSelected();
-		return game.viewport.target = game.combine;
+		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var field_id = $('input[name="field_id"]').val();
+			if (field_id !== -1) {
+				game.path = []; // clear existing path
+				game.state = 'harvesting';
+				game.currentfield = field_id; // !!! ???
+				displayCurrentButtonSelected();
+				game.viewport.target = game.combine;
+			}
+		});
 	});
 	
 	$('#auto-harvest').on('click', function() {
-      return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
+      $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
 		var field_id, pattern;
 		field_id = $('input[name="field_id"]:checked').val();
 		if (field_id !== -1) {
+			game.path = [];
 			game.state = 'harvesting';
+			game.currentfield = field_id; // !!! ???
 			simulation.size.fields[field_id].poly.drawPath();
 		}
       });
@@ -1238,7 +1303,7 @@ if ($('#simulation-controls').length > 0) {
 		index = $(this).data('field-index');
 		boxes = $("input[name=field_id]");
 		boxes.prop('checked', false).parent().removeClass("active");
-		console.log(index);
+		//console.log(index);
 		return boxes.filter("[value=" + index + "]").prop('checked', true).parent().addClass("active");
 	});
 	
@@ -1255,7 +1320,7 @@ if ($('#simulation-controls').length > 0) {
     step = function() {
 		if (simulation.paused != true) // !!! if paused, do not update game data.
 		{
-			console.log('step');
+			//console.log('step');
 			simulation.worker.postMessage({
 				type: 'tick'
 			});
@@ -1459,7 +1524,7 @@ if ($('#simulation-controls').length > 0) {
 	
 	//run the simulation
     run.on('click', function() {
-      console.log('before step');
+      //console.log('before step');
 		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
 		{
 			simulation.interval = setInterval(step, 100);

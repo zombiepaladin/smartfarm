@@ -40,11 +40,14 @@ onmessage = function(msg) {
 			postMessage({type: 'time_update', time: simulation.clock.time});
 			break;
 		case 'till': 
-			tillField(msg.data.field);
+			tillField(msg.data.field, msg.data.x, msg.data.y);
 			//updateSoil();
 			break;
 		case 'plant':
-			plantFieldWithCrop(msg.data.field, msg.data.crop)
+			plantFieldWithCrop(msg.data.field, msg.data.crop, msg.data.x, msg.data.y)
+			break;
+		case 'harvest':
+			harvestField(msg.data.field, msg.data.x, msg.data.y)
 			break;
 		case 'spray':
 			// do stuff
@@ -364,7 +367,10 @@ function updateCrops() {
 // Simulation interaction methods
 
 //when the field has been auto tilled, what do we do?
-function tillField(fieldIndex) {
+function tillField(fieldIndex, x, y) {
+	//var field = simulation.fields[fieldIndex];
+	console.log("tilling field " + fieldIndex + " at x: " + x + " y: " + y);
+
 	//see plantFieldWithCrop
 	
 	/*
@@ -395,7 +401,9 @@ function tillField(fieldIndex) {
 	postMessage({type: 'field_tilled', field_index: fieldIndex});
 }
 
-function plantFieldWithCrop(fieldIndex, cropID) {
+function plantFieldWithCrop(fieldIndex, cropID, x, y) {
+	//var field = simulation.fields[fieldIndex];
+	console.log("planting field " + fieldIndex + " with crop " + cropID + " at x: " + x + " y: " + y);
 	if (simulation.crops[cropID] == undefined) { // crop not already in use
 
 		// Load the crop data
@@ -430,5 +438,9 @@ function plantFieldWithCrop(fieldIndex, cropID) {
 	}
 }
 
+function harvestField(fieldIndex, x, y) {
+	//var field = simulation.fields[fieldIndex];
+	console.log("harvesting field " + fieldIndex + " at x: " + x + " y: " + y);
+}
 <%= render "load_via_xhr" %>
 <%= render "liang_barsky" %>

@@ -2,7 +2,7 @@
 	
 	setTimeout(function(){
 		var tagHighlightList = $('.tagClass');
-		console.log(tagHighlightList.length);
+		//console.log(tagHighlightList.length);
 		tagHighlightList.each(function( key ) {
 			//console.log(tagHighlightList[key].innerHTML);
 			if (typeof tagHighlightList[key] != "undefined" && typeof tagHighlightList[key].innerHTML != "undefined")
