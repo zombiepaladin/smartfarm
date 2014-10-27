@@ -41,6 +41,7 @@ onmessage = function(msg) {
 			break;
 		case 'till': 
 			tillField(msg.data.field);
+			//updateSoil();
 			break;
 		case 'plant':
 			plantFieldWithCrop(msg.data.field, msg.data.crop)
@@ -362,8 +363,36 @@ function updateCrops() {
 //=====================================================
 // Simulation interaction methods
 
+//when the field has been auto tilled, what do we do?
 function tillField(fieldIndex) {
-	fields[fieldIndex]
+	//see plantFieldWithCrop
+	
+	/*
+	this method should probably remove any existing crop from the field
+	and reset some soil properties.
+	*/
+	//currently, removes all crops from the selected field and
+	//resets the soil to a new array
+	
+	
+	//use this once we have multiple fields working
+	/*if (simulation.fields[fieldIndex] == undefined)
+	{
+		load('/fields/' + fieldIndex + '.json', function(xhr) {
+			simulation.fields[fieldIndex] = JSON.parse(xhr.responseText);
+			<% for property in Soil::PROPERTIES %>
+				simulation.field[fieldIndex].<%= property %> = new Uint8Array(simulation.width * simulation.height);
+			<% end %>
+			postMessage({type: 'field_initialize', field_index: fieldIndex, field_name: simulation.field[fieldIndex].name}); //do we need name?
+		}
+	}*/
+		
+	simulation.crops = [];
+	// Reset soil data buffers  
+	<% for property in Soil::PROPERTIES %>
+		simulation.soil.<%= property %> = new Uint8Array(simulation.width * simulation.height);
+	<% end %>
+	postMessage({type: 'field_tilled', field_index: fieldIndex});
 }
 
 function plantFieldWithCrop(fieldIndex, cropID) {

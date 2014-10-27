@@ -179,7 +179,12 @@ if ($('#simulation-controls').length > 0) {
 				break;
 			case 'weather_update':
 				updateWeather(msg.data.weather);
-				break
+				break;
+			case 'field_tilled':
+				alert("Message received from worker");
+				setTimeout(function() {}, 10000);
+				tillField(msg.data.field_index); //, msg.data.field_name); //write this function
+				break;
 			case 'soil_data_layer_update':
 				updateSoilDataLayer(msg.data.layer_name, msg.data.layer_data);
 				break;
@@ -361,6 +366,24 @@ if ($('#simulation-controls').length > 0) {
 	//set the weather within the simulation object
 	updateWeather = function(weather) {
 		return simulation.weather = weather;
+	};
+
+	//what should we do when the field has been tilled??
+	tillField = function(fieldIndex) {
+		//fieldIndex not used (multiple fields not implemented yet)
+		simulation.soilLayerContexts = {}; //reset soil layers
+		attributes = ["snow_cover", "water_content", "wilting_point", "percolation_travel_time", "porosity", "nitrate", "ammonium", "fresh_organic_nitrogen", "active_organic_nitrogen", "stable_organic_nitrogen", "labile_phosphorus", "fresh_organic_phosphorus", "bound_organic_phosphorus", "active_mineral_phosphorus", "stable_mineral_phosphorus", "flat_residue_carbon", "humus_carbon"];
+
+		//add each of the weather attributes as a checkbox within the Legend
+		attributes.forEach(function(name) {
+			var layer;
+			layer = $("<canvas id='" + name + "' class='layer' width=" + size.width + " height=" + size.height + " style='display: none;'></canvas>");
+			simulation.soilLayerContexts[name] = layer[0].getContext('2d');
+			soilDataLayers.prepend(layer);
+		});
+		
+		//update the game object to reflect changes?
+		alert("Fields reset?");
 	};
 
 	//colors the soil with the RGB values from the layerColors dictionary
