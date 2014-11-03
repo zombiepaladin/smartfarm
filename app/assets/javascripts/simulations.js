@@ -131,6 +131,7 @@ if ($('#simulation-controls').length > 0) {
 	game = {
 		state: 'observer',
 		currentfield: 0,
+		currentcrop: 0,
 		mouse: {
 			x: 0,
 			y: 0
@@ -815,26 +816,45 @@ if ($('#simulation-controls').length > 0) {
 					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
 					game.tractor.x += speed * Math.cos(game.tractor.angle);
 					game.tractor.y += speed * Math.sin(game.tractor.angle);
+					
 					game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
 					game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
+					//game.plow.x = game.tractor.x;
+					//game.plow.y = game.tractor.y;
+					
 					game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16);
 					if (game.plow.active) {
 						game.ctx.terrain.save();
 						game.ctx.terrain.fillStyle = '#3d1f00';
+						/*
 						x = game.plow.x;
 						y = game.plow.y;
 						game.ctx.terrain.translate(x, y);
 						game.ctx.terrain.rotate(game.plow.angle);
 						game.ctx.terrain.drawImage(game.plow.stamp, -22, -9);
+						*/
+						// ???
+						
+						x = game.tractor.x;
+						y = game.tractor.y;
+						game.ctx.terrain.translate(x, y);
+						game.ctx.terrain.rotate(game.tractor.angle);
+						game.ctx.terrain.drawImage(game.plow.stamp, 0, -9);
+						
 						game.ctx.terrain.restore();
 						
 						// ???
-						simulation.worker.postMessage({
-							type: 'till',
-							field: game.currentfield,
-							x: x,
-							y: y
-						});
+						var widthOfTool = game.plow.width; // 18.288; // 60 meters
+						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						for (var i = 0; i < widthOfTool; i++)
+						{
+							simulation.worker.postMessage({
+								type: 'till',
+								field: game.currentfield,
+								x: x,
+								y: y+i
+							});
+						}
 
 					
 					}
@@ -870,27 +890,32 @@ if ($('#simulation-controls').length > 0) {
 					game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16);
 					if (game.drill.active) {
 						game.ctx.terrain.save();
-						x = game.drill.x;
-						y = game.drill.y;
+						x = game.drill.x; // drill
+						y = game.drill.y; // drill
 						game.ctx.terrain.translate(x, y);
 						game.ctx.terrain.rotate(game.drill.angle);
 						game.ctx.terrain.drawImage(game.drill.stamp, -16, -9);
 						game.ctx.terrain.restore();
 						game.ctx.vegitation.save();
 						game.ctx.vegitation.translate(x, y);
-						game.ctx.vegitation.rotate(game.drill.angle);
+						game.ctx.vegitation.rotate(game.drill.angle); // drill
 						game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
 						game.ctx.vegitation.restore();
 
 						
 						// ???
-						simulation.worker.postMessage({
-							type: 'plant',
-							crop: crop_id,
-							field: game.currentfield,
-							x: x,
-							y: y
-						});
+						var widthOfTool = game.combine.width; // 18.288; // 60 meters
+						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						for (var i = 0; i < widthOfTool; i++)
+						{
+							simulation.worker.postMessage({
+								type: 'plant',
+								crop: game.currentcrop,
+								field: game.currentfield,
+								x: x,
+								y: y+i
+							});
+						}
 					}
 				}
 				break;
@@ -919,24 +944,56 @@ if ($('#simulation-controls').length > 0) {
 					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
 					game.combine.x += speed * Math.cos(game.combine.angle);
 					game.combine.y += speed * Math.sin(game.combine.angle);
+					
+					x = game.combine.x;
+					y = game.combine.y;
 
 					
 					if (game.combine.active) {
 						// ???
-						simulation.worker.postMessage({
-							type: 'harvest',
-							field: game.currentfield,
-							x: x,
-							y: y
-						});
+						var widthOfTool = game.combine.width; // 18.288; // 60 meters
+						//widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						for (var i = 0; i < widthOfTool; i++)
+						{
+							simulation.worker.postMessage({
+								type: 'harvest',
+								//crop: game.currentcrop, // Not needed, the worker will need to check to see what crop is planted in this patch.
+								field: game.currentfield,
+								x: x,
+								y: y+i
+							});
+						}
+						
+						//console.log("x: " + x + " y: " + y);
+
+						// Erase crops
+						game.ctx.vegitation.save();
+						game.ctx.vegitation.beginPath();
+						game.ctx.vegitation.translate(x, y);
+						game.ctx.vegitation.rotate(game.combine.angle);
+						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
+						//game.ctx.vegitation.fill();
+						//game.ctx.vegitation.strokeStyle = "limegreen";
+						//game.ctx.vegitation.rect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
+						//game.ctx.vegitation.stroke();
+						game.ctx.vegitation.restore();	
+
+						// // Erase crops
+						// game.ctx.terrain.save();
+						// game.ctx.terrain.beginPath();
+						// game.ctx.terrain.translate(x, y);
+						// game.ctx.terrain.rotate(game.combine.angle);
+						// game.ctx.terrain.clearRect(-widthOfTool/2,0,widthOfTool,80); // ???
+						// //game.ctx.terrain.fill();
+						// game.ctx.terrain.restore();
 					}
 					
 					// if (game.combine.active) {
-						// game.ctx.terrain.save();
-						// x = game.combine.x;
-						// y = game.combine.y;
-						// game.ctx.terrain.translate(x, y);
-						// game.ctx.terrain.rotate(game.combine.angle);
+						// // game.ctx.terrain.save();
+						// // x = game.combine.x;
+						// // y = game.combine.y;
+						// // game.ctx.terrain.translate(x, y);
+						// // game.ctx.terrain.rotate(game.combine.angle);
 						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
 						
 						// // ??? Placeholder, no stamp for the combine yet
@@ -946,6 +1003,9 @@ if ($('#simulation-controls').length > 0) {
 						// game.ctx.vegitation.save();
 						// game.ctx.vegitation.translate(x, y);
 						// game.ctx.vegitation.rotate(game.drill.angle);
+						
+						// game.ctx.vegitation.clearRect(x,y,widthOfTool,30); // ???
+						
 						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
 						// //game.ctx.vegitation.fillStyle = '#3d1f00';
 						// //game.ctx.vegitation.fillRect(-16, -9, 20, 20);
@@ -973,7 +1033,7 @@ if ($('#simulation-controls').length > 0) {
 						// game.ctx.vegitation.globalCompositeOperation = globalComposite;
 						// */
 						
-						// game.ctx.vegitation.restore();
+						// //game.ctx.vegitation.restore();
 						
 						
 						// game.ctx.terrain.restore();
@@ -1179,18 +1239,16 @@ if ($('#simulation-controls').length > 0) {
 	
 	//allows a user to manually till a field
 	$('#manual-till').on('click', function() {
-		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-			var field_id = $('input[name="field_id"]').val();
-			if (field_id !== -1) {
+		//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+		//	var field_id = $('input[name="field_id"]').val();
+		//	if (field_id !== -1) {
 				game.state = 'tilling';
-
-
-				game.currentfield = field_id; // !!! ???
+		//		game.currentfield = field_id; // !!! ???
 				displayCurrentButtonSelected();
 				game.viewport.target = game.tractor;
 				game.path = []; // clear existing path
-			}
-		});
+		//	}
+		//});
 	});
 	
 	
@@ -1223,19 +1281,19 @@ if ($('#simulation-controls').length > 0) {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-					var field_id = $('input[name="field_id"]').val();
-					if (field_id !== -1) {
+				//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+				//	var field_id = $('input[name="field_id"]').val();
+				//	if (field_id !== -1) {
 						game.path = []; // clear existing path
 						game.state = 'planting';
 
 
 
-						game.currentfield = field_id; // !!! ???
+				//		game.currentfield = field_id; // !!! ???
 						displayCurrentButtonSelected();
 						game.viewport.target = game.tractor;
-					}
-				});
+				//	}
+				//});
 			}
 		});
 	});
@@ -1253,6 +1311,7 @@ if ($('#simulation-controls').length > 0) {
 						game.path = []; // clear existing path
 						game.state = 'planting';
 						game.currentfield = field_id; // !!! ???
+						game.currentcrop = crop_id;
 						simulation.size.fields[field_id].poly.drawPath();
 
 					}
@@ -1276,16 +1335,16 @@ if ($('#simulation-controls').length > 0) {
 	});
 
 	$('#manual-harvest').on('click', function() {
-		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-			var field_id = $('input[name="field_id"]').val();
-			if (field_id !== -1) {
+		//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+		//	var field_id = $('input[name="field_id"]').val();
+		//	if (field_id !== -1) {
 				game.path = []; // clear existing path
 				game.state = 'harvesting';
-				game.currentfield = field_id; // !!! ???
+		//		game.currentfield = field_id; // !!! ???
 				displayCurrentButtonSelected();
 				game.viewport.target = game.combine;
-			}
-		});
+		//	}
+		//});
 	});
 	
 	$('#auto-harvest').on('click', function() {
@@ -1711,26 +1770,24 @@ if ($('#simulation-controls').length > 0) {
 				{
 					for (var x = 1; x < simulation.size.granularity-1; x++)
 					{
-						console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
-						if (x % (widthOfTool/this.stepx) <= 1) // Width of implement
-						{
+						//console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
+						//if (x % (widthOfTool/this.stepx) <= 1) { // Width of implement
 							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
 							lastX = x*this.stepx;
 							lastY = y*this.stepy;
-						}
+						//}
 					}
 				}
 				else
 				{
 					for (var x = simulation.size.granularity-1; x > 1; x--)
 					{
-						console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
-						if (x % (widthOfTool/this.stepx) <= 1) // Width of implement
-						{
+						//console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
+						//if (x % (widthOfTool/this.stepx) <= 1) { // Width of implement
 							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
 							lastX = x*this.stepx;
 							lastY = y*this.stepy;
-						}
+						//}
 					}
 				}
 				goLeftToRight = !goLeftToRight;
