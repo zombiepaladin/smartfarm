@@ -1224,31 +1224,28 @@ if ($('#simulation-controls').length > 0) {
 	});
 	
 	//add a class to a button
-	function displayCurrentButtonSelected() {
+	function clearButtonSelection() {
 		$('#manual-till').removeClass('simulation-button-selected');
 		$('#manual-plant').removeClass('simulation-button-selected');
 		$('#manual-harvest').removeClass('simulation-button-selected');
-	
-		if (game.state == 'tilling')
-			$('#manual-till').addClass('simulation-button-selected');
-		else if (game.state == 'planting')	
-			$('#manual-plant').addClass('simulation-button-selected');
-		else if (game.state == 'harvesting')	
-			$('#manual-harvest').addClass('simulation-button-selected');
+		$('#auto-till').removeClass('simulation-button-selected');
+		$('#auto-plant').removeClass('simulation-button-selected');
+		$('#auto-harvest').removeClass('simulation-button-selected');
 	}
 	
 	//allows a user to manually till a field
 	$('#manual-till').on('click', function() {
-		//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-		//	var field_id = $('input[name="field_id"]').val();
-		//	if (field_id !== -1) {
+		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var field_id = $('input[name="field_id"]').val();
+			if (field_id !== -1) {
 				game.state = 'tilling';
-		//		game.currentfield = field_id; // !!! ???
-				displayCurrentButtonSelected();
+				game.currentfield = field_id; // !!! ???
 				game.viewport.target = game.tractor;
 				game.path = []; // clear existing path
-		//	}
-		//});
+				clearButtonSelection();
+				$('#manual-till').addClass('simulation-button-selected');
+			}
+		});
 	});
 	
 	
@@ -1269,6 +1266,8 @@ if ($('#simulation-controls').length > 0) {
 			game.state = 'tilling';
 			game.currentfield = field_id; // !!! ???
 			simulation.size.fields[field_id].poly.drawPath();
+			clearButtonSelection();
+			$('#auto-till').addClass('simulation-button-selected');
 		}
       });
     });
@@ -1281,19 +1280,20 @@ if ($('#simulation-controls').length > 0) {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-				//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-				//	var field_id = $('input[name="field_id"]').val();
-				//	if (field_id !== -1) {
+				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+					var field_id = $('input[name="field_id"]').val();
+					if (field_id !== -1) {
 						game.path = []; // clear existing path
 						game.state = 'planting';
 
 
 
-				//		game.currentfield = field_id; // !!! ???
-						displayCurrentButtonSelected();
+						game.currentfield = field_id; // !!! ???
 						game.viewport.target = game.tractor;
-				//	}
-				//});
+						clearButtonSelection();
+						$('#manual-plant').addClass('simulation-button-selected');
+					}
+				});
 			}
 		});
 	});
@@ -1313,7 +1313,8 @@ if ($('#simulation-controls').length > 0) {
 						game.currentfield = field_id; // !!! ???
 						game.currentcrop = crop_id;
 						simulation.size.fields[field_id].poly.drawPath();
-
+						clearButtonSelection();
+						$('#auto-plant').addClass('simulation-button-selected');
 					}
 				});
 			}
@@ -1335,16 +1336,17 @@ if ($('#simulation-controls').length > 0) {
 	});
 
 	$('#manual-harvest').on('click', function() {
-		//$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-		//	var field_id = $('input[name="field_id"]').val();
-		//	if (field_id !== -1) {
+		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var field_id = $('input[name="field_id"]').val();
+			if (field_id !== -1) {
 				game.path = []; // clear existing path
 				game.state = 'harvesting';
-		//		game.currentfield = field_id; // !!! ???
-				displayCurrentButtonSelected();
+				game.currentfield = field_id; // !!! ???
 				game.viewport.target = game.combine;
-		//	}
-		//});
+				clearButtonSelection();
+				$('#manual-harvest').addClass('simulation-button-selected');
+			}
+		});
 	});
 	
 	$('#auto-harvest').on('click', function() {
@@ -1356,6 +1358,8 @@ if ($('#simulation-controls').length > 0) {
 			game.state = 'harvesting';
 			game.currentfield = field_id; // !!! ???
 			simulation.size.fields[field_id].poly.drawPath();
+			clearButtonSelection();
+			$('#auto-harvest').addClass('simulation-button-selected');
 		}
       });
     });
