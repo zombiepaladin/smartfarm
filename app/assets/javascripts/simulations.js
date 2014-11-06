@@ -6,9 +6,6 @@ var globalDrawGranularityGuidelines = false;
 
 //var globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
 
-
-
-
 //gets the angle between -2pi and +2pi
 wrapAngle = function(angle) {
 	while (angle < -Math.PI) {
@@ -43,6 +40,7 @@ steerAngle = function(desired, current, speed) {
 
 jQuery(function() {
 	var game, growCrop, initializeCropDataLayers, initializeDataLayers, initializeGame, layerColors, pause, renderGame, restart, run, saveButton, simulation, step, updateCropDataLayer, updateGame, updateSize, updateSoilDataLayer, updateTime, updateWeather;
+	var field_id = 0;
   
 	//if we have necessary items (farm, weather, soil) to perform simulation
 	if ($('#simulation-form').size() > 0) {
@@ -181,12 +179,7 @@ if ($('#simulation-controls').length > 0) {
 				break;
 			case 'weather_update':
 				updateWeather(msg.data.weather);
-				break
-
-
-
-
-
+				break;
 			case 'soil_data_layer_update':
 				updateSoilDataLayer(msg.data.layer_name, msg.data.layer_data);
 				break;
@@ -732,11 +725,14 @@ if ($('#simulation-controls').length > 0) {
 		if (game.width <= game.viewport.width && game.height <= game.viewport.height)
 		{
 			panmenu.hide();
+			viewportlabel.hide();
 			$('#simulation-expand-viewport-button').hide();
 			$('#simulation-shrink-viewport-button').hide();
 		}
 		else
 		{
+			viewportlabel.show();
+			viewportlabel.css('display', 'block');
 			panmenu.show();
 			panmenu.css('display', 'block');
 			
@@ -967,25 +963,41 @@ if ($('#simulation-controls').length > 0) {
 						//console.log("x: " + x + " y: " + y);
 
 						// Erase crops
+						/*
 						game.ctx.vegitation.save();
 						game.ctx.vegitation.beginPath();
 						game.ctx.vegitation.translate(x, y);
 						game.ctx.vegitation.rotate(game.combine.angle);
 						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
+						*/
 						//game.ctx.vegitation.fill();
 						//game.ctx.vegitation.strokeStyle = "limegreen";
 						//game.ctx.vegitation.rect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
 						//game.ctx.vegitation.stroke();
-						game.ctx.vegitation.restore();	
+						//game.ctx.vegitation.restore();	this
 
-						// // Erase crops
+						// Erase crops
 						// game.ctx.terrain.save();
 						// game.ctx.terrain.beginPath();
 						// game.ctx.terrain.translate(x, y);
 						// game.ctx.terrain.rotate(game.combine.angle);
 						// game.ctx.terrain.clearRect(-widthOfTool/2,0,widthOfTool,80); // ???
-						// //game.ctx.terrain.fill();
+						// game.ctx.terrain.fill();
 						// game.ctx.terrain.restore();
+						
+						//David's attempt. This isn't working though.
+						//Erase the vegetation & clear the terrain
+						game.ctx.terrain.save();
+						game.ctx.terrain.translate(x, y);
+						game.ctx.terrain.rotate(game.combine.angle);
+						game.ctx.terrain.clearRect(0, 0, -game.combine.width, game.combine.height);
+						game.ctx.terrain.restore();
+						
+						game.ctx.vegitation.save();
+						game.ctx.vegitation.translate(x, y);
+						game.ctx.vegitation.rotate(game.combine.angle);
+						game.ctx.vegitation.clearRect(0, 0, -game.combine.width, game.combine.height);
+						game.ctx.vegitation.restore();
 					}
 					
 					// if (game.combine.active) {
@@ -1148,8 +1160,8 @@ if ($('#simulation-controls').length > 0) {
 				game.ctx.back.closePath();
 				game.ctx.back.moveTo(point.x, point.y);
 				game.ctx.back.beginPath();
-				if (point.noaction) 	game.ctx.back.strokeStyle = '#7A7A52';
-				else 				game.ctx.back.strokeStyle = 'red';
+				if (point.noaction) game.ctx.back.strokeStyle = '#7A7A52';
+				else game.ctx.back.strokeStyle = 'red';
 			}
 			
 			game.ctx.back.lineTo(point.x, point.y);
@@ -1163,10 +1175,7 @@ if ($('#simulation-controls').length > 0) {
 		// render granularity guidelines
 		if (globalDrawGranularityGuidelines) 
 		{
-			//drawGranularity(0); // Using first field // ??? WILL THIS EVER BE MORE THAN 0 ???
-			
 			simulation.size.fields.forEach(function(field) {
-				//console.log(field);
 				field.poly.drawGrid();
 			});
 		}
@@ -1233,22 +1242,6 @@ if ($('#simulation-controls').length > 0) {
 		$('#auto-harvest').removeClass('simulation-button-selected');
 	}
 	
-	//allows a user to manually till a field
-	$('#manual-till').on('click', function() {
-		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-			var field_id = $('input[name="field_id"]').val();
-			if (field_id !== -1) {
-				game.state = 'tilling';
-				game.currentfield = field_id; // !!! ???
-				game.viewport.target = game.tractor;
-				game.path = []; // clear existing path
-				clearButtonSelection();
-				$('#manual-till').addClass('simulation-button-selected');
-			}
-		});
-	});
-	
-	
 	// This is mostly a helper for use during development
 	// This draws a grid to show the "patches" created by the "granularity" of the simulation
 	$('#draw-granularity').on('click', function() {
@@ -1256,23 +1249,77 @@ if ($('#simulation-controls').length > 0) {
 		//globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
 	});
 	
+	$('#toggle-granularity').on('click', function() {
+		toggleGranularity();
+	});
 	
-    $('#auto-till').on('click', function() {
-      return $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
-		var field_id, pattern;
-		field_id = $('input[name="field_id"]:checked').val();
-        if (field_id !== -1) {
+	function toggleGranularity()
+	{
+		if ($('#toggle-granularity').hasClass('simulation-button-selected'))
+		{
+			$('#toggle-granularity').removeClass('simulation-button-selected');
+			globalDrawGranularityGuidelines = false;
+		}
+		else
+		{
+			$('#toggle-granularity').addClass('simulation-button-selected');
+			globalDrawGranularityGuidelines = true;
+		}
+	}
+	
+	function setFieldId(id)
+	{
+		field_id = id;
+	}
+	
+	function getFieldId()
+	{
+		if (typeof field_id === 'undefined' || field_id == -1)
+		{
+			chooseField();
+		}
+		return field_id;
+	}
+	
+	function chooseField()
+	{
+		clearButtonSelection();
+		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
+			var selected_field_id;
+			selected_field_id = $('input[name="field_id"]:checked').val();
+			if (selected_field_id !== -1) {
+				setFieldId(selected_field_id);
+			}
+		});
+	}
+	
+	//allows a user to manually till a field
+	$('#manual-till').on('click', function() {
+		var field = getFieldId();
+		if (field > -1)
+		{
+			game.state = 'tilling';
+			game.currentfield = field;
+			game.viewport.target = game.tractor;
+			game.path = []; // clear existing path
+			clearButtonSelection();
+			$('#manual-till').addClass('simulation-button-selected');
+		}
+	});
+	
+	//allows a user to automatically till a field
+	$('#auto-till').on('click', function() {
+		var field = getFieldId();
+		if (field > -1)
+		{
 			game.path = [];
 			game.state = 'tilling';
-			game.currentfield = field_id; // !!! ???
-			simulation.size.fields[field_id].poly.drawPath();
+			game.currentfield = field;
+			simulation.size.fields[field].poly.drawPath();
 			clearButtonSelection();
 			$('#auto-till').addClass('simulation-button-selected');
 		}
-      });
     });
-	
-	
 	
 	//allows a user to begin manually planting a field
 	$('#manual-plant').on('click', function() {
@@ -1280,20 +1327,13 @@ if ($('#simulation-controls').length > 0) {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-					var field_id = $('input[name="field_id"]').val();
-					if (field_id !== -1) {
-						game.path = []; // clear existing path
-						game.state = 'planting';
-
-
-
-						game.currentfield = field_id; // !!! ???
-						game.viewport.target = game.tractor;
-						clearButtonSelection();
-						$('#manual-plant').addClass('simulation-button-selected');
-					}
-				});
+				var field = getFieldId();
+				game.path = []; // clear existing path
+				game.state = 'planting';
+				game.currentfield = field;
+				game.viewport.target = game.tractor;
+				clearButtonSelection();
+				$('#manual-plant').addClass('simulation-button-selected');
 			}
 		});
 	});
@@ -1304,22 +1344,39 @@ if ($('#simulation-controls').length > 0) {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
-				$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-					var field_id, pattern;
-					field_id = $('input[name="field_id"]:checked').val();
-					if (field_id !== -1) {
-						game.path = []; // clear existing path
-						game.state = 'planting';
-						game.currentfield = field_id; // !!! ???
-						game.currentcrop = crop_id;
-						simulation.size.fields[field_id].poly.drawPath();
-						clearButtonSelection();
-						$('#auto-plant').addClass('simulation-button-selected');
-					}
-				});
+				var field = getFieldId();
+				game.path = [];h
+				game.state = 'planting';
+				game.currentfield = field;
+				game.currentcrop = crop_id;
+				simulation.size.fields[field].poly.drawPath();
+				clearButtonSelection();
+				$('#auto-plant').addClass('simulation-button-selected');
 			}
 		});
 	});
+	
+	//manual harves the crop
+	$('#manual-harvest').on('click', function() {
+		var field = getFieldId();
+		game.path = [];
+		game.state = 'harvesting';
+		game.currentfield = field;
+		game.viewport.target = game.combine;
+		clearButtonSelection();
+		$('#manual-harvest').addClass('simulation-button-selected');
+	});
+	
+	//automatically harvest the crop
+	$('#auto-harvest').on('click', function() {
+		var field = getFieldId();
+		game.path = [];
+		game.state = 'harvesting';
+		game.currentfield = field;
+		simulation.size.fields[field].poly.drawPath();
+		clearButtonSelection();
+		$('#auto-harvest').addClass('simulation-button-selected');
+    });
 	
 	//return -1 if the user does not select a field
 	$('#crop-select-modal-cancel').on('click', function() {
@@ -1333,37 +1390,7 @@ if ($('#simulation-controls').length > 0) {
 		$('input[name="crop_id"]').val(crop_id);
 		$('#crop-select-modal').modal('hide');
 		return false;
-	});
-
-	$('#manual-harvest').on('click', function() {
-		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
-			var field_id = $('input[name="field_id"]').val();
-			if (field_id !== -1) {
-				game.path = []; // clear existing path
-				game.state = 'harvesting';
-				game.currentfield = field_id; // !!! ???
-				game.viewport.target = game.combine;
-				clearButtonSelection();
-				$('#manual-harvest').addClass('simulation-button-selected');
-			}
-		});
-	});
-	
-	$('#auto-harvest').on('click', function() {
-      $('#field-select-modal').modal().one('hidden.bs.modal', function() { // !!! temp, re-enable later!
-		var field_id, pattern;
-		field_id = $('input[name="field_id"]:checked').val();
-		if (field_id !== -1) {
-			game.path = [];
-			game.state = 'harvesting';
-			game.currentfield = field_id; // !!! ???
-			simulation.size.fields[field_id].poly.drawPath();
-			clearButtonSelection();
-			$('#auto-harvest').addClass('simulation-button-selected');
-		}
-      });
-    });
-	
+	});	
 
 	$('#field-select-map polygon').on('click', function() {
 		var boxes, index;
@@ -1381,6 +1408,44 @@ if ($('#simulation-controls').length > 0) {
 	// Hide these buttons until run is clicked
 	pause.hide();
 	restart.hide();
+	
+	//run the simulation
+    run.on('click', function() {
+      //console.log('before step');
+		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
+		{
+			simulation.interval = setInterval(step, 100);
+		}
+		run.hide();
+		pause.show();
+		restart.show();
+		return simulation.paused = false;
+    });
+	
+	//pause the simulation
+    pause.on('click', function() {
+		//clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		run.show();
+		pause.hide();
+		return simulation.paused = true;
+    });
+	
+	//restart the simulation
+    restart.on('click', function() {
+      //clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		simulation.paused = true;
+		clearButtonSelection();
+		$('#farm-display').html(''); // Remove the old canvas element before adding the new one.
+		run.show();
+		pause.hide();
+		$('#toggle-granularity').removeClass('simulation-button-selected');
+		globalDrawGranularityGuidelines = false;
+		return simulation.worker.postMessage({ type: 'init'});
+    });
+	
+	$('#field-select').on('click', function() {
+		chooseField();
+    });
 	
 	// Add an option to skip ahead a month?
 
@@ -1407,6 +1472,7 @@ if ($('#simulation-controls').length > 0) {
 	
 //============================== PAN VIEWPORT FUNCTIONS (begin) ==================================
 	var panmenu = $('#simulation-pan-arrow-menu');
+	var viewportlabel = $('#viewport-div');
 	var panviewportup = $('#simulation-pan-up');
 	var panviewportdown = $('#simulation-pan-down');
 	var panviewportleft = $('#simulation-pan-left');
@@ -1587,49 +1653,9 @@ if ($('#simulation-controls').length > 0) {
 		game.buffers.front.width = game.viewport.width;
 		game.buffers.front.height = game.viewport.height;
 	});
-//========================== EXPAND VIEWPORT (end) ================================
-	
-	//run the simulation
-    run.on('click', function() {
-      //console.log('before step');
-		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
-		{
-			simulation.interval = setInterval(step, 100);
-		}
-		run.hide();
-		pause.show();
-		restart.show();
-		return simulation.paused = false;
-    });
-	
-	//pause the simulation
-    pause.on('click', function() {
-		//clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
-		run.show();
-		pause.hide();
-		return simulation.paused = true;
-    });
-	
-	//restart the simulation
-    restart.on('click', function() {
-      //clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
-		simulation.paused = true;
-		$('#farm-display').html(''); // Remove the old canvas element before adding the new one.
-		run.show();
-		pause.hide();
-		return simulation.worker.postMessage({ type: 'init'});
-    });
-  //} //end if
+//========================== EXPAND VIEWPORT (end) ===============================
 
-
-
-
-
-
-
-
-
-	//============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
+//============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
 		// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
 		/*
 		Copyright (c) 1970-2003, Wm. Randolph Franklin

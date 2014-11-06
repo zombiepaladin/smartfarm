@@ -125,22 +125,16 @@
 {
 	margin-top: 10px;
 }
-#clear-game-path
-{
-	margin-bottom: 20px;
-}
 .button-group-label
 {
 	font-size: 15px;
 	text-align: center;
-	margin-bottom: 10px;
+	margin: 5px 0px 10px 0px;
 }
-.button-group-marginbottom
+#viewport-div
 {
-	margin-bottom: 20px;
+	display: none;
 }
-
-
 .pan-viewport-btn
 {
 	width: 40px;
@@ -149,6 +143,11 @@
 #simulation-pan-arrow-menu
 {
 	display: none;
+	margin: 0, auto;
+}
+#simulation-expand-viewport-button
+{
+	margin-top: 10px;
 }
 #simulation-shrink-viewport-button
 {
