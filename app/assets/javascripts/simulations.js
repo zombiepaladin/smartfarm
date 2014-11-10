@@ -3,6 +3,7 @@ var panViewportToFollowTractor = true;
 var canvasDimensions = [800, 600];
 var clampAngle, steerAngle, wrapAngle;
 var globalDrawGranularityGuidelines = false;
+var globalTractorSteeringRadius = Math.PI / 2; // Math.PI / 8
 
 //var globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
 
@@ -809,7 +810,7 @@ if ($('#simulation-controls').length > 0) {
 				}
 				else {
 					speed = 5;
-					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
+					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, globalTractorSteeringRadius);
 					game.tractor.x += speed * Math.cos(game.tractor.angle);
 					game.tractor.y += speed * Math.sin(game.tractor.angle);
 					
@@ -878,7 +879,7 @@ if ($('#simulation-controls').length > 0) {
 				}
 				else {
 					speed = 5;
-					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, Math.PI / 8);
+					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, globalTractorSteeringRadius);
 					game.tractor.x += speed * Math.cos(game.tractor.angle);
 					game.tractor.y += speed * Math.sin(game.tractor.angle);
 					game.drill.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
@@ -937,7 +938,7 @@ if ($('#simulation-controls').length > 0) {
 				}
 				else {
 					speed = 5;
-					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, Math.PI / 8);
+					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, globalTractorSteeringRadius);
 					game.combine.x += speed * Math.cos(game.combine.angle);
 					game.combine.y += speed * Math.sin(game.combine.angle);
 					
@@ -1694,8 +1695,19 @@ if ($('#simulation-controls').length > 0) {
 			verty[nvert] = corner.y * simulation.size.granularity;
 			nvert++;
 		});
+		
+		
+		// var widthOfTool = 18.288; // 60 meters
+		// if (game.state == 'tilling') {
+			// widthOfTool = game.plow.width;
+		// } else if (game.state == 'planting') {
+			// widthOfTool = game.combine.width;
+		// } else if (game.state == 'harvesting') {
+			// widthOfTool = game.drill.width;
+		// }
+		
 
-		var stepSizeY = game.height / simulation.size.granularity;
+		var stepSizeY = game.height / simulation.size.granularity; //widthOfTool;
 		var stepSizeX = game.width / simulation.size.granularity;
 		var testx, testy;
 		
@@ -1721,6 +1733,7 @@ if ($('#simulation-controls').length > 0) {
 		this.stepx = stepSizeX;
 		this.stepy = stepSizeY;
 		this.grid = outputGrid;
+		//this.tool = widthOfTool;
 	}
 
 	PolygonGrid.prototype.drawGrid = function() {
@@ -1774,6 +1787,7 @@ if ($('#simulation-controls').length > 0) {
 		// !!! Use width of implement to determine spacing between rows (instead of just using granularity)!
 		// ??? Also need to make both the visually tilling/etc and the FUNCTIONAL tilling/etc be accurate to scale?
 		
+		
 		var widthOfTool = 18.288; // 60 meters
 		if (game.state == 'tilling') {
 			widthOfTool = game.plow.width;
@@ -1782,6 +1796,8 @@ if ($('#simulation-controls').length > 0) {
 		} else if (game.state == 'harvesting') {
 			widthOfTool = game.drill.width;
 		}
+		this.tool = widthOfTool;
+		
 		
 		var testx, testy;
 		
@@ -1789,35 +1805,39 @@ if ($('#simulation-controls').length > 0) {
 		game.ctx.front.strokeStyle = '#0000ff';
 		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
 			
-		var lastStepWasOutside = true;
+		var lastStep = {
+			wasOutside: true,
+			x: 0,
+			y: 0
+		};
+		
+		Get start and end y-indices of the sweep.
+		var yStartIndex = (Math.floor((widthOfTool/2)/this.stepy) + 1);// * this.stepy;
+		var yEndIndex = (yStartIndex - 1);
+		if (yEndIndex < 0) yEndIndex = 0;
+		yEndIndex = simulation.size.granularity - yEndIndex;
+		//console.log(yStartIndex);
+		
 		var goLeftToRight = true;
-		for (var y = 1; y < simulation.size.granularity; y++)
-		{
-			console.log("offsetcalc y: " + (y % (widthOfTool/this.stepy)));
+		for (var y = yStartIndex; y < yEndIndex; y++)
+		{		
+			//console.log(y % widthOfTool);
 			if (y % (widthOfTool/this.stepy) <= 1) // Width of implement
 			{
 				if (goLeftToRight)
 				{
-					for (var x = 1; x < simulation.size.granularity-1; x++)
+					for (var x = 0; x < simulation.size.granularity-1; x++)
 					{
-						//console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
-						//if (x % (widthOfTool/this.stepx) <= 1) { // Width of implement
-							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
-							lastX = x*this.stepx;
-							lastY = y*this.stepy;
-						//}
+						//if (this.grid[x][y-(y % this.stepy)]) // ???
+						lastStep = this.drawStep(x, y, lastStep);
 					}
 				}
 				else
 				{
 					for (var x = simulation.size.granularity-1; x > 1; x--)
 					{
-						//console.log("offsetcalc x: " + (x % (widthOfTool/this.stepx)));
-						//if (x % (widthOfTool/this.stepx) <= 1) { // Width of implement
-							lastStepWasOutside = this.drawStep(x, y, lastStepWasOutside);
-							lastX = x*this.stepx;
-							lastY = y*this.stepy;
-						//}
+						//if (this.grid[x][y-(y % this.stepy)]) // ???
+						lastStep = this.drawStep(x, y, lastStep);
 					}
 				}
 				goLeftToRight = !goLeftToRight;
@@ -1825,18 +1845,21 @@ if ($('#simulation-controls').length > 0) {
 		}
 	};
 	
-	PolygonGrid.prototype.drawStep = function(x, y, lastStepWasOutside)
+	PolygonGrid.prototype.drawStep = function(x, y, lastStep)
 	{
-		testy = y*this.stepy;
 		testx = x*this.stepx;
-	
+		//testy = y*this.stepy - ((y*this.stepy) % this.tool);
+		testy = y*this.stepy - ((y*this.stepy) % this.tool) - this.tool/2;
+
 		// Check if this grid square fits inside the field boundaries
 		if (this.grid[x][y])
 		{
+			console.log("stroke at y: " + testy);
+		
 			// Travel to start of next sweep, but do NOT have tiller down until we get there
-			if (lastStepWasOutside)
+			if (lastStep.wasOutside == true)
 			{
-				lastStepWasOutside = false;
+				lastStep.wasOutside = false;
 				game.path.push({
 					x: testx,
 					y: testy,
@@ -1852,17 +1875,22 @@ if ($('#simulation-controls').length > 0) {
 		else
 		{
 			// Travel to start of next sweep, but do NOT have tiller down until we get there
-			if (!lastStepWasOutside)
+			if (lastStep.wasOutside == false)
 			{
-				lastStepWasOutside = true;
+				lastStep.wasOutside = true;
 				game.path.push({
-					x: lastX,
-					y: lastY,
+					x: lastStep.x,
+					y: lastStep.y,
 					noaction: true
 				});
 			}
 		}
-		return lastStepWasOutside;
+		
+		lastStep.x = testx;
+		lastStep.y = testy;
+		//console.log(thisStep);
+		
+		return lastStep;
 	};
 	
 
