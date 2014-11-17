@@ -1811,7 +1811,7 @@ if ($('#simulation-controls').length > 0) {
 			y: 0
 		};
 		
-		Get start and end y-indices of the sweep.
+		// Get start and end y-indices of the sweep.
 		var yStartIndex = (Math.floor((widthOfTool/2)/this.stepy) + 1);// * this.stepy;
 		var yEndIndex = (yStartIndex - 1);
 		if (yEndIndex < 0) yEndIndex = 0;
