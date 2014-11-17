@@ -368,7 +368,7 @@ function updateCrops() {
 
 //when the field has been auto tilled, what do we do?
 function tillField(fieldIndex, x, y) {
-	console.log("tilling field " + fieldIndex + " at x: " + x + " y: " + y);
+	//console.log("tilling field " + fieldIndex + " at x: " + x + " y: " + y);
 
 	/*
 	// ??? v
@@ -421,7 +421,7 @@ function tillField(fieldIndex, x, y) {
 
 function plantFieldWithCrop(fieldIndex, cropID, x, y) {
 	//var field = simulation.fields[fieldIndex];
-	console.log("planting field " + fieldIndex + " with crop " + cropID + " at x: " + x + " y: " + y);
+	//console.log("planting field " + fieldIndex + " with crop " + cropID + " at x: " + x + " y: " + y);
 	if (simulation.crops[cropID] == undefined) { // crop not already in use
 
 		// Load the crop data
@@ -458,7 +458,7 @@ function plantFieldWithCrop(fieldIndex, cropID, x, y) {
 
 function harvestField(fieldIndex, x, y) {
 	//var field = simulation.fields[fieldIndex];
-	console.log("harvesting field " + fieldIndex + " at x: " + x + " y: " + y);
+	//console.log("harvesting field " + fieldIndex + " at x: " + x + " y: " + y);
 }
 <%= render "load_via_xhr" %>
 <%= render "liang_barsky" %>

@@ -840,6 +840,23 @@ if ($('#simulation-controls').length > 0) {
 						
 						game.ctx.terrain.restore();
 						
+						
+						
+						// Erase crops
++						game.ctx.vegitation.save();
++						game.ctx.vegitation.beginPath();
++						game.ctx.vegitation.translate(x, y);
++						game.ctx.vegitation.rotate(game.plow.angle);
++						game.ctx.vegitation.clearRect(0, -game.plow.width/2, -game.plow.width, game.combine.width); // ???
++						//game.ctx.vegitation.fill();
++						//game.ctx.vegitation.strokeStyle = "limegreen";
++						//game.ctx.vegitation.rect(0, -game.plow.width/2, -game.plow.width, game.combine.width); // ???
++						//game.ctx.vegitation.stroke();
++						game.ctx.vegitation.restore();
+						
+						
+						
+						
 						// ???
 						var widthOfTool = game.plow.width; // 18.288; // 60 meters
 						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
@@ -961,96 +978,18 @@ if ($('#simulation-controls').length > 0) {
 							});
 						}
 						
-						//console.log("x: " + x + " y: " + y);
-
 						// Erase crops
-						/*
-						game.ctx.vegitation.save();
-						game.ctx.vegitation.beginPath();
-						game.ctx.vegitation.translate(x, y);
-						game.ctx.vegitation.rotate(game.combine.angle);
-						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
-						*/
-						//game.ctx.vegitation.fill();
-						//game.ctx.vegitation.strokeStyle = "limegreen";
-						//game.ctx.vegitation.rect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
-						//game.ctx.vegitation.stroke();
-						//game.ctx.vegitation.restore();	this
-
-						// Erase crops
-						// game.ctx.terrain.save();
-						// game.ctx.terrain.beginPath();
-						// game.ctx.terrain.translate(x, y);
-						// game.ctx.terrain.rotate(game.combine.angle);
-						// game.ctx.terrain.clearRect(-widthOfTool/2,0,widthOfTool,80); // ???
-						// game.ctx.terrain.fill();
-						// game.ctx.terrain.restore();
-						
-						//David's attempt. This isn't working though.
-						//Erase the vegetation & clear the terrain
-						game.ctx.terrain.save();
-						game.ctx.terrain.translate(x, y);
-						game.ctx.terrain.rotate(game.combine.angle);
-						game.ctx.terrain.clearRect(0, 0, -game.combine.width, game.combine.height);
-						game.ctx.terrain.restore();
-						
-						game.ctx.vegitation.save();
-						game.ctx.vegitation.translate(x, y);
-						game.ctx.vegitation.rotate(game.combine.angle);
-						game.ctx.vegitation.clearRect(0, 0, -game.combine.width, game.combine.height);
-						game.ctx.vegitation.restore();
++						game.ctx.vegitation.save();
++						game.ctx.vegitation.beginPath();
++						game.ctx.vegitation.translate(x, y);
++						game.ctx.vegitation.rotate(game.combine.angle);
++						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
++						//game.ctx.vegitation.fill();
++						//game.ctx.vegitation.strokeStyle = "limegreen";
++						//game.ctx.vegitation.rect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
++						//game.ctx.vegitation.stroke();
++						game.ctx.vegitation.restore();	
 					}
-					
-					// if (game.combine.active) {
-						// // game.ctx.terrain.save();
-						// // x = game.combine.x;
-						// // y = game.combine.y;
-						// // game.ctx.terrain.translate(x, y);
-						// // game.ctx.terrain.rotate(game.combine.angle);
-						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
-						
-						// // ??? Placeholder, no stamp for the combine yet
-						// //game.ctx.terrain.fillStyle = '#3d1f00';
-						// //game.ctx.terrain.fillRect(-16, -9, 20, 20)
-						
-						// game.ctx.vegitation.save();
-						// game.ctx.vegitation.translate(x, y);
-						// game.ctx.vegitation.rotate(game.drill.angle);
-						
-						// game.ctx.vegitation.clearRect(x,y,widthOfTool,30); // ???
-						
-						// //game.ctx.terrain.drawImage(game.plow.stamp, -16, -9); // ??? Placeholder, no stamp for the combine yet
-						// //game.ctx.vegitation.fillStyle = '#3d1f00';
-						// //game.ctx.vegitation.fillRect(-16, -9, 20, 20);
-						
-						// /*
-						// // Eraser
-						// var globalComposite = game.ctx.vegitation.globalCompositeOperation;
-						
-						// // SOURCE:  http://jsfiddle.net/ArtBIT/WUXDb/1/
-						// game.ctx.vegitation.globalCompositeOperation = 'destination-out';
-						
-						// //game.ctx.vegitation.fillCircle(-10, -10, 20, '#ff0000');
-						
-						// //game.ctx.vegitation.fillStyle = '#ff0000';
-						// //game.ctx.vegitation.fillRect(-10, -10, 20, 20);
-						
-						// //game.ctx.arc(-10, -10, 20, 0, 2 * Math.PI, false);
-						// //game.ctx.fill();
-						
-						// //game.ctx.vegitation.globalCompositeOperation = "copy";
-						// //game.ctx.vegitation.globalCompositeOperation = "destination-out";
-						// //game.ctx.vegitation.strokeStyle = "rgba(0,0,0,1)";
-						// //game.ctx.vegitation.stroke(); 
-						// //game.ctx.vegitation.fillRect(-16, -9, 20, 20);
-						// game.ctx.vegitation.globalCompositeOperation = globalComposite;
-						// */
-						
-						// //game.ctx.vegitation.restore();
-						
-						
-						// game.ctx.terrain.restore();
-					// }
 				}
 			} //end switch
 			
