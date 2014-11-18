@@ -1571,6 +1571,8 @@ if ($('#simulation-controls').length > 0) {
 	*/
 //============================ PAN VIEWPORT FUNCTIONS (end) =====================================
 	
+	
+	
 //=========================== EXPAND VIEWPORT (begin) =============================
 	$('#simulation-expand-viewport-button').on('click', function(event) {
 		panmenu.hide();
@@ -1594,6 +1596,8 @@ if ($('#simulation-controls').length > 0) {
 		game.buffers.front.height = game.viewport.height;
 	});
 //========================== EXPAND VIEWPORT (end) ===============================
+
+
 
 //============== CHECK IF POINT FALLS WITHIN POLYGON (begin) ================
 		// SOURCE:  http://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon
@@ -1678,11 +1682,10 @@ if ($('#simulation-controls').length > 0) {
 	PolygonGrid.prototype.drawGrid = function() {
 		var testx, testy;
 		
-		game.ctx.terrain.lineWidth = 0.3;
+		game.ctx.front.save();
+		game.ctx.front.lineWidth = 0.2;
 		game.ctx.front.strokeStyle = '#0000ff';
 		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
-			
-		game.ctx.front.save();
 		game.ctx.front.beginPath();
 		for (var j = 0; j < simulation.size.granularity-1; j++)
 		{
@@ -1726,7 +1729,6 @@ if ($('#simulation-controls').length > 0) {
 		// !!! Use width of implement to determine spacing between rows (instead of just using granularity)!
 		// ??? Also need to make both the visually tilling/etc and the FUNCTIONAL tilling/etc be accurate to scale?
 		
-		
 		var widthOfTool = 18.288; // 60 meters
 		if (game.state == 'tilling') {
 			widthOfTool = game.plow.width;
@@ -1739,10 +1741,6 @@ if ($('#simulation-controls').length > 0) {
 		
 		
 		var testx, testy;
-		
-		game.ctx.terrain.lineWidth = 0.3;
-		game.ctx.front.strokeStyle = '#0000ff';
-		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
 			
 		var lastStep = {
 			wasOutside: true,
@@ -1751,36 +1749,50 @@ if ($('#simulation-controls').length > 0) {
 		};
 		
 		// Get start and end y-indices of the sweep.
-		var yStartIndex = (Math.floor((widthOfTool/2)/this.stepy) + 1);// * this.stepy;
-		var yEndIndex = (yStartIndex - 1);
-		if (yEndIndex < 0) yEndIndex = 0;
-		yEndIndex = simulation.size.granularity - yEndIndex;
-		//console.log(yStartIndex);
+		var yStartIndex = 0; //(Math.floor((widthOfTool/2)/this.stepy) + 1);// * this.stepy;
+		var yEndIndex = simulation.size.granularity - Math.floor((widthOfTool/2)/this.stepy); //(yStartIndex - 1);
+		// if (yEndIndex < 0) yEndIndex = 0;
+		// yEndIndex = simulation.size.granularity - yEndIndex;
+		console.log("y index - Start: " + yStartIndex + " " + "End: " + yEndIndex);
+		
+		var yToolOffset = Math.floor((widthOfTool/2)/this.stepy);
+		var hitInteriorThisRound = false;
 		
 		var goLeftToRight = true;
 		for (var y = yStartIndex; y < yEndIndex; y++)
 		{		
 			//console.log(y % widthOfTool);
-			if (y % (widthOfTool/this.stepy) <= 1) // Width of implement
-			{
+			//if (y % (widthOfTool/this.stepy) <= 1) // Width of implement
+			//{
 				if (goLeftToRight)
 				{
 					for (var x = 0; x < simulation.size.granularity-1; x++)
 					{
-						//if (this.grid[x][y-(y % this.stepy)]) // ???
-						lastStep = this.drawStep(x, y, lastStep);
+						if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+						{
+							lastStep = this.drawStep(x, y+yToolOffset, lastStep);
+						}
+						
+						if (!lastStep.wasOutside) hitInteriorThisRound = true;
 					}
 				}
 				else
 				{
 					for (var x = simulation.size.granularity-1; x > 1; x--)
 					{
-						//if (this.grid[x][y-(y % this.stepy)]) // ???
-						lastStep = this.drawStep(x, y, lastStep);
+						if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+						{
+							lastStep = this.drawStep(x, y+yToolOffset, lastStep);
+						}
+						
+						if (!lastStep.wasOutside) hitInteriorThisRound = true;
 					}
 				}
 				goLeftToRight = !goLeftToRight;
-			}
+			//}
+			
+			if (hitInteriorThisRound) y += (yToolOffset*2);
+			hitInteriorThisRound = false;
 		}
 	};
 	
@@ -1788,7 +1800,8 @@ if ($('#simulation-controls').length > 0) {
 	{
 		testx = x*this.stepx;
 		//testy = y*this.stepy - ((y*this.stepy) % this.tool);
-		testy = y*this.stepy - ((y*this.stepy) % this.tool) - this.tool/2;
+		//testy = y*this.stepy - ((y*this.stepy) % this.tool) - this.tool/2;
+		testy = y*this.stepy;
 
 		// Check if this grid square fits inside the field boundaries
 		if (this.grid[x][y])
