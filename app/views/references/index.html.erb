@@ -1,3 +1,68 @@
+<h1>Getting Started</h1>
+
+<div class="img-wrapper">
+	<%= image_tag("getting_started.jpg", :alt => "Getting Started", :class => "pic") %>
+</div>
+
+<div class="information">
+	<i class="fa fa-lightbulb-o"></i>
+	Once you read these steps, you will be ready to create your very own simulation.
+</div>
+<ul class="list">
+	<li>
+		<span class="step">Step 1:</span>
+		To create your own simulation, click <%= link_to 'here', new_simulation_path, class: 'link', role: 'button' %>
+	</li>
+	<li>
+		<span class="step">Step 2:</span>
+		Enter your information. In the 'Name' field, enter the name you would like to call your farm. 'Start on' is the day on which you would
+		like to begin your farming simulation, in the format YYYY-MM-DD. 'End on' is the end date for your simulation, in the format YYYY-MM-DD.
+		Under 'Description', you can enter information about your farm.
+	</li>
+	<li>
+		<span class="step">Step 3:</span>
+		Select the 'Farm' tab and pick the farm you would like to work with or create your own.
+	</li>
+	<li>
+		<span class="step">Step 4:</span>
+		Select the 'Weather' tab and pick the weather model you would like to work with or create your own.
+	</li>
+	<li>
+		<span class="step">Step 5:</span>
+		Select the 'Soil' tab and pick the soil model you would like to work with or create your own.
+	</li>
+	<li>
+		<span class="step">Step 6:</span>
+		Save the simulation using the green button with the floppy disc icon at the top, right side of the page.
+	</li>
+</ul>
+
+<h1>Customize Your Experience</h1>
+<div class="information">
+	<i class="fa fa-lightbulb-o"></i>
+	Listed below are the instructions you need to begin your simulation. Before
+	creating a simulation, try these steps for a customized experience.
+</div>
+<ul class="list">
+	<li>
+		<span class="step">Step 1:</span>
+		If you would like to create your farm, click <%= link_to 'here', new_farm_path, class: 'link', role: 'button' %>
+	</li>
+	<li>
+		<span class="step">Step 2:</span>
+		If you would like to create your own soil model, click <%= link_to 'here', new_soil_path, class: 'link', role: 'button' %>
+	</li>
+	<li>
+		<span class="step">Step 3:</span>
+		If you would like to create your own crop model, click <%= link_to 'here', new_crop_path, class: 'link', role: 'button' %>
+	</li>
+	<li>
+		<span class="step">Step 4:</span>
+		If you would like to create your own weather model, click <%= link_to 'here', new_weather_path, class: 'link', role: 'button' %>
+	</li>
+</ul>
+
+
 <h1>External References</h1>
 <div class="information">
 	<i class="fa fa-lightbulb-o"></i>
@@ -6,21 +71,9 @@
 </div>
 <ul class="list">
 	<li>
-		For all your search needs:
+		External link:
 		<a href="www.google.com">
-			Google
-		</a>
-	</li>
-	<li>
-		For all your social needs:
-		<a href="www.facebook.com">
-			Facebook
-		</a>
-	</li>
-	<li>
-		For all your media needs:
-		<a href="www.twitter.com">
-			Twitter
+			link
 		</a>
 	</li>
 </ul>
