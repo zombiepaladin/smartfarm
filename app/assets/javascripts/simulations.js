@@ -1219,6 +1219,7 @@ if ($('#simulation-controls').length > 0) {
 			game.path = [];
 			game.state = 'tilling';
 			game.currentfield = field;
+			game.viewport.target = game.tractor;
 			simulation.size.fields[field].poly.drawPath();
 			clearButtonSelection();
 			$('#auto-till').addClass('simulation-button-selected');
@@ -1254,6 +1255,7 @@ if ($('#simulation-controls').length > 0) {
 				game.state = 'planting';
 				game.currentfield = field;
 				game.currentcrop = crop_id;
+				game.viewport.target = game.tractor;
 				simulation.size.fields[field].poly.drawPath();
 				clearButtonSelection();
 				$('#auto-plant').addClass('simulation-button-selected');
@@ -1278,6 +1280,7 @@ if ($('#simulation-controls').length > 0) {
 		game.path = [];
 		game.state = 'harvesting';
 		game.currentfield = field;
+		game.viewport.target = game.combine;
 		simulation.size.fields[field].poly.drawPath();
 		clearButtonSelection();
 		$('#auto-harvest').addClass('simulation-button-selected');
@@ -1407,30 +1410,30 @@ if ($('#simulation-controls').length > 0) {
 
 	// Center viewport pan on tractor
 	function centerViewportOnTractor() {
-	  if (game.width <= game.viewport.width) { // || game.width <= game.buffers.front.width // Do not pan if simulation size is smaller than the canvas screen size.
-		game.viewport.x = 0;
-      }
-	  else if (game.viewport.target.x < game.viewport.width / 2) {
-        game.viewport.x = 0;
-      }
-	  else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
-        game.viewport.x = game.width - game.viewport.width;
-      }
-	  else {
-        game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
-      }
-	  if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
-		return game.viewport.y = 0;
-      }
-	  else if (game.viewport.target.y < game.viewport.height / 2) {
-        return game.viewport.y = 0;
-      }
-	  else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
-        return game.viewport.y = game.height - game.viewport.height;
-      }
-	  else {
-        return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
-      }
+		if (game.width <= game.viewport.width) { // || game.width <= game.buffers.front.width // Do not pan if simulation size is smaller than the canvas screen size.
+			game.viewport.x = 0;
+		}
+		else if (game.viewport.target.x < game.viewport.width / 2) {
+			game.viewport.x = 0;
+		}
+		else if (game.viewport.target.x > game.width - game.viewport.width / 2) {
+			game.viewport.x = game.width - game.viewport.width;
+		}
+		else {
+			game.viewport.x = game.viewport.target.x - game.viewport.width / 2;
+		}
+		if (game.height <= game.viewport.height) { // Do not pan if simulation size is smaller than the canvas screen size.
+			return game.viewport.y = 0;
+		}
+		else if (game.viewport.target.y < game.viewport.height / 2) {
+			return game.viewport.y = 0;
+		}
+		else if (game.viewport.target.y > game.height - game.viewport.height / 2) {
+			return game.viewport.y = game.height - game.viewport.height;
+		}
+		else {
+			return game.viewport.y = game.viewport.target.y - game.viewport.height / 2;
+		}
 	}
 
 	// Pan viewport in a direction.
@@ -1498,7 +1501,6 @@ if ($('#simulation-controls').length > 0) {
 	addPanViewportControl(panviewportleft, "left");
 	addPanViewportControl(panviewportright, "right");
 	addPanViewportControl(panviewportcenter, "center");
-
 
 	// Stop viewport auto-follow for a bit if user is clicking somewhere in the viewport
 	$('#farm-display').mousedown(function() {
@@ -1696,58 +1698,58 @@ if ($('#simulation-controls').length > 0) {
 			y: 0
 		};
 
-		// Get start and end y-indices of the sweep.
-		var yStartIndex = 0; //(Math.floor((widthOfTool/2)/this.stepy) + 1);// * this.stepy;
-		var yEndIndex = simulation.size.granularity - Math.floor((widthOfTool/2)/this.stepy); //(yStartIndex - 1);
-		// if (yEndIndex < 0) yEndIndex = 0;
-		// yEndIndex = simulation.size.granularity - yEndIndex;
-		//console.log("y index - Start: " + yStartIndex + " " + "End: " + yEndIndex);
+		// Get start and end y-indices of the pathfinding sweep.
+		var yStartIndex = 0;
+		var yEndIndex = simulation.size.granularity - Math.floor((widthOfTool/2)/this.stepy);
 
 		var yToolOffset = Math.floor((widthOfTool/2)/this.stepy);
+		console.log("yToolOffset: " + yToolOffset);
 		var hitInteriorThisRound = false;
 
 		var goLeftToRight = true;
 		for (var y = yStartIndex; y < yEndIndex; y++)
 		{
-			//console.log(y % widthOfTool);
-			//if (y % (widthOfTool/this.stepy) <= 1) // Width of implement
-			//{
-				if (goLeftToRight)
+			if (goLeftToRight)
+			{
+				for (var x = 0; x < simulation.size.granularity-1; x++)
 				{
-					for (var x = 0; x < simulation.size.granularity-1; x++)
+					if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
 					{
-						if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
-						{
-							lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
-						}
-						else
-						{
-							lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
-						}
-
-						if (!lastStep.wasOutside) hitInteriorThisRound = true;
+						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
+						hitInteriorThisRound = true;
 					}
+					else
+					{
+						lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
+					}
+
+					//if (!lastStep.wasOutside) hitInteriorThisRound = true;
 				}
-				else
+			}
+			else
+			{
+				for (var x = simulation.size.granularity-1; x > 1; x--)
 				{
-					for (var x = simulation.size.granularity-1; x > 1; x--)
+					if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
 					{
-						if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
-						{
-							lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
-						}
-						else
-						{
-							lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
-						}
-
-						if (!lastStep.wasOutside) hitInteriorThisRound = true;
+						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
+						hitInteriorThisRound = true;
 					}
-				}
-				goLeftToRight = !goLeftToRight;
-			//}
+					else
+					{
+						lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
+					}
 
-			if (hitInteriorThisRound) y += (yToolOffset*2);
+					//if (!lastStep.wasOutside) hitInteriorThisRound = true;
+				}
+			}
+			goLeftToRight = !goLeftToRight;
+
+			if (hitInteriorThisRound)
+			{
+				//console.log("increment y by " + (yToolOffset*2));
+				y += (yToolOffset*2);
+			}
 			hitInteriorThisRound = false;
 		}
 	};
