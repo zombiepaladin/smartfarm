@@ -1567,7 +1567,6 @@ if ($('#simulation-controls').length > 0) {
 	$('#simulation-expand-viewport-button').on('click', function(event) {
 		panmenu.hide();
 		$('#simulation-expand-viewport-button').hide();
-		$('#simulation-pan-arrow-menu').hide();
 		$('#simulation-shrink-viewport-button').show();
 		game.viewport.x = 0;
 		game.viewport.y = 0;
@@ -1580,7 +1579,6 @@ if ($('#simulation-controls').length > 0) {
 	$('#simulation-shrink-viewport-button').on('click', function(event) {
 		panmenu.show();
 		$('#simulation-expand-viewport-button').show();
-		$('#simulation-pan-arrow-menu').show();
 		$('#simulation-shrink-viewport-button').hide();
 		game.viewport.width = canvasDimensions[0];
 		game.viewport.height = canvasDimensions[1];
