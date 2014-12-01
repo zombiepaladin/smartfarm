@@ -811,51 +811,28 @@ if ($('#simulation-controls').length > 0) {
 					game.tractor.angle = steerAngle(Math.atan2(dy, dx), game.tractor.angle, globalTractorSteeringRadius);
 					game.tractor.x += speed * Math.cos(game.tractor.angle);
 					game.tractor.y += speed * Math.sin(game.tractor.angle);
-
 					game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
 					game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
-					//game.plow.x = game.tractor.x;
-					//game.plow.y = game.tractor.y;
 
 					game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16);
 					if (game.plow.active) {
 						game.ctx.terrain.save();
 						game.ctx.terrain.fillStyle = '#3d1f00';
-						/*
-						x = game.plow.x;
-						y = game.plow.y;
-						game.ctx.terrain.translate(x, y);
-						game.ctx.terrain.rotate(game.plow.angle);
-						game.ctx.terrain.drawImage(game.plow.stamp, -22, -9);
-						*/
-						// ???
-
 						x = game.tractor.x;
 						y = game.tractor.y;
 						game.ctx.terrain.translate(x, y);
 						game.ctx.terrain.rotate(game.tractor.angle);
 						game.ctx.terrain.drawImage(game.plow.stamp, 0, -9);
-
 						game.ctx.terrain.restore();
-
-
 
 						// Erase crops
 +						game.ctx.vegitation.save();
 +						game.ctx.vegitation.beginPath();
 +						game.ctx.vegitation.translate(x, y);
 +						game.ctx.vegitation.rotate(game.plow.angle);
-+						game.ctx.vegitation.clearRect(0, -game.plow.width/2, -game.plow.width, game.combine.width); // ???
-+						//game.ctx.vegitation.fill();
-+						//game.ctx.vegitation.strokeStyle = "limegreen";
-+						//game.ctx.vegitation.rect(0, -game.plow.width/2, -game.plow.width, game.combine.width); // ???
-+						//game.ctx.vegitation.stroke();
++						game.ctx.vegitation.clearRect(0, -game.plow.width/2, -game.plow.width, game.combine.width);
 +						game.ctx.vegitation.restore();
 
-
-
-
-						// ???
 						var widthOfTool = game.plow.width; // 18.288; // 60 meters
 						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
@@ -867,8 +844,6 @@ if ($('#simulation-controls').length > 0) {
 								y: y+i
 							});
 						}
-
-
 					}
 				}
 				break;
@@ -914,8 +889,6 @@ if ($('#simulation-controls').length > 0) {
 						game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
 						game.ctx.vegitation.restore();
 
-
-						// ???
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
 						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
@@ -956,15 +929,13 @@ if ($('#simulation-controls').length > 0) {
 					game.combine.angle = steerAngle(Math.atan2(dy, dx), game.combine.angle, globalTractorSteeringRadius);
 					game.combine.x += speed * Math.cos(game.combine.angle);
 					game.combine.y += speed * Math.sin(game.combine.angle);
-
 					x = game.combine.x;
 					y = game.combine.y;
-
 
 					if (game.combine.active) {
 						// ???
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
-						//widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
 						{
 							simulation.worker.postMessage({
@@ -982,10 +953,6 @@ if ($('#simulation-controls').length > 0) {
 +						game.ctx.vegitation.translate(x, y);
 +						game.ctx.vegitation.rotate(game.combine.angle);
 +						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
-+						//game.ctx.vegitation.fill();
-+						//game.ctx.vegitation.strokeStyle = "limegreen";
-+						//game.ctx.vegitation.rect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
-+						//game.ctx.vegitation.stroke();
 +						game.ctx.vegitation.restore();
 					}
 				}
@@ -1120,15 +1087,6 @@ if ($('#simulation-controls').length > 0) {
 	};
 
 	growCrop = function(patchX, patchY, category, amount) {
-		/*
-		if (!simulation.size.fields[game.currentfield].poly.grid[patchX, patchY])
-		{
-			console.log("Do not Grow", patchX, patchY, category, amount);
-			return false;
-		}
-		*/
-		//console.log(simulation.size.fields[game.currentfield].poly.grid[patchX, patchY]);
-
 		var granularity, offsetX, offsetY, pattern;
 		granularity = simulation.size.granularity;
 		offsetX = patchX * granularity;
