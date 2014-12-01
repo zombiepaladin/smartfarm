@@ -5,8 +5,6 @@ var clampAngle, steerAngle, wrapAngle;
 var globalDrawGranularityGuidelines = false;
 var globalTractorSteeringRadius = Math.PI / 2; // Math.PI / 8
 
-//var globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
-
 //gets the angle between -2pi and +2pi
 wrapAngle = function(angle) {
 	while (angle < -Math.PI) {
@@ -1122,6 +1120,15 @@ if ($('#simulation-controls').length > 0) {
 	};
 
 	growCrop = function(patchX, patchY, category, amount) {
+		/*
+		if (!simulation.size.fields[game.currentfield].poly.grid[patchX, patchY])
+		{
+			console.log("Do not Grow", patchX, patchY, category, amount);
+			return false;
+		}
+		*/
+		//console.log(simulation.size.fields[game.currentfield].poly.grid[patchX, patchY]);
+
 		var granularity, offsetX, offsetY, pattern;
 		granularity = simulation.size.granularity;
 		offsetX = patchX * granularity;
@@ -1186,7 +1193,6 @@ if ($('#simulation-controls').length > 0) {
 	// This draws a grid to show the "patches" created by the "granularity" of the simulation
 	$('#draw-granularity').on('click', function() {
 		globalDrawGranularityGuidelines = this.checked; // !globalDrawGranularityGuidelines; // Toggle guidelines
-		//globalLastPathLinkChecked = -1; // Setting this to -1 tells the step to re-render the page
 	});
 
 	$('#toggle-granularity').on('click', function() {
@@ -1263,7 +1269,7 @@ if ($('#simulation-controls').length > 0) {
 
 	//allows a user to begin manually planting a field
 	$('#manual-plant').on('click', function() {
-		return $('#crop-select-modal').modal().one('hidden.bs.modal', function() {
+		$('#crop-select-modal').modal().one('hidden.bs.modal', function() {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
 			if (crop_id !== -1) {
@@ -1271,6 +1277,7 @@ if ($('#simulation-controls').length > 0) {
 				game.path = []; // clear existing path
 				game.state = 'planting';
 				game.currentfield = field;
+				game.currentcrop = crop_id;
 				game.viewport.target = game.tractor;
 				clearButtonSelection();
 				$('#manual-plant').addClass('simulation-button-selected');
@@ -1387,28 +1394,24 @@ if ($('#simulation-controls').length > 0) {
 		chooseField();
     });
 
-	// Add an option to skip ahead a month?
+    // Add an option to skip ahead a month?
 
     step = function() {
-		if (simulation.paused != true) // !!! if paused, do not update game data.
-		{
-			//console.log('step');
-			simulation.worker.postMessage({
-				type: 'tick'
-			});
-			updateGame();
-		}
-		//if (game && game.path && game.path.length != globalLastPathLinkChecked) {
-			//console.log("rendering...");
-			//globalLastPathLinkChecked = game.path.length;
-			if (game && game.ctx && game.ctx.back) // !!!
-				return renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
-		//}
+	if (simulation.paused != true) // !!! if paused, do not update game data.
+	{
+		//console.log('step');
+		simulation.worker.postMessage({
+			type: 'tick'
+		});
+		updateGame();
+	}
+	if (game && game.ctx && game.ctx.back)
+		renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
     };
+    // Start interval (with paused set to 'true') so that we can draw paths before running the simulation.
+    simulation.paused = true;
+    simulation.interval = setInterval(step, 100);
 
-	// !!! Start interval (with paused set to 'true') so that we can draw paths before running the simulation.
-	simulation.paused = true;
-	simulation.interval = setInterval(step, 100);
 
 //============================== PAN VIEWPORT FUNCTIONS (begin) ==================================
 	var panmenu = $('#simulation-pan-arrow-menu');
@@ -1443,18 +1446,6 @@ if ($('#simulation-controls').length > 0) {
 	}).on('mouseout', function() {
 		pausePanTracking();
 	});
-
-	/*
-	var pausePanTrackerMouseIsDown = false;
-	$(document).on('mousedown', function() {
-		pausePanTrackerMouseIsDown = true;
-		pausePanTracking();
-	}).on('mousemove', function() {
-		if (pausePanTrackerMouseIsDown) pausePanTracking();
-	}).on('mouseup', function() {
-		pausePanTrackerMouseIsDown = false;
-	});
-	*/
 
 	// Center viewport pan on tractor
 	function centerViewportOnTractor() {
@@ -1550,8 +1541,8 @@ if ($('#simulation-controls').length > 0) {
 	addPanViewportControl(panviewportright, "right");
 	addPanViewportControl(panviewportcenter, "center");
 
-	/*
-	// Stop viewport auto-follow for a bit if user is doing something in the viewport
+
+	// Stop viewport auto-follow for a bit if user is clicking somewhere in the viewport
 	$('#farm-display').mousedown(function() {
 		panViewportToFollowTractor = false;
 		clearInterval(pausePanTrackingTimer);
@@ -1565,10 +1556,9 @@ if ($('#simulation-controls').length > 0) {
 		clearInterval(pausePanTrackingTimer);
 		pausePanTrackingTimer = setTimeout(function(){
 			panViewportToFollowTractor = true;
-			alert("true");
+			//alert("true");
 		}, 6000);
 	});
-	*/
 //============================ PAN VIEWPORT FUNCTIONS (end) =====================================
 
 
