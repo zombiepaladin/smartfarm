@@ -10,7 +10,7 @@ var simulation = {
 	soil: {},
 	crops: [],
 	patches: [],
-	granularity: 100, 		// 100x100 meters
+	granularity: 18, 		// size of a patch // 18x18 meters (same as width of tool)
 	width: 0,
 	height: 0,
 	water: undefined
@@ -420,8 +420,11 @@ function tillField(fieldIndex, x, y) {
 }
 
 function plantFieldWithCrop(fieldIndex, cropID, x, y) {
-	//var field = simulation.fields[fieldIndex];
 	console.log("planting field " + fieldIndex + " with crop " + cropID + " at x: " + x + " y: " + y);
+
+	// Need to create an implementation to plant crops only in the sector that the x y coordinates fall within
+	/*
+	//var field = simulation.fields[fieldIndex];
 	if (simulation.crops[cropID] == undefined) { // crop not already in use
 
 		// Load the crop data
@@ -454,6 +457,7 @@ function plantFieldWithCrop(fieldIndex, cropID, x, y) {
 			postMessage({type: 'crop_data_layer_update', crop_id: cropID, layer_name: '<%= property %>', layer_data: simulation.crops[cropID].<%= property %>});
 		<% end %>
 	}
+	*/
 }
 
 function harvestField(fieldIndex, x, y) {

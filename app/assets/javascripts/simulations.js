@@ -818,11 +818,14 @@ if ($('#simulation-controls').length > 0) {
 					if (game.plow.active) {
 						game.ctx.terrain.save();
 						game.ctx.terrain.fillStyle = '#3d1f00';
-						x = game.tractor.x;
-						y = game.tractor.y;
+						//x = game.plow.x; // plow position
+						//y = game.plow.y; // plow position
+						x = game.tractor.x; // tractor position
+						y = game.tractor.y; // tractor position
 						game.ctx.terrain.translate(x, y);
 						game.ctx.terrain.rotate(game.tractor.angle);
-						game.ctx.terrain.drawImage(game.plow.stamp, 0, -9);
+						//game.ctx.terrain.drawImage(game.plow.stamp, 0, -9); // plow position
+						game.ctx.terrain.drawImage(game.plow.stamp, 0, -9); // tractor position
 						game.ctx.terrain.restore();
 
 						// Erase crops
@@ -877,16 +880,23 @@ if ($('#simulation-controls').length > 0) {
 					game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16);
 					if (game.drill.active) {
 						game.ctx.terrain.save();
-						x = game.drill.x; // drill
-						y = game.drill.y; // drill
+						//x = game.drill.x; // drill
+						//y = game.drill.y; // drill
+						x = game.tractor.x; // tractor
+						y = game.tractor.y; // tractor
 						game.ctx.terrain.translate(x, y);
-						game.ctx.terrain.rotate(game.drill.angle);
-						game.ctx.terrain.drawImage(game.drill.stamp, -16, -9);
+						//game.ctx.terrain.rotate(game.drill.angle); // drill position
+						game.ctx.terrain.rotate(game.tractor.angle); // tractor position
+						//game.ctx.terrain.drawImage(game.drill.stamp, -16, -9); // drill position
+						//game.ctx.terrain.drawImage(game.drill.stamp, 0, -9); // tractor position
 						game.ctx.terrain.restore();
+
 						game.ctx.vegitation.save();
 						game.ctx.vegitation.translate(x, y);
-						game.ctx.vegitation.rotate(game.drill.angle); // drill
-						game.ctx.vegitation.drawImage(game.drill.seed, -16, -9);
+						//game.ctx.vegitation.rotate(game.drill.angle); // drill position
+						game.ctx.vegitation.rotate(game.tractor.angle); // tractor position
+						//game.ctx.vegitation.drawImage(game.drill.seed, -16, -9); // drill position
+						game.ctx.vegitation.drawImage(game.drill.seed, 9, -9); // tractor position
 						game.ctx.vegitation.restore();
 
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
@@ -933,7 +943,6 @@ if ($('#simulation-controls').length > 0) {
 					y = game.combine.y;
 
 					if (game.combine.active) {
-						// ???
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
 						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
@@ -952,7 +961,7 @@ if ($('#simulation-controls').length > 0) {
 +						game.ctx.vegitation.beginPath();
 +						game.ctx.vegitation.translate(x, y);
 +						game.ctx.vegitation.rotate(game.combine.angle);
-+						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width); // ???
++						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width);
 +						game.ctx.vegitation.restore();
 					}
 				}
@@ -1320,7 +1329,7 @@ if ($('#simulation-controls').length > 0) {
 	//run the simulation
     run.on('click', function() {
       //console.log('before step');
-		if (!simulation.interval) // !!! Start interval if NOT started already (this should not ever be triggered with current implementation).
+		if (!simulation.interval) // Start interval if NOT started already (this should not ever be triggered with current implementation).
 		{
 			simulation.interval = setInterval(step, 100);
 		}
@@ -1332,7 +1341,7 @@ if ($('#simulation-controls').length > 0) {
 
 	//pause the simulation
     pause.on('click', function() {
-		//clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		//clearInterval(simulation.interval); // Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
 		run.show();
 		pause.hide();
 		return simulation.paused = true;
@@ -1340,7 +1349,7 @@ if ($('#simulation-controls').length > 0) {
 
 	//restart the simulation
     restart.on('click', function() {
-      //clearInterval(simulation.interval); // !!! Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+      //clearInterval(simulation.interval); // Disabled so that renderGame() function updates, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
 		simulation.paused = true;
 		clearButtonSelection();
 		$('#farm-display').html(''); // Remove the old canvas element before adding the new one.
@@ -1358,7 +1367,7 @@ if ($('#simulation-controls').length > 0) {
     // Add an option to skip ahead a month?
 
     step = function() {
-	if (simulation.paused != true) // !!! if paused, do not update game data.
+	if (simulation.paused != true) // if paused, do not update game data.
 	{
 		//console.log('step');
 		simulation.worker.postMessage({
@@ -1367,7 +1376,7 @@ if ($('#simulation-controls').length > 0) {
 		updateGame();
 	}
 	if (game && game.ctx && game.ctx.back)
-		renderGame(); // !!! renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
+		renderGame(); // renderGame() function will still update, allowing users to draw paths before the simulation starts, or even while the simulation is paused.
     };
     // Start interval (with paused set to 'true') so that we can draw paths before running the simulation.
     simulation.paused = true;
@@ -1583,7 +1592,6 @@ if ($('#simulation-controls').length > 0) {
 		var vertx = [];
 		var verty = [];
 		simulation.size.fields[field_id].bounds.forEach(function(corner) {
-		//field.bounds.forEach(function(corner) {
 			vertx[nvert] = corner.x * simulation.size.granularity;
 			verty[nvert] = corner.y * simulation.size.granularity;
 			nvert++;
@@ -1600,24 +1608,28 @@ if ($('#simulation-controls').length > 0) {
 		// }
 
 
-		var stepSizeY = game.height / simulation.size.granularity; //widthOfTool;
-		var stepSizeX = game.width / simulation.size.granularity;
+		var stepSizeY = game.height / simulation.size.height;
+		var stepSizeX = game.width / simulation.size.width;
 		var testx, testy;
 
 		var outputGrid = [];
 
-		for (var i = 0; i < simulation.size.granularity; i++)
+		for (var i = 0; i <= simulation.size.width; i++)
 		{
 			testx = i*stepSizeX;
 
 			outputGrid[i] = [];
 
-			for (var j = 0; j < simulation.size.granularity; j++)
+			for (var j = 0; j <= simulation.size.height; j++)
 			{
 				testy = j*stepSizeY;
 
-				// Check if these coordinates fall inside the polygon's boundaries
-				outputGrid[i][j] = pnpoly( nvert, vertx, verty, testx, testy );
+				// Check if this patch falls *entirely* inside the polygon's boundaries
+				outputGrid[i][j] = false; //pnpoly( nvert, vertx, verty, testx, testy );
+				if (pnpoly( nvert, vertx, verty, testx, testy ) && pnpoly( nvert, vertx, verty, testx + stepSizeX, testy ) && pnpoly( nvert, vertx, verty, testx, testy + stepSizeY ) && pnpoly( nvert, vertx, verty, testx + stepSizeX, testy + stepSizeY ))
+				{
+					outputGrid[i][j] = true;
+				}				
 			}
 		}
 
@@ -1637,16 +1649,17 @@ if ($('#simulation-controls').length > 0) {
 		game.ctx.front.strokeStyle = '#0000ff';
 		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
 		game.ctx.front.beginPath();
-		for (var j = 0; j < simulation.size.granularity-1; j++)
+		for (var j = 0; j < simulation.size.height; j++)
 		{
 			testy = j*this.stepy - game.viewport.y;
 
-			for (var i = 0; i < simulation.size.granularity-1; i++)
+			for (var i = 0; i < simulation.size.width-1; i++)
 			{
 				testx = i*this.stepx - game.viewport.x;
 
 				// Check if this grid square fits inside the field boundaries
-				if (this.grid[i][j] && this.grid[i+1][j+1])
+				//if (this.grid[i][j] && this.grid[i][j+1] && this.grid[i+1][j] && this.grid[i+1][j+1])
+				if (this.grid[i][j])
 				{
 					// Draw four lines to create a square grid box
 
@@ -1676,9 +1689,6 @@ if ($('#simulation-controls').length > 0) {
 	PolygonGrid.prototype.drawPath = function() {
 		game.path = [];
 
-		// !!! Use width of implement to determine spacing between rows (instead of just using granularity)!
-		// ??? Also need to make both the visually tilling/etc and the FUNCTIONAL tilling/etc be accurate to scale?
-
 		var widthOfTool = 18.288; // 60 meters
 		if (game.state == 'tilling') {
 			widthOfTool = game.plow.width;
@@ -1700,20 +1710,22 @@ if ($('#simulation-controls').length > 0) {
 
 		// Get start and end y-indices of the pathfinding sweep.
 		var yStartIndex = 0;
-		var yEndIndex = simulation.size.granularity - Math.floor((widthOfTool/2)/this.stepy);
+		var yEndIndex = simulation.size.height - Math.floor((widthOfTool/2)/this.stepy);
 
 		var yToolOffset = Math.floor((widthOfTool/2)/this.stepy);
 		console.log("yToolOffset: " + yToolOffset);
 		var hitInteriorThisRound = false;
 
+		/*
 		var goLeftToRight = true;
 		for (var y = yStartIndex; y < yEndIndex; y++)
 		{
 			if (goLeftToRight)
 			{
-				for (var x = 0; x < simulation.size.granularity-1; x++)
+				for (var x = 0; x < simulation.size.width; x++)
 				{
-					if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+					//if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+					if (this.grid[x][y] && this.grid[x][y])
 					{
 						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
 						hitInteriorThisRound = true;
@@ -1728,9 +1740,10 @@ if ($('#simulation-controls').length > 0) {
 			}
 			else
 			{
-				for (var x = simulation.size.granularity-1; x > 1; x--)
+				for (var x = simulation.size.width; x > 0; x--)
 				{
-					if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+					//if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
+					if (this.grid[x][y] && this.grid[x][y])
 					{
 						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
 						hitInteriorThisRound = true;
@@ -1748,16 +1761,45 @@ if ($('#simulation-controls').length > 0) {
 			if (hitInteriorThisRound)
 			{
 				//console.log("increment y by " + (yToolOffset*2));
-				y += (yToolOffset*2);
+				//y += (yToolOffset*2);
 			}
 			hitInteriorThisRound = false;
+		}
+		*/
+
+		var goLeftToRight = true;
+		for (var j = 0; j < simulation.size.height; j++)
+		{
+			if (goLeftToRight)
+			{
+				for (var i = 0; i < simulation.size.width; i++)
+				{
+					lastStep = this.drawStep(i, j, lastStep, this.grid[i][j]);
+					this.drawStep(i+1, j, lastStep, this.grid[i][j]);
+				}
+			}
+			else
+			{
+				for (var i = simulation.size.width; i > 0; i--)
+				{
+					this.drawStep(i+1, j, lastStep, this.grid[i][j]);
+					lastStep = this.drawStep(i, j, lastStep, this.grid[i][j]);
+				}
+			}
+			goLeftToRight = !goLeftToRight;
+
+			if (hitInteriorThisRound)
+			{
+				//console.log("increment y by " + (yToolOffset*2));
+				y += (yToolOffset*2);
+			}
 		}
 	};
 
 	PolygonGrid.prototype.drawStep = function(x, y, lastStep, isActionStep)
 	{
-		testx = x*this.stepx;
-		testy = y*this.stepy;
+		testx = x*this.stepx; // + 0.5*this.stepx;
+		testy = y*this.stepy + 0.5*this.stepy;
 
 		//if (this.grid[x][y]) // Check if this grid square fits inside the field boundaries (check has been moved to drawPath() function)
 		if (isActionStep) // Is this a Till/Plant/Harvest step in the path, or are we just moving to the start of the next row?
