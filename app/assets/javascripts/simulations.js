@@ -836,17 +836,31 @@ if ($('#simulation-controls').length > 0) {
 +						game.ctx.vegitation.clearRect(0, -game.plow.width/2, -game.plow.width, game.combine.width);
 +						game.ctx.vegitation.restore();
 
+						/*
+						// Send a message for the entire width of the tool's reach
 						var widthOfTool = game.plow.width; // 18.288; // 60 meters
-						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						//widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						//console.log("Tool width: " + widthOfTool);
+						//console.log("y: " + y);
+						//console.log(y - widthOfTool/2);
+						//console.log(y + widthOfTool/2);
 						for (var i = 0; i < widthOfTool; i++)
 						{
 							simulation.worker.postMessage({
 								type: 'till',
 								field: game.currentfield,
 								x: x,
-								y: y+i
+								y: y+i - (widthOfTool/2)
 							});
 						}
+						*/
+						// Only send message for center-point of tool, let worker handle calculating the spread of the tool's reach
+						simulation.worker.postMessage({
+							type: 'till',
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
 					}
 				}
 				break;
@@ -899,8 +913,10 @@ if ($('#simulation-controls').length > 0) {
 						game.ctx.vegitation.drawImage(game.drill.seed, 9, -9); // tractor position
 						game.ctx.vegitation.restore();
 
+						/*
+						// Send a message for the entire width of the tool's reach
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
-						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						//widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
 						{
 							simulation.worker.postMessage({
@@ -908,9 +924,18 @@ if ($('#simulation-controls').length > 0) {
 								crop: game.currentcrop,
 								field: game.currentfield,
 								x: x,
-								y: y+i
+								y: y+i - (widthOfTool/2)
 							});
 						}
+						*/
+						// Only send message for center-point of tool, let worker handle calculating the spread of the tool's reach
+						simulation.worker.postMessage({
+							type: 'plant',
+							crop: game.currentcrop,
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
 					}
 				}
 				break;
@@ -943,8 +968,11 @@ if ($('#simulation-controls').length > 0) {
 					y = game.combine.y;
 
 					if (game.combine.active) {
+
+						/*
+						// Send a message for the entire width of the tool's reach
 						var widthOfTool = game.combine.width; // 18.288; // 60 meters
-						widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
+						//widthOfTool = Math.round(widthOfTool/(game.height/simulation.size.granularity));
 						for (var i = 0; i < widthOfTool; i++)
 						{
 							simulation.worker.postMessage({
@@ -952,9 +980,19 @@ if ($('#simulation-controls').length > 0) {
 								//crop: game.currentcrop, // Not needed, the worker will need to check to see what crop is planted in this patch.
 								field: game.currentfield,
 								x: x,
-								y: y+i
+								y: y+i - (widthOfTool/2)
 							});
 						}
+						*/
+						// Only send message for center-point of tool, let worker handle calculating the spread of the tool's reach
+						simulation.worker.postMessage({
+							type: 'harvest',
+							//crop: game.currentcrop, // Not needed, the worker will need to check to see what crop is planted in this patch.
+							field: game.currentfield,
+							x: x,
+							y: y
+						});
+
 
 						// Erase crops
 +						game.ctx.vegitation.save();
@@ -1614,21 +1652,21 @@ if ($('#simulation-controls').length > 0) {
 
 		var outputGrid = [];
 
-		for (var i = 0; i <= simulation.size.width; i++)
+		for (var x = 0; x <= simulation.size.width; x++)
 		{
-			testx = i*stepSizeX;
+			testx = x*stepSizeX;
 
-			outputGrid[i] = [];
+			outputGrid[x] = [];
 
-			for (var j = 0; j <= simulation.size.height; j++)
+			for (var y = 0; y <= simulation.size.height; y++)
 			{
-				testy = j*stepSizeY;
+				testy = y*stepSizeY;
 
 				// Check if this patch falls *entirely* inside the polygon's boundaries
-				outputGrid[i][j] = false; //pnpoly( nvert, vertx, verty, testx, testy );
+				outputGrid[x][y] = false; //pnpoly( nvert, vertx, verty, testx, testy );
 				if (pnpoly( nvert, vertx, verty, testx, testy ) && pnpoly( nvert, vertx, verty, testx + stepSizeX, testy ) && pnpoly( nvert, vertx, verty, testx, testy + stepSizeY ) && pnpoly( nvert, vertx, verty, testx + stepSizeX, testy + stepSizeY ))
 				{
-					outputGrid[i][j] = true;
+					outputGrid[x][y] = true;
 				}				
 			}
 		}
@@ -1649,17 +1687,17 @@ if ($('#simulation-controls').length > 0) {
 		game.ctx.front.strokeStyle = '#0000ff';
 		//game.ctx.front.setLineDash([1]); // not supported in all browsers?
 		game.ctx.front.beginPath();
-		for (var j = 0; j < simulation.size.height; j++)
+		for (var y = 0; y < simulation.size.height; y++)
 		{
-			testy = j*this.stepy - game.viewport.y;
+			testy = y*this.stepy - game.viewport.y;
 
-			for (var i = 0; i < simulation.size.width-1; i++)
+			for (var x = 0; x < simulation.size.width-1; x++)
 			{
-				testx = i*this.stepx - game.viewport.x;
+				testx = x*this.stepx - game.viewport.x;
 
 				// Check if this grid square fits inside the field boundaries
-				//if (this.grid[i][j] && this.grid[i][j+1] && this.grid[i+1][j] && this.grid[i+1][j+1])
-				if (this.grid[i][j])
+				//if (this.grid[x][y] && this.grid[x][y+1] && this.grid[x+1][y] && this.grid[x+1][y+1])
+				if (this.grid[x][y])
 				{
 					// Draw four lines to create a square grid box
 
@@ -1709,81 +1747,36 @@ if ($('#simulation-controls').length > 0) {
 		};
 
 		// Get start and end y-indices of the pathfinding sweep.
-		var yStartIndex = 0;
+		var yStartIndex = Math.ceil((widthOfTool/2)/this.stepy);
 		var yEndIndex = simulation.size.height - Math.floor((widthOfTool/2)/this.stepy);
 
 		var yToolOffset = Math.floor((widthOfTool/2)/this.stepy);
-		console.log("yToolOffset: " + yToolOffset);
+		//console.log("yToolOffset: " + yToolOffset);
 		var hitInteriorThisRound = false;
 
-		/*
 		var goLeftToRight = true;
 		for (var y = yStartIndex; y < yEndIndex; y++)
 		{
+			hitInteriorThisRound = false;
+
 			if (goLeftToRight)
 			{
 				for (var x = 0; x < simulation.size.width; x++)
 				{
-					//if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
-					if (this.grid[x][y] && this.grid[x][y])
-					{
-						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
-						hitInteriorThisRound = true;
-					}
-					else
-					{
-						lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
-					}
+					lastStep = this.drawStep(x, y, lastStep, this.grid[x][y]);
+					this.drawStep(x+1, y, lastStep, this.grid[x][y]);
 
-					//if (!lastStep.wasOutside) hitInteriorThisRound = true;
+					if (this.grid[x][y]) hitInteriorThisRound = true;
 				}
 			}
 			else
 			{
 				for (var x = simulation.size.width; x > 0; x--)
 				{
-					//if (this.grid[x][y] && this.grid[x][y+yToolOffset] && this.grid[x][y+(yToolOffset*2)])
-					if (this.grid[x][y] && this.grid[x][y])
-					{
-						lastStep = this.drawStep(x, y+yToolOffset, lastStep, true);
-						hitInteriorThisRound = true;
-					}
-					else
-					{
-						lastStep = this.drawStep(x, y+yToolOffset, lastStep, false);
-					}
+					this.drawStep(x+1, y, lastStep, this.grid[x][y]);
+					lastStep = this.drawStep(x, y, lastStep, this.grid[x][y]);
 
-					//if (!lastStep.wasOutside) hitInteriorThisRound = true;
-				}
-			}
-			goLeftToRight = !goLeftToRight;
-
-			if (hitInteriorThisRound)
-			{
-				//console.log("increment y by " + (yToolOffset*2));
-				//y += (yToolOffset*2);
-			}
-			hitInteriorThisRound = false;
-		}
-		*/
-
-		var goLeftToRight = true;
-		for (var j = 0; j < simulation.size.height; j++)
-		{
-			if (goLeftToRight)
-			{
-				for (var i = 0; i < simulation.size.width; i++)
-				{
-					lastStep = this.drawStep(i, j, lastStep, this.grid[i][j]);
-					this.drawStep(i+1, j, lastStep, this.grid[i][j]);
-				}
-			}
-			else
-			{
-				for (var i = simulation.size.width; i > 0; i--)
-				{
-					this.drawStep(i+1, j, lastStep, this.grid[i][j]);
-					lastStep = this.drawStep(i, j, lastStep, this.grid[i][j]);
+					if (this.grid[x][y]) hitInteriorThisRound = true;
 				}
 			}
 			goLeftToRight = !goLeftToRight;
@@ -1804,7 +1797,7 @@ if ($('#simulation-controls').length > 0) {
 		//if (this.grid[x][y]) // Check if this grid square fits inside the field boundaries (check has been moved to drawPath() function)
 		if (isActionStep) // Is this a Till/Plant/Harvest step in the path, or are we just moving to the start of the next row?
 		{
-			console.log("path row drawn at y: " + testy);
+			//console.log("path row drawn at y: " + testy);
 
 			// Travel to start of next sweep, but do NOT have tiller down until we get there
 			if (lastStep.wasOutside == true)
