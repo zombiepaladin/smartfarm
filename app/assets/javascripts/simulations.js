@@ -475,7 +475,8 @@ if ($('#simulation-controls').length > 0) {
 	game.plow.stamp.src = "/images/plow_trail.png";
 	game.drill.image.src = "/images/drill.png";
 	game.drill.stamp.src = "/images/drill_trail.png";
-	game.drill.seed.src = "/images/drill_seed.png";
+	game.drill.seed.src = "/images/drill_seed_big.png"; // Placeholder, maked crops more visible until crop density calculations are finished
+	//game.drill.seed.src = "/images/drill_seed.png"; // Use this once crop density calculations are finished
 
 	//the object for our weather
 	game.weather = {
@@ -667,6 +668,20 @@ if ($('#simulation-controls').length > 0) {
 				myX = x - offset.left + game.viewport.x;
 				myY = y - offset.top + game.viewport.y;
 				if (myX <= game.width && myY <= game.height) {
+					if (game.path.length >= 1) {
+						game.path.push({
+							x: game.path[game.path.length-1].x,
+							y: game.path[game.path.length-1].y,
+							noaction: true
+						});
+					}
+
+					game.path.push({
+						x: myX,
+						y: myY,
+						noaction: true
+					});
+
 					game.path.push({
 						x: myX,
 						y: myY
@@ -795,8 +810,8 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.tractor.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						if (game.path[0].noaction) game.plow.active = false; // so we can travel without tilling
-						else game.plow.active = true;
+						//if (game.path[0].noaction) game.plow.active = false; // so we can travel without tilling
+						//else game.plow.active = true;
 						game.path.shift();
 					}
 					else {
@@ -813,8 +828,11 @@ if ($('#simulation-controls').length > 0) {
 					game.tractor.y += speed * Math.sin(game.tractor.angle);
 					game.plow.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
 					game.plow.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
-
 					game.plow.angle = steerAngle(game.tractor.angle, game.plow.angle, Math.PI / 16);
+					
+					if (game.path[0].noaction) game.plow.active = false; // so we can travel without tilling
+					else game.plow.active = true;
+
 					if (game.plow.active) {
 						game.ctx.terrain.save();
 						game.ctx.terrain.fillStyle = '#3d1f00';
@@ -833,7 +851,7 @@ if ($('#simulation-controls').length > 0) {
 +						game.ctx.vegitation.beginPath();
 +						game.ctx.vegitation.translate(x, y);
 +						game.ctx.vegitation.rotate(game.plow.angle);
-+						game.ctx.vegitation.clearRect(0, -game.plow.width/2, -game.plow.width, game.combine.width);
++						game.ctx.vegitation.clearRect(0, -game.plow.width/2, 9, game.combine.width);
 +						game.ctx.vegitation.restore();
 
 						/*
@@ -873,8 +891,8 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.tractor.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						if (game.path[0].noaction) game.drill.active = false; // so we can travel without tilling
-						else game.drill.active = true;
+						//if (game.path[0].noaction) game.drill.active = false; // so we can travel without tilling
+						//else game.drill.active = true;
 						game.path.shift();
 					}
 					else {
@@ -892,6 +910,10 @@ if ($('#simulation-controls').length > 0) {
 					game.drill.x = -5 * Math.cos(game.tractor.angle) + game.tractor.x;
 					game.drill.y = -5 * Math.sin(game.tractor.angle) + game.tractor.y;
 					game.drill.angle = steerAngle(game.tractor.angle, game.drill.angle, Math.PI / 16);
+
+					if (game.path[0].noaction) game.drill.active = false; // so we can travel without tilling
+					else game.drill.active = true;
+
 					if (game.drill.active) {
 						game.ctx.terrain.save();
 						//x = game.drill.x; // drill
@@ -948,8 +970,8 @@ if ($('#simulation-controls').length > 0) {
 					dx = game.path[0].x - game.combine.x;
 					distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance < 12) {
-						if (game.path[0].noaction) game.combine.active = false; // so we can travel without tilling
-						else game.combine.active = true;
+						//if (game.path[0].noaction) game.combine.active = false; // so we can travel without tilling
+						//else game.combine.active = true;
 						game.path.shift();
 					}
 					else {
@@ -966,6 +988,9 @@ if ($('#simulation-controls').length > 0) {
 					game.combine.y += speed * Math.sin(game.combine.angle);
 					x = game.combine.x;
 					y = game.combine.y;
+
+					if (game.path[0].noaction) game.combine.active = false; // so we can travel without tilling
+					else game.combine.active = true;
 
 					if (game.combine.active) {
 
@@ -999,7 +1024,7 @@ if ($('#simulation-controls').length > 0) {
 +						game.ctx.vegitation.beginPath();
 +						game.ctx.vegitation.translate(x, y);
 +						game.ctx.vegitation.rotate(game.combine.angle);
-+						game.ctx.vegitation.clearRect(0, -game.combine.width/2, -game.combine.width, game.combine.width);
++						game.ctx.vegitation.clearRect(0, -game.combine.width/2, 9, game.combine.width);
 +						game.ctx.vegitation.restore();
 					}
 				}
@@ -1238,7 +1263,7 @@ if ($('#simulation-controls').length > 0) {
 		$('#field-select-modal').modal().one('hidden.bs.modal', function() {
 			var selected_field_id;
 			selected_field_id = $('input[name="field_id"]:checked').val();
-			if (selected_field_id !== -1) {
+			if (selected_field_id != -1) {
 				setFieldId(selected_field_id);
 			}
 		});
@@ -1270,6 +1295,11 @@ if ($('#simulation-controls').length > 0) {
 			simulation.size.fields[field].poly.drawPath();
 			clearButtonSelection();
 			$('#auto-till').addClass('simulation-button-selected');
+
+			// start running the simulation automatically
+			if (simulation.paused == true) {
+				run.click();
+			}
 		}
     });
 
@@ -1278,7 +1308,7 @@ if ($('#simulation-controls').length > 0) {
 		$('#crop-select-modal').modal().one('hidden.bs.modal', function() {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
-			if (crop_id !== -1) {
+			if (crop_id != -1) {
 				var field = getFieldId();
 				game.path = []; // clear existing path
 				game.state = 'planting';
@@ -1296,7 +1326,7 @@ if ($('#simulation-controls').length > 0) {
 		$('#crop-select-modal').modal().one('hidden.bs.modal', function() {
 			var crop_id;
 			crop_id = $('input[name="crop_id"]').val();
-			if (crop_id !== -1) {
+			if (crop_id != -1) {
 				var field = getFieldId();
 				game.path = [];
 				game.state = 'planting';
@@ -1306,6 +1336,11 @@ if ($('#simulation-controls').length > 0) {
 				simulation.size.fields[field].poly.drawPath();
 				clearButtonSelection();
 				$('#auto-plant').addClass('simulation-button-selected');
+
+				// start running the simulation automatically
+				if (simulation.paused == true) {
+					run.click();
+				}
 			}
 		});
 	});
@@ -1331,6 +1366,11 @@ if ($('#simulation-controls').length > 0) {
 		simulation.size.fields[field].poly.drawPath();
 		clearButtonSelection();
 		$('#auto-harvest').addClass('simulation-button-selected');
+		
+		// start running the simulation automatically
+		if (simulation.paused == true) {
+			run.click();
+		}
     });
 
 	//return -1 if the user does not select a field
@@ -1763,8 +1803,8 @@ if ($('#simulation-controls').length > 0) {
 			{
 				for (var x = 0; x < simulation.size.width; x++)
 				{
-					lastStep = this.drawStep(x, y, lastStep, this.grid[x][y]);
-					this.drawStep(x+1, y, lastStep, this.grid[x][y]);
+					this.drawStep(x, y, lastStep, this.grid[x][y]);
+					lastStep = this.drawStep(x+1, y, lastStep, this.grid[x][y]);
 
 					if (this.grid[x][y]) hitInteriorThisRound = true;
 				}
